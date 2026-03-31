@@ -1,2 +1,6 @@
 2026-03-31 22:49:06,363 INFO django.utils.autoreload Watching for file changes with StatReloader
 2026-03-31 22:52:13,669 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-01 00:04:16,283 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-01 00:06:52,377 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\backend\settings.py changed, reloading.
+2026-04-01 00:06:54,116 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-01 00:25:19,747 INFO django.utils.autoreload Watching for file changes with StatReloader

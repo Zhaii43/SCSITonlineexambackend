@@ -1,7 +1,7 @@
 """
 Django settings for backend project.
 """
-
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 import logging
@@ -151,6 +151,8 @@ DATABASES = {
         'PORT': config('DB_PORT'),
     }
 }
+
+DATABASES['default'] = dj_database_url.parse(config("DATABASE_URL"))
 
 AUTH_USER_MODEL = 'user.User'
 

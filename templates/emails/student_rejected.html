@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+        .notice { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 4px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 20px; color: #64748b; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❌ Registration Not Approved</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ user.first_name }} {{ user.last_name }}</strong>,</p>
+
+            <p>Your student account registration has been reviewed and was <strong>not approved</strong> at this time.</p>
+
+            {% if rejection_reason %}
+            <div class="notice">
+                <strong>Reason for rejection:</strong>
+                <p>{{ rejection_reason }}</p>
+            </div>
+            {% endif %}
+
+            <div class="notice">
+                <strong>What happens next — your account is still active:</strong>
+                <ul>
+                    <li>Your account has <strong>not</strong> been deleted. You can still log in.</li>
+                    <li>Once logged in, you will see a screen explaining the rejection and the reason above.</li>
+                    <li>You can update the following details directly from that screen:
+                        <ul>
+                            <li>First name &amp; last name</li>
+                            <li>School ID</li>
+                            <li>Year level</li>
+                            <li>Contact number</li>
+                        </ul>
+                    </li>
+                    <li>After correcting your information, click <strong>Resubmit</strong> to send your registration back to the dean for review.</li>
+                    <li>Once resubmitted, your account will appear in the dean's pending list again.</li>
+                </ul>
+            </div>
+
+            <p>Please log in using your existing email and password, review the rejection reason, correct your details, and resubmit.</p>
+
+            <p>If you believe this was a mistake or need further assistance, please contact your department administrator.</p>
+
+            <p>Best regards,<br><strong>Online Exam System</strong></p>
+        </div>
+        <div class="footer">
+            <p>This is an automated email. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

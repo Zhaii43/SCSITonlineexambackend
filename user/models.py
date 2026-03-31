@@ -1,0 +1,191 @@
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+import secrets
+from datetime import timedelta
+from django.utils import timezone
+
+class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('instructor', 'Instructor'),
+        ('dean', 'Dean'),
+    ]
+    
+    DEPARTMENT_CHOICES = [
+        ('BSHM', 'Hospitality Management'),
+        ('BSIT', 'Information Technology'),
+        ('BSEE', 'Electrical Engineering'),
+        ('BSBA', 'Business Administration'),
+        ('BSCRIM', 'Criminology'),
+        ('BSED', 'Education'),
+        ('BSCE', 'Civil Engineering'),
+        ('BSChE', 'Chemical Engineering'),
+        ('BSME', 'Mechanical Engineering'),
+        ('GENERAL', 'General Education'),
+    ]
+    
+    YEAR_LEVEL_CHOICES = [
+        ('1', '1st Year'),
+        ('2', '2nd Year'),
+        ('3', '3rd Year'),
+        ('4', '4th Year'),
+    ]
+    
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
+    department = models.CharField(max_length=10, choices=DEPARTMENT_CHOICES, default='GENERAL')
+    
+    # Student/Instructor ID
+    school_id = models.CharField(max_length=20, unique=True, blank=True, null=True, help_text="Student ID or Employee ID")
+    
+    # Additional fields
+    year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES, blank=True, null=True)
+    contact_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    id_photo = models.ImageField(upload_to='id_photos/', blank=True, null=True)
+    study_load = models.FileField(upload_to='study_loads/', blank=True, null=True, help_text="Student's study load document")
+    
+    # Approval system
+    is_approved = models.BooleanField(default=False, help_text="Admin approval for instructors")
+    approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, related_name='approved_users')
+    approved_at = models.DateTimeField(blank=True, null=True)
+
+    # Expo push notification token
+    expo_push_token = models.CharField(max_length=255, blank=True, null=True)
+
+    # ID verification
+    id_verified = models.BooleanField(default=False)
+    id_verified_by = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, related_name='id_verified_users')
+    id_verified_at = models.DateTimeField(blank=True, null=True)
+
+    # Special student types
+    is_transferee = models.BooleanField(default=False)
+    is_irregular = models.BooleanField(default=False)
+    declaration_verified = models.BooleanField(default=False)
+    declaration_verified_by = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, related_name='declaration_verified_users')
+    declaration_verified_at = models.DateTimeField(blank=True, null=True)
+    extra_approved = models.BooleanField(default=False)
+    extra_approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, related_name='extra_approved_users')
+    extra_approved_at = models.DateTimeField(blank=True, null=True)
+    
+    # Rejection reason
+    rejection_reason = models.TextField(blank=True, null=True, help_text="Reason for account rejection")
+
+    # Rejection status
+    is_rejected = models.BooleanField(default=False, help_text="Whether the student registration was rejected")
+
+    
+    def save(self, *args, **kwargs):
+        # Students require dean approval
+        if not self.pk and self.role == 'student':
+            self.is_approved = False
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.username} - {self.role} ({self.school_id})"
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    EXPIRY_HOURS = 1  # default for password reset
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            import random
+            self.token = f"{random.randint(0, 999999):06d}"
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=self.EXPIRY_HOURS)
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        return not self.is_used and timezone.now() < self.expires_at
+
+    class Meta:
+        db_table = 'password_reset_tokens'
+
+
+class EmailChangeOTP(models.Model):
+    """OTP for verifying email changes for authenticated users."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_change_otps')
+    new_email = models.EmailField()
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            import random
+            self.code = f"{random.randint(0, 999999):06d}"
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=10)
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        return not self.is_used and timezone.now() < self.expires_at
+
+    class Meta:
+        db_table = 'email_change_otps'
+
+
+
+class EnrolledStudent(models.Model):
+    """Official enrollment records added by admin — used by deans to verify student registrations."""
+    DEPARTMENT_CHOICES = [
+        ('BSHM', 'Hospitality Management'),
+        ('BSIT', 'Information Technology'),
+        ('BSEE', 'Electrical Engineering'),
+        ('BSBA', 'Business Administration'),
+        ('BSCRIM', 'Criminology'),
+        ('BSED', 'Education'),
+        ('BSCE', 'Civil Engineering'),
+        ('BSChE', 'Chemical Engineering'),
+        ('BSME', 'Mechanical Engineering'),
+    ]
+    YEAR_LEVEL_CHOICES = [
+        ('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year'),
+    ]
+
+    school_id = models.CharField(max_length=20, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    department = models.CharField(max_length=10, choices=DEPARTMENT_CHOICES)
+    year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES)
+    email = models.EmailField(blank=True, null=True)
+    contact_number = models.CharField(max_length=15, blank=True, null=True)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.school_id} — {self.first_name} {self.last_name} ({self.department})"
+
+    class Meta:
+        db_table = 'enrolled_students'
+        ordering = ['department', 'last_name']
+
+
+class PreRegistrationOTP(models.Model):
+    """Stores OTP for email verification BEFORE a user account is created."""
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    token = models.CharField(max_length=64, unique=True, blank=True)  # returned after successful verify
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            import random
+            self.code = f"{random.randint(0, 999999):06d}"
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=10)
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        return not self.is_verified and timezone.now() < self.expires_at
+
+    class Meta:
+        db_table = 'pre_registration_otps'

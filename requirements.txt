@@ -1,0 +1,14 @@
+Django>=4.2
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3
+Pillow>=10.0
+pytesseract>=0.3.10
+django-cors-headers>=4.0
+python-decouple>=3.8
+rarfile>=4.0
+channels>=4.0
+channels-redis>=4.2
+daphne>=4.0
+psycopg[binary]>=3.1.12
+cloudinary>=1.36
+django-cloudinary-storage>=0.3.0

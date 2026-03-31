@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; }
+        .button { display: inline-block; background: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+        .warning { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px; margin: 16px 0; color: #92400e; }
+        .footer { text-align: center; margin-top: 20px; color: #64748b; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Account Created</h1>
+            <p>Set your password to get started</p>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ user.first_name }} {{ user.last_name }}</strong>,</p>
+
+            <p>Your student account has been created by your dean. Here are your account details:</p>
+
+            <div class="info">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>School ID:</strong> {{ user.school_id }}</p>
+                <p><strong>Department:</strong> {{ user.department }}</p>
+                <p><strong>Year Level:</strong> {{ user.year_level }}</p>
+            </div>
+
+            <div class="warning">
+                ⚠️ <strong>No password has been set yet.</strong> Click the button below to set your password. This link expires in <strong>7 days</strong>.
+            </div>
+
+            <center>
+                <a href="{{ frontend_url }}/reset-password?token={{ set_password_token }}" class="button">Set My Password</a>
+            </center>
+
+            <p><strong>After setting your password:</strong></p>
+            <ol>
+                <li>Log in with your username and new password</li>
+                <li>Go to <strong>Profile Settings</strong></li>
+                <li>Upload your <strong>study load</strong> (PDF or image)</li>
+                <li>Wait for the dean to review and approve your account</li>
+            </ol>
+
+            <p>If you have any questions, please contact your dean or administrator.</p>
+
+            <p>Best regards,<br><strong>Online Exam System</strong></p>
+        </div>
+        <div class="footer">
+            <p>This is an automated email. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

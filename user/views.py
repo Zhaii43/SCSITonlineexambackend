@@ -1151,7 +1151,7 @@ def request_email_change(request):
     throttle_response = throttle_request(
         request,
         'email_change_request',
-        limit=4,
+        limit=100,
         window_seconds=600,
         identifiers=[user.id, new_email],
         message='Too many email change OTP requests. Please wait 10 minutes before trying again.',
@@ -1193,7 +1193,7 @@ def resend_email_change_otp(request):
     throttle_response = throttle_request(
         request,
         'email_change_resend',
-        limit=4,
+        limit=100,
         window_seconds=600,
         identifiers=[user.id, new_email],
         message='Too many OTP resend attempts. Please wait 10 minutes before trying again.',
@@ -1229,7 +1229,7 @@ def verify_email_change(request):
     throttle_response = throttle_request(
         request,
         'email_change_verify',
-        limit=8,
+        limit=100,
         window_seconds=600,
         identifiers=[user.id, new_email],
         message='Too many OTP verification attempts. Please request a new code.',
@@ -1410,7 +1410,7 @@ def reset_password(request):
     throttle_response = throttle_request(
         request,
         'password_reset_apply',
-        limit=6,
+        limit=100,
         window_seconds=600,
         identifiers=[token],
         message='Too many password reset attempts. Please request a new reset code.',

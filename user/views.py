@@ -1353,7 +1353,13 @@ def request_password_reset(request):
     PasswordResetToken.objects.filter(user=user, is_used=False).delete()
     reset_token = PasswordResetToken.objects.create(user=user)
 
-    send_password_reset_email(user, reset_token.token)
+    if not send_password_reset_email(user, reset_token.token):
+        reset_token.delete()
+        return Response(
+            {'error': 'Unable to send password reset email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+
     log_activity(user, 'password_reset_requested', f'{user.username} requested password reset', request)
 
     return Response({'message': f'A 6-digit verification code has been sent to {email}'})

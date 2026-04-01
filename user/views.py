@@ -376,7 +376,7 @@ def pre_verify_email(request):
     throttle_response = throttle_request(
         request,
         'registration_email_otp',
-        limit=5,
+        limit=100,
         window_seconds=600,
         identifiers=[email],
         message='Too many OTP requests. Please wait 10 minutes before trying again.',
@@ -389,12 +389,12 @@ def pre_verify_email(request):
     if User.objects.filter(email__iexact=email).exists():
         return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Rate limit: max 3 OTP requests per email per 10 minutes
+    # Rate limit: max 100 OTP requests per email per 10 minutes
     ten_minutes_ago = tz.now() - timedelta(minutes=10)
     recent_count = PreRegistrationOTP.objects.filter(
         email__iexact=email, created_at__gte=ten_minutes_ago
     ).count()
-    if recent_count >= 3:
+    if recent_count >= 100:
         return Response(
             {'error': 'Too many OTP requests. Please wait 10 minutes before trying again.'},
             status=status.HTTP_429_TOO_MANY_REQUESTS
@@ -423,7 +423,7 @@ def confirm_pre_verify_email(request):
     throttle_response = throttle_request(
         request,
         'registration_email_otp_verify',
-        limit=8,
+        limit=100,
         window_seconds=600,
         identifiers=[email],
         message='Too many verification attempts. Please request a new OTP.',
@@ -1322,7 +1322,7 @@ def request_password_reset(request):
     throttle_response = throttle_request(
         request,
         'password_reset_request',
-        limit=5,
+        limit=100,
         window_seconds=600,
         identifiers=[email],
         message='Too many password reset requests. Please wait 10 minutes before trying again.',
@@ -1338,12 +1338,12 @@ def request_password_reset(request):
     except User.DoesNotExist:
         return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Rate limit: max 3 reset requests per user per 10 minutes
+    # Rate limit: max 100 reset requests per user per 10 minutes
     ten_minutes_ago = tz.now() - timedelta(minutes=10)
     recent_count = PasswordResetToken.objects.filter(
         user=user, created_at__gte=ten_minutes_ago
     ).count()
-    if recent_count >= 3:
+    if recent_count >= 100:
         return Response(
             {'error': 'Too many reset requests. Please wait 10 minutes before trying again.'},
             status=status.HTTP_429_TOO_MANY_REQUESTS
@@ -1374,7 +1374,7 @@ def verify_reset_code(request):
     throttle_response = throttle_request(
         request,
         'password_reset_verify',
-        limit=8,
+        limit=100,
         window_seconds=600,
         identifiers=[email],
         message='Too many verification attempts. Please request a new reset code.',

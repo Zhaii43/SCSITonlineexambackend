@@ -153,7 +153,7 @@ class CustomLoginView(APIView):
         throttle_response = throttle_request(
             request,
             'login',
-            limit=5,
+            limit=1000,
             window_seconds=600,
             identifiers=[username],
             message='Too many login attempts. Please wait 10 minutes before trying again.',

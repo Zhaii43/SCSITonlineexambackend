@@ -185,6 +185,7 @@ def get_public_stats(request):
     all_approved = Exam.objects.filter(is_approved=True, is_practice=False)
     active_exams = [e for e in all_approved if e.get_status() == 'ongoing']
     active_count = len(active_exams)
+    total_exams = all_approved.count()
 
     # Total registered students (exclude superusers/admins)
     total_users = User.objects.filter(role='student', is_superuser=False).count()
@@ -232,6 +233,7 @@ def get_public_stats(request):
 
     return Response({
         'active_exams': active_count,
+        'total_exams': total_exams,
         'total_users': total_users,
         'violations_today': violations_today,
         'live_exam': live_exam_data,

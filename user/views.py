@@ -404,7 +404,12 @@ def pre_verify_email(request):
     PreRegistrationOTP.objects.filter(email__iexact=email).delete()
 
     otp = PreRegistrationOTP.objects.create(email=email)
-    send_pre_registration_otp(email, otp.code)
+    if not send_pre_registration_otp(email, otp.code):
+        otp.delete()
+        return Response(
+            {'error': 'Unable to send OTP email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     return Response({'message': f'OTP sent to {email}'})
 
@@ -1165,7 +1170,12 @@ def request_email_change(request):
 
     EmailChangeOTP.objects.filter(user=user, is_used=False).delete()
     otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
-    send_pre_registration_otp(new_email, otp.code)
+    if not send_pre_registration_otp(new_email, otp.code):
+        otp.delete()
+        return Response(
+            {'error': 'Unable to send OTP email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     log_activity(user, 'email_change_requested', f'{user.username} requested email change', request, {
         'new_email': new_email
@@ -1199,7 +1209,12 @@ def resend_email_change_otp(request):
 
     EmailChangeOTP.objects.filter(user=user, new_email__iexact=new_email, is_used=False).delete()
     otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
-    send_pre_registration_otp(new_email, otp.code)
+    if not send_pre_registration_otp(new_email, otp.code):
+        otp.delete()
+        return Response(
+            {'error': 'Unable to send OTP email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     return Response({'message': f'OTP resent to {new_email}', 'email': new_email})
 
@@ -1674,7 +1689,12 @@ def resend_registration_email_otp(request):
 
     PreRegistrationOTP.objects.filter(email__iexact=user.email, is_verified=False).delete()
     otp = PreRegistrationOTP.objects.create(email=user.email)
-    send_email_verification_otp(user, otp.code)
+    if not send_email_verification_otp(user, otp.code):
+        otp.delete()
+        return Response(
+            {'error': 'Unable to send OTP email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     return Response({'message': f'OTP resent to {user.email}'})
 
@@ -1702,7 +1722,12 @@ def update_registration_email(request):
 
     PreRegistrationOTP.objects.filter(email__iexact=user.email, is_verified=False).delete()
     otp = PreRegistrationOTP.objects.create(email=user.email)
-    send_email_verification_otp(user, otp.code)
+    if not send_email_verification_otp(user, otp.code):
+        otp.delete()
+        return Response(
+            {'error': 'Unable to send OTP email right now. Please try again later.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     return Response({'message': f'Email updated and OTP sent to {new_email}', 'email': new_email})
 

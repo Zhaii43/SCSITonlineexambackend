@@ -1,7 +1,11 @@
+import logging
+
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
+
+logger = logging.getLogger(__name__)
 
 
 def send_email_verification_otp(user, otp_code):
@@ -23,7 +27,7 @@ def send_email_verification_otp(user, otp_code):
         )
         return True
     except Exception as e:
-        print(f"Failed to send email verification OTP: {e}")
+        logger.exception("Failed to send email verification OTP to %s", user.email)
         return False
 
 
@@ -46,7 +50,7 @@ def send_pre_registration_otp(email, otp_code):
         )
         return True
     except Exception as e:
-        print(f"Failed to send pre-registration OTP: {e}")
+        logger.exception("Failed to send pre-registration OTP to %s", email)
         return False
 
 

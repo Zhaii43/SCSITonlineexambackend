@@ -7,6 +7,7 @@ from datetime import timedelta
 import logging
 import logging.config
 import os
+from corsheaders.defaults import default_headers
 from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -98,6 +99,9 @@ CORS_ALLOWED_ORIGINS = config(
     'DJANGO_CORS_ALLOWED_ORIGINS',
     cast=Csv(),
 )
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-exam-session',
+]
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True

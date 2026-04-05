@@ -11,7 +11,7 @@ from audit.models import AuditLog
 from .utils import safe_delete_field
 from user.models import User
 from notifications.models import Notification
-from notifications.email_utils import send_exam_scheduled_email, send_results_published_email, send_exam_rejected_email, send_time_extension_email, send_issue_report_email, send_dean_exam_created_email
+from notifications.email_utils import send_exam_scheduled_email, send_results_published_email, send_exam_rejected_email, send_time_extension_email, send_issue_report_email, send_dean_exam_created_email, send_issue_report_reply_email
 from notifications.push_utils import send_push_notification, send_push_to_users
 from notifications.realtime import send_notification
 from .realtime import send_exam_update
@@ -1900,6 +1900,8 @@ def add_question_issue_message(request, report_id):
         title = 'Issue Report Update'
         body = f'{user.get_full_name() or user.username} replied to your report for "{report.exam.title}".'
         _notify_issue_report_users(report, actor=user, title=title, message=body, student_link=True, staff_link=False)
+        if report.student.email:
+            send_issue_report_reply_email(report.student, report, user.get_full_name() or user.username, message_text)
 
     return Response({'report': _serialize_issue_report_detail(report, user)})
 

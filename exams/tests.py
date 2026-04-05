@@ -276,16 +276,18 @@ class ExamModelAndApiTests(TestCase):
         self.assertEqual(QuestionIssueMessage.objects.filter(report=report).count(), 1)
 
         self.client.force_authenticate(user=self.instructor)
-        reply_response = self.client.post(
-            f'/api/exams/report-issues/{report.id}/messages/',
-            {'message': 'Thanks, we will review this.'},
-            format='json',
-        )
+        with patch('exams.views.send_issue_report_reply_email') as mock_reply_email:
+            reply_response = self.client.post(
+                f'/api/exams/report-issues/{report.id}/messages/',
+                {'message': 'Thanks, we will review this.'},
+                format='json',
+            )
 
         self.assertEqual(reply_response.status_code, 200)
         report.refresh_from_db()
         self.assertEqual(report.status, 'resolved')
         self.assertEqual(QuestionIssueMessage.objects.filter(report=report).count(), 2)
+        mock_reply_email.assert_called_once()
 
     def test_dean_created_exam_is_auto_approved(self):
         self.authenticate(self.dean)

@@ -424,3 +424,44 @@ def send_issue_report_email(user, report, actor_name):
     except Exception as e:
         print(f"Failed to send issue report email to {user.email}: {e}")
         return False
+
+
+def send_issue_report_reply_email(user, report, actor_name, message_text):
+    """Send email to a student when staff replies to an exam issue report."""
+    subject = f'Issue Report Reply: {report.exam.title} - Question {report.question.order}'
+    report_link = f"{settings.FRONTEND_URL}/dashboard/student/reports?report={report.id}"
+    html_message = f"""
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a;">
+          <h2 style="margin-bottom: 8px;">There is an update on your exam issue report</h2>
+          <p>{actor_name} replied to your issue report for <strong>{report.exam.title}</strong>.</p>
+          <p><strong>Question:</strong> #{report.question.order}</p>
+          <p><strong>Status:</strong> {report.get_status_display()}</p>
+          <p><strong>Reply:</strong><br>{message_text}</p>
+          <p style="margin-top: 20px;">
+            <a href="{report_link}" style="background:#0f172a;color:#ffffff;padding:10px 16px;border-radius:8px;text-decoration:none;">
+              Open My Exam Issue Report
+            </a>
+          </p>
+        </div>
+    """
+    plain_message = (
+        f"There is an update on your exam issue report\n\n"
+        f"{actor_name} replied to your issue report for {report.exam.title}.\n"
+        f"Question: #{report.question.order}\n"
+        f"Status: {report.get_status_display()}\n"
+        f"Reply: {message_text}\n\n"
+        f"Open report: {report_link}"
+    )
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Failed to send issue report reply email to {user.email}: {e}")
+        return False

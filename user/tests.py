@@ -1,11 +1,13 @@
 import tempfile
 from unittest.mock import patch
 
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from audit.models import AuditLog
+from notifications.email_utils import send_password_reset_email, send_pre_registration_otp
 from notifications.models import Announcement, Notification
 from user.models import PasswordResetToken, User
 
@@ -134,6 +136,34 @@ class UserAndNotificationApiTests(TestCase):
         self.assertEqual(reset_response.status_code, 200)
         user.refresh_from_db()
         self.assertTrue(user.check_password('EvenStronger123!'))
+
+    def test_shared_email_helper_sends_password_reset_email(self):
+        user = User.objects.create_user(
+            username='mailstudent',
+            email='mailstudent@example.com',
+            password='StrongPass123!',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='S-2010',
+            contact_number='09170000016',
+            is_approved=True,
+        )
+
+        sent = send_password_reset_email(user, 'ABC123')
+
+        self.assertTrue(sent)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Password Reset Request', mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, [user.email])
+
+    def test_shared_email_helper_sends_pre_registration_otp(self):
+        sent = send_pre_registration_otp('newstudent@example.com', '654321')
+
+        self.assertTrue(sent)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Verify Your Email', mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, ['newstudent@example.com'])
 
     def test_upload_documents_requires_student_role(self):
         self.client.force_authenticate(user=self.instructor)

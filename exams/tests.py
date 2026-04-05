@@ -368,6 +368,44 @@ class ExamModelAndApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
 
+        self.authenticate(self.student)
+        available_response = self.client.get('/api/exams/available/')
+        self.assertEqual(available_response.status_code, 200)
+        self.assertTrue(any(item['id'] == exam.id for item in available_response.data))
+
+    def test_dean_first_question_save_sends_student_email(self):
+        exam = self.create_exam(
+            created_by=self.dean,
+            is_approved=True,
+            approved_by=self.dean,
+            approved_at=timezone.now(),
+            total_points=5,
+        )
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_exam_scheduled_email') as mock_email, patch('exams.views.send_push_to_users'):
+            response = self.client.post(
+                f'/api/exams/{exam.id}/questions/',
+                {
+                    'questions': [
+                        {
+                            'question': 'What is 2 + 2?',
+                            'type': 'multiple_choice',
+                            'options': ['3', '4', '5'],
+                            'correct_answer': '4',
+                            'points': 5,
+                        }
+                    ]
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, 201)
+        mock_email.assert_called_once()
+        notified_student, notified_exam = mock_email.call_args.args
+        self.assertEqual(notified_student, self.student)
+        self.assertEqual(notified_exam.id, exam.id)
+
     def test_import_questions_csv_requires_total_points_match(self):
         exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=10)
         self.authenticate(self.instructor)
@@ -472,3 +510,45 @@ class ExamModelAndApiTests(TestCase):
         result.refresh_from_db()
         self.assertTrue(result.is_graded)
         self.assertEqual(result.score, 8)
+
+    def test_approve_exam_still_succeeds_when_email_send_fails(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None)
+        Question.objects.create(
+            exam=exam,
+            question='What is 2 + 2?',
+            type='multiple_choice',
+            options=['3', '4', '5'],
+            correct_answer='4',
+            points=10,
+            order=1,
+        )
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_exam_scheduled_email', side_effect=Exception('smtp error')):
+            response = self.client.post(f'/api/exams/{exam.id}/approve/')
+
+        self.assertEqual(response.status_code, 200)
+        exam.refresh_from_db()
+        self.assertTrue(exam.is_approved)
+
+    def test_approve_exam_sends_student_email(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None)
+        Question.objects.create(
+            exam=exam,
+            question='What is 2 + 2?',
+            type='multiple_choice',
+            options=['3', '4', '5'],
+            correct_answer='4',
+            points=10,
+            order=1,
+        )
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_exam_scheduled_email') as mock_email, patch('exams.views.send_push_to_users'):
+            response = self.client.post(f'/api/exams/{exam.id}/approve/')
+
+        self.assertEqual(response.status_code, 200)
+        mock_email.assert_called_once()
+        notified_student, notified_exam = mock_email.call_args.args
+        self.assertEqual(notified_student, self.student)
+        self.assertEqual(notified_exam.id, exam.id)

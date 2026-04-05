@@ -1,140 +1,105 @@
 import logging
+from email.utils import parseaddr
 
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
 
+def _normalized_from_email():
+    configured = (getattr(settings, 'DEFAULT_FROM_EMAIL', '') or '').strip()
+    smtp_user = (getattr(settings, 'EMAIL_HOST_USER', '') or '').strip()
+    email_host = (getattr(settings, 'EMAIL_HOST', '') or '').strip().lower()
+    if email_host == 'smtp.gmail.com' and smtp_user:
+        return smtp_user
+    sender_email = parseaddr(configured)[1]
+    if sender_email:
+        return configured
+    return smtp_user
+
+
+def _send_html_email(subject, recipient, html_message, plain_message=None):
+    recipient = (recipient or '').strip()
+    if not recipient:
+        logger.warning("Skipping email with empty recipient for subject %s", subject)
+        return False
+
+    from_email = _normalized_from_email()
+    if not from_email:
+        logger.error("Email send aborted because DEFAULT_FROM_EMAIL/EMAIL_HOST_USER is not configured")
+        return False
+
+    if plain_message is None:
+        plain_message = strip_tags(html_message)
+
+    try:
+        connection = get_connection(fail_silently=False)
+        message = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=[recipient],
+            connection=connection,
+        )
+        message.attach_alternative(html_message, "text/html")
+        message.send(fail_silently=False)
+        logger.info("Email sent successfully to %s with subject %s", recipient, subject)
+        return True
+    except Exception:
+        logger.exception("Failed to send email to %s with subject %s", recipient, subject)
+        return False
+
+
 def send_email_verification_otp(user, otp_code):
-    """Send OTP code for email verification during registration"""
-    subject = '✉️ Verify Your Email — SCSIT Online Exam'
+    subject = 'Verify Your Email - SCSIT Online Exam'
     html_message = render_to_string('emails/email_verification.html', {
         'user': user,
         'otp_code': otp_code,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        logger.exception("Failed to send email verification OTP to %s", user.email)
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_pre_registration_otp(email, otp_code):
-    """Send OTP to an email address before user account is created"""
-    subject = '✉️ Verify Your Email — SCSIT Online Exam'
+    subject = 'Verify Your Email - SCSIT Online Exam'
     html_message = render_to_string('emails/email_verification.html', {
         'user': None,
         'otp_code': otp_code,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        logger.exception("Failed to send pre-registration OTP to %s", email)
-        return False
+    return _send_html_email(subject, email, html_message)
 
 
 def send_student_approval_email(user):
-    """Send email when student account is approved"""
-    subject = '🎉 Your Account Has Been Approved!'
-    
+    subject = 'Your Account Has Been Approved!'
     html_message = render_to_string('emails/student_approval.html', {
         'user': user,
         'frontend_url': settings.FRONTEND_URL,
     })
-    
-    plain_message = strip_tags(html_message)
-    
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send approval email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_staff_approval_email(user):
-    """Send email when instructor/dean account is approved"""
-    subject = 'ðŸŽ‰ Your Staff Account Has Been Approved!'
-
+    subject = 'Your Staff Account Has Been Approved!'
     html_message = render_to_string('emails/staff_approval.html', {
         'user': user,
         'frontend_url': settings.FRONTEND_URL,
     })
-
-    plain_message = strip_tags(html_message)
-
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send staff approval email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_exam_scheduled_email(user, exam):
-    """Send email when new exam is scheduled"""
-    subject = f'📝 New Exam Scheduled: {exam.title}'
-    
+    subject = f'New Exam Scheduled: {exam.title}'
     html_message = render_to_string('emails/exam_scheduled.html', {
         'user': user,
         'exam': exam,
         'frontend_url': settings.FRONTEND_URL,
     })
-    
-    plain_message = strip_tags(html_message)
-    
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send exam scheduled email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_dean_exam_created_email(user, exam):
-    """Send confirmation email when a dean successfully creates an exam."""
     subject = f'Exam Created Successfully: {exam.title}'
     exam_link = f"{settings.FRONTEND_URL}/exam/questions/{exam.id}"
     dashboard_link = f"{settings.FRONTEND_URL}/dashboard/dean"
@@ -172,104 +137,40 @@ def send_dean_exam_created_email(user, exam):
         f"Add questions: {exam_link}\n"
         f"Dashboard: {dashboard_link}"
     )
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send dean exam created email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message, plain_message)
 
 
 def send_results_published_email(user, result):
-    """Send email when exam results are published"""
-    subject = f'📊 Results Available: {result.exam_title}'
-    
+    subject = f'Results Available: {result.exam_title}'
     html_message = render_to_string('emails/results_published.html', {
         'user': user,
         'result': result,
         'frontend_url': settings.FRONTEND_URL,
     })
-    
-    plain_message = strip_tags(html_message)
-    
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send results email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_password_reset_email(user, reset_code):
-    """Send email with password reset code"""
-    subject = '🔐 Password Reset Request'
-    
+    subject = 'Password Reset Request'
     html_message = render_to_string('emails/password_reset.html', {
         'user': user,
         'reset_code': reset_code,
         'frontend_url': settings.FRONTEND_URL,
     })
-    
-    plain_message = strip_tags(html_message)
-    
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send password reset email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_bulk_import_email(user, set_password_token):
-    """Send email to bulk-imported student with a set-password link"""
-    subject = '📋 Your Student Account Has Been Created'
-
+    subject = 'Your Student Account Has Been Created'
     html_message = render_to_string('emails/bulk_import.html', {
         'user': user,
         'set_password_token': set_password_token,
         'frontend_url': settings.FRONTEND_URL,
     })
-
-    plain_message = strip_tags(html_message)
-
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send bulk import email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_bulk_exam_notification(users, exam):
-    """Send exam notification to multiple users"""
     success_count = 0
     for user in users:
         if send_exam_scheduled_email(user, exam):
@@ -278,57 +179,28 @@ def send_bulk_exam_notification(users, exam):
 
 
 def send_student_rejected_email(user, rejection_reason=None):
-    """Send email when student account is rejected"""
-    subject = '❌ Your Account Registration Was Not Approved'
+    subject = 'Your Account Registration Was Not Approved'
     html_message = render_to_string('emails/student_rejected.html', {
         'user': user,
         'rejection_reason': rejection_reason,
         'frontend_url': settings.FRONTEND_URL,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send rejection email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_exam_rejected_email(user, exam_title, dean_name):
-    """Send email when exam is rejected by dean"""
-    subject = f'❌ Exam Rejected: {exam_title}'
+    subject = f'Exam Rejected: {exam_title}'
     html_message = render_to_string('emails/exam_rejected.html', {
         'user': user,
         'exam_title': exam_title,
         'dean_name': dean_name,
         'frontend_url': settings.FRONTEND_URL,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send exam rejected email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_announcement_email(user, announcement, created_by):
-    """Send email when a new announcement is posted"""
-    subject = f'📢 New Announcement: {announcement.title}'
+    subject = f'New Announcement: {announcement.title}'
     html_message = render_to_string('emails/announcement.html', {
         'user': user,
         'title': announcement.title,
@@ -337,25 +209,11 @@ def send_announcement_email(user, announcement, created_by):
         'created_at': announcement.created_at.strftime('%B %d, %Y %I:%M %p'),
         'frontend_url': settings.FRONTEND_URL,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send announcement email to {user.email}: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_time_extension_email(user, exam, extra_minutes, reason):
-    """Send email when exam time is extended for a student"""
-    subject = f'⏰ Exam Time Extended: {exam.title}'
+    subject = f'Exam Time Extended: {exam.title}'
     html_message = render_to_string('emails/time_extension.html', {
         'user': user,
         'exam': exam,
@@ -363,24 +221,10 @@ def send_time_extension_email(user, exam, extra_minutes, reason):
         'reason': reason or 'No reason provided.',
         'frontend_url': settings.FRONTEND_URL,
     })
-    plain_message = strip_tags(html_message)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send time extension email: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
 
 
 def send_issue_report_email(user, report, actor_name):
-    """Send email when a student reports an issue about an exam question"""
     subject = f'Issue Report: {report.exam.title} - Question {report.question.order}'
     report_link = (
         f"{settings.FRONTEND_URL}/dashboard/teacher/reports?report={report.id}"
@@ -411,23 +255,10 @@ def send_issue_report_email(user, report, actor_name):
         f"Description: {report.description}\n\n"
         f"Open report: {report_link}"
     )
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send issue report email to {user.email}: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message, plain_message)
 
 
 def send_issue_report_reply_email(user, report, actor_name, message_text):
-    """Send email to a student when staff replies to an exam issue report."""
     subject = f'Issue Report Reply: {report.exam.title} - Question {report.question.order}'
     report_link = f"{settings.FRONTEND_URL}/dashboard/student/reports?report={report.id}"
     html_message = f"""
@@ -452,16 +283,4 @@ def send_issue_report_reply_email(user, report, actor_name, message_text):
         f"Reply: {message_text}\n\n"
         f"Open report: {report_link}"
     )
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send issue report reply email to {user.email}: {e}")
-        return False
+    return _send_html_email(subject, getattr(user, 'email', ''), html_message, plain_message)

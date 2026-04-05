@@ -52,6 +52,26 @@ def _exam_access_error(user, exam):
     return None
 
 
+def _normalized_exam_year_levels(exam):
+    if exam.year_level == 'ALL':
+        return None
+    return [level.strip() for level in str(exam.year_level).split(',') if level.strip()]
+
+
+def _eligible_students_for_exam(exam):
+    students = User.objects.filter(
+        department=exam.department,
+        role='student',
+        is_approved=True,
+    )
+
+    year_levels = _normalized_exam_year_levels(exam)
+    if year_levels:
+        students = students.filter(year_level__in=year_levels)
+
+    return students
+
+
 def _extract_exam_session_token(request):
     token = request.headers.get('X-Exam-Session')
     if token:
@@ -141,31 +161,31 @@ def _notify_exam_approved(exam, approver, notify_creator=True):
         except Exception as exc:
             print(f"Warning: failed to notify exam creator about approval: {exc}")
 
-    students = User.objects.filter(
-        department=exam.department,
-        role='student',
-        is_approved=True
-    )
-
-    if exam.year_level != 'ALL':
-        year_levels = exam.year_level.split(',')
-        students = students.filter(year_level__in=year_levels)
-
-    student_list = list(students)
+    student_list = list(_eligible_students_for_exam(exam))
 
     for student in student_list:
+        should_send_email = False
         try:
-            Notification.objects.create(
+            notification_link = f'/exam/{exam.id}/instructions'
+            notification_exists = Notification.objects.filter(
                 user=student,
                 type='exam_scheduled',
-                title='New Exam Scheduled',
-                message=f'A new {exam.exam_type} exam "{exam.title}" has been scheduled for {exam.scheduled_date.strftime("%B %d, %Y")}.',
-                link=f'/exam/{exam.id}/instructions'
-            )
+                link=notification_link,
+            ).exists()
+            if not notification_exists:
+                Notification.objects.create(
+                    user=student,
+                    type='exam_scheduled',
+                    title='New Exam Scheduled',
+                    message=f'A new {exam.exam_type} exam "{exam.title}" has been scheduled for {exam.scheduled_date.strftime("%B %d, %Y")}.',
+                    link=notification_link
+                )
+                should_send_email = True
         except Exception as exc:
             print(f"Warning: failed to create exam notification for student {student.id}: {exc}")
         try:
-            send_exam_scheduled_email(student, exam)
+            if should_send_email and student.email:
+                send_exam_scheduled_email(student, exam)
         except Exception as exc:
             print(f"Warning: failed to send exam scheduled email to student {student.id}: {exc}")
 
@@ -192,7 +212,8 @@ def _publish_dean_exam_if_ready(exam, user):
     if exam.questions.count() == 0:
         return
     try:
-        _notify_exam_approved(exam, user, notify_creator=False)
+        fresh_exam = Exam.objects.get(id=exam.id)
+        _notify_exam_approved(fresh_exam, user, notify_creator=False)
     except Exception as exc:
         print(f"Warning: failed to publish dean exam {exam.id}: {exc}")
 
@@ -389,14 +410,11 @@ def get_available_exams(request):
         return Response({'error': 'Your account is not approved yet'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
-    # Get approved exams for student's department and year level (or ALL year levels)
-    from django.db.models import Q
     exams = Exam.objects.filter(
-        Q(department=user.department) & 
-        Q(is_approved=True) &
-        Q(questions__isnull=False) &
-        Q(is_practice=False) &
-        (Q(year_level__contains=user.year_level) | Q(year_level='ALL'))
+        department=user.department,
+        is_approved=True,
+        questions__isnull=False,
+        is_practice=False,
     ).distinct()
     
     exam_list = []
@@ -876,6 +894,8 @@ def approve_exam(request, exam_id):
         exam.save()
         
         log_activity(user, 'exam_approved', f'Approved exam: {exam.title}', request, {'exam_id': exam.id})
+        _notify_exam_approved(Exam.objects.get(id=exam.id), user, notify_creator=True)
+        return Response({'message': 'Exam approved successfully'})
         
         # Create notification for instructor
         Notification.objects.create(
@@ -1124,8 +1144,6 @@ def save_questions(request, exam_id):
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
-        had_questions = exam.questions.exists()
-        
         # Delete existing questions
         exam.questions.all().delete()
         
@@ -1140,7 +1158,7 @@ def save_questions(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
-        if exam.is_approved and not had_questions and questions_data:
+        if exam.is_approved and questions_data:
             _publish_dean_exam_if_ready(exam, user)
 
         return Response({'message': 'Questions saved successfully'}, status=status.HTTP_201_CREATED)
@@ -1209,8 +1227,6 @@ def import_questions_csv(request, exam_id):
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
-        had_questions = exam.questions.exists()
-        
         # Delete existing questions
         exam.questions.all().delete()
         
@@ -1225,7 +1241,7 @@ def import_questions_csv(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
-        if exam.is_approved and not had_questions and questions_data:
+        if exam.is_approved and questions_data:
             _publish_dean_exam_if_ready(exam, user)
         
         return Response({

@@ -36,7 +36,10 @@ def _send_html_email(subject, recipient, html_message, plain_message=None):
         plain_message = strip_tags(html_message)
 
     try:
-        connection = get_connection(fail_silently=False)
+        connection = get_connection(
+            fail_silently=False,
+            timeout=getattr(__import__('django.conf', fromlist=['settings']).settings, 'EMAIL_TIMEOUT', 20),
+        )
         message = EmailMultiAlternatives(
             subject=subject,
             body=plain_message,
@@ -48,8 +51,8 @@ def _send_html_email(subject, recipient, html_message, plain_message=None):
         message.send(fail_silently=False)
         logger.info("Email sent successfully to %s with subject %s", recipient, subject)
         return True
-    except Exception:
-        logger.exception("Failed to send email to %s with subject %s", recipient, subject)
+    except Exception as exc:
+        logger.exception("Failed to send email to %s | subject: %s | error: %s", recipient, subject, exc)
         return False
 
 

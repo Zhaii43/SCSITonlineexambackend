@@ -73,6 +73,12 @@ def _get_staff_exam_or_404(user, exam_id):
     return Exam.objects.get(id=exam_id, created_by=user)
 
 
+def _can_modify_exam_questions(user, exam):
+    if not exam.is_approved:
+        return True
+    return user.role == 'dean' and exam.created_by_id == user.id
+
+
 def _notify_exam_approved(exam, approver, notify_creator=True):
     if notify_creator and exam.created_by_id != approver.id:
         Notification.objects.create(
@@ -1028,7 +1034,7 @@ def save_questions(request, exam_id):
     try:
         exam = _get_staff_exam_or_404(user, exam_id)
         
-        if exam.is_approved:
+        if not _can_modify_exam_questions(user, exam):
             return Response({'error': 'Cannot add questions to approved exams'}, 
                            status=status.HTTP_403_FORBIDDEN)
         
@@ -1073,7 +1079,7 @@ def import_questions_csv(request, exam_id):
         
         exam = _get_staff_exam_or_404(user, exam_id)
         
-        if exam.is_approved:
+        if not _can_modify_exam_questions(user, exam):
             return Response({'error': 'Cannot import questions to approved exams'}, 
                            status=status.HTTP_403_FORBIDDEN)
         

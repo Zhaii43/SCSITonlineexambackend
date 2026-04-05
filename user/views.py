@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework import serializers
 import secrets
+import logging
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth import authenticate
@@ -30,6 +31,8 @@ import re
 from urllib.parse import urlparse
 import cloudinary
 from cloudinary import utils as cloudinary_utils, api as cloudinary_api
+
+logger = logging.getLogger(__name__)
 
 
 def _file_url(request, field):
@@ -404,7 +407,9 @@ def pre_verify_email(request):
     PreRegistrationOTP.objects.filter(email__iexact=email).delete()
 
     otp = PreRegistrationOTP.objects.create(email=email)
-    if not send_pre_registration_otp(email, otp.code):
+    sent = send_pre_registration_otp(email, otp.code)
+    logger.info("pre_verify_email send_pre_registration_otp result=%s email=%s", sent, email)
+    if not sent:
         otp.delete()
         return Response(
             {'error': 'Unable to send OTP email right now. Please try again later.'},
@@ -1352,8 +1357,14 @@ def request_password_reset(request):
     # Delete old unused tokens and create a fresh 6-digit code
     PasswordResetToken.objects.filter(user=user, is_used=False).delete()
     reset_token = PasswordResetToken.objects.create(user=user)
-
-    if not send_password_reset_email(user, reset_token.token):
+    sent = send_password_reset_email(user, reset_token.token)
+    logger.info(
+        "request_password_reset send_password_reset_email result=%s email=%s user_id=%s",
+        sent,
+        user.email,
+        user.id,
+    )
+    if not sent:
         reset_token.delete()
         return Response(
             {'error': 'Unable to send password reset email right now. Please try again later.'},

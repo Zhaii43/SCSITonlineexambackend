@@ -6,3 +6,4 @@
 2026-04-01 00:25:19,747 INFO django.utils.autoreload Watching for file changes with StatReloader
 2026-04-05 20:38:11,318 INFO notifications.email_utils Email sent successfully to SCSITonlineexam@gmail.com with subject SCSIT Online Exam email test
 2026-04-05 20:49:12,553 INFO notifications.email_utils Email sent successfully to SCSITonlineexam@gmail.com with subject SCSIT Online Exam email test
+2026-04-05 21:06:46,507 INFO notifications.email_utils Email sent successfully to hanzprahinog@gmail.com with subject Password Reset Request

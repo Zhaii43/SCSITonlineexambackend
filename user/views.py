@@ -1407,6 +1407,46 @@ def request_password_reset(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def request_password_reset_direct(request):
+    """Minimal fallback endpoint for password reset email sending."""
+    try:
+        email = str(request.data.get('email', '')).strip().lower()
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        reset_token = PasswordResetToken.objects.create(user=user)
+
+        sent = send_password_reset_email(user, reset_token.token)
+        logger.info(
+            "request_password_reset_direct send_password_reset_email result=%s email=%s user_id=%s",
+            sent,
+            user.email,
+            user.id,
+        )
+        if not sent:
+            reset_token.delete()
+            return Response(
+                {'error': 'Unable to send password reset email right now. Please try again later.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        return Response({'message': f'A 6-digit verification code has been sent to {email}'})
+    except Exception as exc:
+        logger.exception("request_password_reset_direct failed for email=%s | error: %s", request.data.get('email', ''), exc)
+        return Response(
+            {'error': 'Unable to process password reset right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def verify_reset_code(request):
     """Step 2 — verify the 6-digit code, return the token for step 3"""
     email = request.data.get('email', '').strip().lower()

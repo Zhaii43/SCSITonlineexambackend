@@ -1658,9 +1658,10 @@ def bulk_import_students(request):
 
                 # Create a 7-day token for setting password
                 from django.utils import timezone as tz
+                from user.password_reset import _now as _pr_now
                 reset_token = PasswordResetToken(
                     user=student,
-                    expires_at=tz.now() + timedelta(days=7),
+                    expires_at=_pr_now() + timedelta(days=7),
                 )
                 reset_token.save()
 

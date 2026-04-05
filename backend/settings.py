@@ -228,17 +228,18 @@ SECURE_HSTS_SECONDS = config('DJANGO_SECURE_HSTS_SECONDS', default=0 if DEBUG el
 SECURE_HSTS_INCLUDE_SUBDOMAINS = config('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', default=not DEBUG, cast=bool)
 SECURE_HSTS_PRELOAD = config('DJANGO_SECURE_HSTS_PRELOAD', default=not DEBUG, cast=bool)
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD').strip()
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='').strip()
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='').strip()
 if EMAIL_HOST.lower() == 'smtp.gmail.com':
     EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD.replace(' ', '')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER or 'noreply@example.com').strip()
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 FRONTEND_URL = config('FRONTEND_URL')
 
 # Exam termination policy

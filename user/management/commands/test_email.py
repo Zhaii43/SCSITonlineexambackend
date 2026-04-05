@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.core.mail import get_connection, send_mail
+from django.core.mail import get_connection
+from notifications.email_utils import _send_html_email
 
 
 class Command(BaseCommand):
@@ -43,20 +44,22 @@ class Command(BaseCommand):
                 pass
 
         try:
-            sent = send_mail(
+            sent = _send_html_email(
                 subject="SCSIT Online Exam email test",
-                message=(
+                recipient=recipient,
+                html_message=(
+                    "<p>This is a test email from the SCSIT Online Exam backend. "
+                    "If you received this, SMTP is configured correctly.</p>"
+                ),
+                plain_message=(
                     "This is a test email from the SCSIT Online Exam backend. "
                     "If you received this, SMTP is configured correctly."
                 ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient],
-                fail_silently=False,
             )
         except Exception as exc:
             raise CommandError(f"SMTP send failed: {exc}") from exc
 
-        if sent != 1:
-            raise CommandError(f"Expected to send 1 email, but send_mail returned {sent}.")
+        if not sent:
+            raise CommandError("SMTP send failed. Check the backend logs for the exact SMTP error.")
 
         self.stdout.write(self.style.SUCCESS("Test email sent successfully."))

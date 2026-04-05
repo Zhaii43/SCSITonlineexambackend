@@ -1318,7 +1318,7 @@ def change_password(request):
 def request_password_reset(request):
     """Step 1 — send a 6-digit OTP code to the user's email"""
     from django.utils import timezone as tz
-    email = request.data.get('email', '').strip()
+    email = request.data.get('email', '').strip().lower()
     throttle_response = throttle_request(
         request,
         'password_reset_request',
@@ -1334,7 +1334,7 @@ def request_password_reset(request):
         return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user = User.objects.get(email=email)
+        user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
         return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1369,7 +1369,7 @@ def request_password_reset(request):
 @permission_classes([AllowAny])
 def verify_reset_code(request):
     """Step 2 — verify the 6-digit code, return the token for step 3"""
-    email = request.data.get('email', '').strip()
+    email = request.data.get('email', '').strip().lower()
     code = request.data.get('code', '').strip()
     throttle_response = throttle_request(
         request,
@@ -1386,7 +1386,7 @@ def verify_reset_code(request):
         return Response({'error': 'Email and code are required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user = User.objects.get(email=email)
+        user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
         return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
 

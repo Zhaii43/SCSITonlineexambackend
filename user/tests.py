@@ -137,6 +137,36 @@ class UserAndNotificationApiTests(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.check_password('EvenStronger123!'))
 
+    def test_password_reset_accepts_case_insensitive_email(self):
+        user = User.objects.create_user(
+            username='resetstudentcase',
+            email='resetstudentcase@example.com',
+            password='StrongPass123!',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='S-2004',
+            contact_number='09170000017',
+            is_approved=True,
+        )
+
+        with patch('user.views.send_password_reset_email'):
+            request_response = self.client.post(
+                '/api/password-reset/request/',
+                {'email': 'ResetStudentCase@Example.com'},
+                format='json',
+            )
+
+        self.assertEqual(request_response.status_code, 200)
+        token = PasswordResetToken.objects.get(user=user)
+
+        verify_response = self.client.post(
+            '/api/password-reset/verify-code/',
+            {'email': 'RESETSTUDENTCASE@example.com', 'code': token.token},
+            format='json',
+        )
+        self.assertEqual(verify_response.status_code, 200)
+
     def test_shared_email_helper_sends_password_reset_email(self):
         user = User.objects.create_user(
             username='mailstudent',

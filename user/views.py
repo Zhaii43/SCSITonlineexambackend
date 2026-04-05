@@ -374,36 +374,40 @@ class RegisterView(APIView):
 @permission_classes([AllowAny])
 def pre_verify_email(request):
     """Send OTP to an email address for registration verification — no user created yet"""
-    from django.utils import timezone as tz
-    email = str(request.data.get('email', '')).strip().lower()
-    throttle_response = throttle_request(
-        request,
-        'registration_email_otp',
-        limit=100,
-        window_seconds=600,
-        identifiers=[email],
-        message='Too many OTP requests. Please wait 10 minutes before trying again.',
-    )
-    if throttle_response:
-        return throttle_response
-    if not email:
-        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if User.objects.filter(email__iexact=email).exists():
-        return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Rate limit: max 100 OTP requests per email per 10 minutes
-    ten_minutes_ago = tz.now() - timedelta(minutes=10)
-    recent_count = PreRegistrationOTP.objects.filter(
-        email__iexact=email, created_at__gte=ten_minutes_ago
-    ).count()
-    if recent_count >= 100:
-        return Response(
-            {'error': 'Too many OTP requests. Please wait 10 minutes before trying again.'},
-            status=status.HTTP_429_TOO_MANY_REQUESTS
-        )
-
     try:
+        from django.utils import timezone as tz
+        email = str(request.data.get('email', '')).strip().lower()
+        try:
+            throttle_response = throttle_request(
+                request,
+                'registration_email_otp',
+                limit=100,
+                window_seconds=600,
+                identifiers=[email],
+                message='Too many OTP requests. Please wait 10 minutes before trying again.',
+            )
+            if throttle_response:
+                return throttle_response
+        except Exception as throttle_exc:
+            logger.exception("pre_verify_email throttle failed for email=%s | error: %s", email, throttle_exc)
+
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=email).exists():
+            return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Rate limit: max 100 OTP requests per email per 10 minutes
+        ten_minutes_ago = tz.now() - timedelta(minutes=10)
+        recent_count = PreRegistrationOTP.objects.filter(
+            email__iexact=email, created_at__gte=ten_minutes_ago
+        ).count()
+        if recent_count >= 100:
+            return Response(
+                {'error': 'Too many OTP requests. Please wait 10 minutes before trying again.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
         # Delete all old OTPs for this email before creating a new one
         PreRegistrationOTP.objects.filter(email__iexact=email).delete()
 
@@ -1329,39 +1333,42 @@ def change_password(request):
 @permission_classes([AllowAny])
 def request_password_reset(request):
     """Step 1 — send a 6-digit OTP code to the user's email"""
-    from django.utils import timezone as tz
-    email = request.data.get('email', '').strip().lower()
-    throttle_response = throttle_request(
-        request,
-        'password_reset_request',
-        limit=100,
-        window_seconds=600,
-        identifiers=[email],
-        message='Too many password reset requests. Please wait 10 minutes before trying again.',
-    )
-    if throttle_response:
-        return throttle_response
-
-    if not email:
-        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
-        user = User.objects.get(email__iexact=email)
-    except User.DoesNotExist:
-        return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
+        from django.utils import timezone as tz
+        email = request.data.get('email', '').strip().lower()
+        try:
+            throttle_response = throttle_request(
+                request,
+                'password_reset_request',
+                limit=100,
+                window_seconds=600,
+                identifiers=[email],
+                message='Too many password reset requests. Please wait 10 minutes before trying again.',
+            )
+            if throttle_response:
+                return throttle_response
+        except Exception as throttle_exc:
+            logger.exception("request_password_reset throttle failed for email=%s | error: %s", email, throttle_exc)
 
-    # Rate limit: max 100 reset requests per user per 10 minutes
-    ten_minutes_ago = tz.now() - timedelta(minutes=10)
-    recent_count = PasswordResetToken.objects.filter(
-        user=user, created_at__gte=ten_minutes_ago
-    ).count()
-    if recent_count >= 100:
-        return Response(
-            {'error': 'Too many reset requests. Please wait 10 minutes before trying again.'},
-            status=status.HTTP_429_TOO_MANY_REQUESTS
-        )
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Rate limit: max 100 reset requests per user per 10 minutes
+        ten_minutes_ago = tz.now() - timedelta(minutes=10)
+        recent_count = PasswordResetToken.objects.filter(
+            user=user, created_at__gte=ten_minutes_ago
+        ).count()
+        if recent_count >= 100:
+            return Response(
+                {'error': 'Too many reset requests. Please wait 10 minutes before trying again.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
         # Delete old unused tokens and create a fresh 6-digit code
         PasswordResetToken.objects.filter(user=user, is_used=False).delete()
         reset_token = PasswordResetToken.objects.create(user=user)

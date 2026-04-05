@@ -403,20 +403,27 @@ def pre_verify_email(request):
             status=status.HTTP_429_TOO_MANY_REQUESTS
         )
 
-    # Delete all old OTPs for this email before creating a new one
-    PreRegistrationOTP.objects.filter(email__iexact=email).delete()
+    try:
+        # Delete all old OTPs for this email before creating a new one
+        PreRegistrationOTP.objects.filter(email__iexact=email).delete()
 
-    otp = PreRegistrationOTP.objects.create(email=email)
-    sent = send_pre_registration_otp(email, otp.code)
-    logger.info("pre_verify_email send_pre_registration_otp result=%s email=%s", sent, email)
-    if not sent:
-        otp.delete()
+        otp = PreRegistrationOTP.objects.create(email=email)
+        sent = send_pre_registration_otp(email, otp.code)
+        logger.info("pre_verify_email send_pre_registration_otp result=%s email=%s", sent, email)
+        if not sent:
+            otp.delete()
+            return Response(
+                {'error': 'Unable to send OTP email right now. Please try again later.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        return Response({'message': f'OTP sent to {email}'})
+    except Exception as exc:
+        logger.exception("pre_verify_email failed for email=%s | error: %s", email, exc)
         return Response(
-            {'error': 'Unable to send OTP email right now. Please try again later.'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE
+            {'error': 'Unable to process OTP request right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    return Response({'message': f'OTP sent to {email}'})
 
 
 @api_view(['POST'])
@@ -1354,26 +1361,41 @@ def request_password_reset(request):
             status=status.HTTP_429_TOO_MANY_REQUESTS
         )
 
-    # Delete old unused tokens and create a fresh 6-digit code
-    PasswordResetToken.objects.filter(user=user, is_used=False).delete()
-    reset_token = PasswordResetToken.objects.create(user=user)
-    sent = send_password_reset_email(user, reset_token.token)
-    logger.info(
-        "request_password_reset send_password_reset_email result=%s email=%s user_id=%s",
-        sent,
-        user.email,
-        user.id,
-    )
-    if not sent:
-        reset_token.delete()
-        return Response(
-            {'error': 'Unable to send password reset email right now. Please try again later.'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE
+    try:
+        # Delete old unused tokens and create a fresh 6-digit code
+        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        reset_token = PasswordResetToken.objects.create(user=user)
+        sent = send_password_reset_email(user, reset_token.token)
+        logger.info(
+            "request_password_reset send_password_reset_email result=%s email=%s user_id=%s",
+            sent,
+            user.email,
+            user.id,
         )
+        if not sent:
+            reset_token.delete()
+            return Response(
+                {'error': 'Unable to send password reset email right now. Please try again later.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
-    log_activity(user, 'password_reset_requested', f'{user.username} requested password reset', request)
+        try:
+            log_activity(user, 'password_reset_requested', f'{user.username} requested password reset', request)
+        except Exception as audit_exc:
+            logger.exception(
+                "request_password_reset audit logging failed for email=%s user_id=%s | error: %s",
+                user.email,
+                user.id,
+                audit_exc,
+            )
 
-    return Response({'message': f'A 6-digit verification code has been sent to {email}'})
+        return Response({'message': f'A 6-digit verification code has been sent to {email}'})
+    except Exception as exc:
+        logger.exception("request_password_reset failed for email=%s | error: %s", email, exc)
+        return Response(
+            {'error': 'Unable to process password reset right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])

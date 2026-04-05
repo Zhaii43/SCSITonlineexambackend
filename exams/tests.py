@@ -338,6 +338,48 @@ class ExamModelAndApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(exam.questions.count(), 1)
 
+    def test_import_questions_csv_requires_total_points_match(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=10)
+        self.authenticate(self.instructor)
+
+        csv_content = (
+            "question,type,options,correct_answer,points\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5\n"
+        )
+        upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
+
+        response = self.client.post(
+            f'/api/exams/{exam.id}/questions/import/',
+            {'file': upload},
+            format='multipart',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('do not match', response.data['error'])
+
+    def test_save_questions_requires_total_points_match(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=10)
+        self.authenticate(self.instructor)
+
+        response = self.client.post(
+            f'/api/exams/{exam.id}/questions/',
+            {
+                'questions': [
+                    {
+                        'question': 'What is 2 + 2?',
+                        'type': 'multiple_choice',
+                        'options': ['3', '4', '5'],
+                        'correct_answer': '4',
+                        'points': 5,
+                    }
+                ]
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('do not match', response.data['error'])
+
     def test_dean_can_grade_own_exam_result(self):
         exam = self.create_exam(
             created_by=self.dean,

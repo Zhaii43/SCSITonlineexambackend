@@ -79,6 +79,21 @@ def _can_modify_exam_questions(user, exam):
     return user.role == 'dean' and exam.created_by_id == user.id
 
 
+def _validate_question_total_points(exam, questions_data):
+    total_question_points = sum(int(q.get('points', 0)) for q in questions_data)
+    if total_question_points != exam.total_points:
+        return Response(
+            {
+                'error': (
+                    f'Total question points ({total_question_points}) do not match '
+                    f'the exam total points ({exam.total_points}).'
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
+
 def _notify_exam_approved(exam, approver, notify_creator=True):
     if notify_creator and exam.created_by_id != approver.id:
         Notification.objects.create(
@@ -1040,6 +1055,9 @@ def save_questions(request, exam_id):
                            status=status.HTTP_403_FORBIDDEN)
         
         questions_data = request.data.get('questions', [])
+        total_points_error = _validate_question_total_points(exam, questions_data)
+        if total_points_error:
+            return total_points_error
         
         # Delete existing questions
         exam.questions.all().delete()
@@ -1114,6 +1132,10 @@ def import_questions_csv(request, exam_id):
         
         if not questions_data:
             return Response({'error': 'No valid questions found in CSV'}, status=status.HTTP_400_BAD_REQUEST)
+
+        total_points_error = _validate_question_total_points(exam, questions_data)
+        if total_points_error:
+            return total_points_error
         
         # Delete existing questions
         exam.questions.all().delete()

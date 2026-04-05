@@ -1164,41 +1164,69 @@ def update_profile(request):
 def request_email_change(request):
     """Send OTP to new email for profile email change."""
     user = request.user
-    new_email = str(request.data.get('email', '')).strip().lower()
-    throttle_response = throttle_request(
-        request,
-        'email_change_request',
-        limit=100,
-        window_seconds=600,
-        identifiers=[user.id, new_email],
-        message='Too many email change OTP requests. Please wait 10 minutes before trying again.',
-    )
-    if throttle_response:
-        return throttle_response
-
-    if not new_email:
-        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if user.email and new_email == user.email.lower():
-        return Response({'error': 'New email must be different from your current email.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
-        return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    EmailChangeOTP.objects.filter(user=user, is_used=False).delete()
-    otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
-    if not send_pre_registration_otp(new_email, otp.code):
-        otp.delete()
-        return Response(
-            {'error': 'Unable to send OTP email right now. Please try again later.'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE
+    new_email = ''
+    try:
+        new_email = str(request.data.get('email', '')).strip().lower()
+        throttle_response = throttle_request(
+            request,
+            'email_change_request',
+            limit=100,
+            window_seconds=600,
+            identifiers=[user.id, new_email],
+            message='Too many email change OTP requests. Please wait 10 minutes before trying again.',
         )
+        if throttle_response:
+            return throttle_response
 
-    log_activity(user, 'email_change_requested', f'{user.username} requested email change', request, {
-        'new_email': new_email
-    })
+        if not new_email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({'message': f'OTP sent to {new_email}', 'email': new_email})
+        if user.email and new_email == user.email.lower():
+            return Response({'error': 'New email must be different from your current email.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
+            return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        EmailChangeOTP.objects.filter(user=user, is_used=False).delete()
+        otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
+        sent = send_pre_registration_otp(new_email, otp.code)
+        logger.info(
+            "request_email_change send_pre_registration_otp result=%s user_id=%s new_email=%s",
+            sent,
+            user.id,
+            new_email,
+        )
+        if not sent:
+            otp.delete()
+            return Response(
+                {'error': 'Unable to send OTP email right now. Please try again later.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        try:
+            log_activity(user, 'email_change_requested', f'{user.username} requested email change', request, {
+                'new_email': new_email
+            })
+        except Exception as audit_exc:
+            logger.exception(
+                "request_email_change audit logging failed for user_id=%s new_email=%s | error: %s",
+                user.id,
+                new_email,
+                audit_exc,
+            )
+
+        return Response({'message': f'OTP sent to {new_email}', 'email': new_email})
+    except Exception as exc:
+        logger.exception(
+            "request_email_change failed for user_id=%s new_email=%s | error: %s",
+            user.id,
+            new_email,
+            exc,
+        )
+        return Response(
+            {'error': 'Unable to process email change right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])
@@ -1206,34 +1234,54 @@ def request_email_change(request):
 def resend_email_change_otp(request):
     """Resend OTP for a pending email change."""
     user = request.user
-    new_email = str(request.data.get('email', '')).strip().lower()
-    throttle_response = throttle_request(
-        request,
-        'email_change_resend',
-        limit=100,
-        window_seconds=600,
-        identifiers=[user.id, new_email],
-        message='Too many OTP resend attempts. Please wait 10 minutes before trying again.',
-    )
-    if throttle_response:
-        return throttle_response
-
-    if not new_email:
-        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
-        return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    EmailChangeOTP.objects.filter(user=user, new_email__iexact=new_email, is_used=False).delete()
-    otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
-    if not send_pre_registration_otp(new_email, otp.code):
-        otp.delete()
-        return Response(
-            {'error': 'Unable to send OTP email right now. Please try again later.'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE
+    new_email = ''
+    try:
+        new_email = str(request.data.get('email', '')).strip().lower()
+        throttle_response = throttle_request(
+            request,
+            'email_change_resend',
+            limit=100,
+            window_seconds=600,
+            identifiers=[user.id, new_email],
+            message='Too many OTP resend attempts. Please wait 10 minutes before trying again.',
         )
+        if throttle_response:
+            return throttle_response
 
-    return Response({'message': f'OTP resent to {new_email}', 'email': new_email})
+        if not new_email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
+            return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        EmailChangeOTP.objects.filter(user=user, new_email__iexact=new_email, is_used=False).delete()
+        otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
+        sent = send_pre_registration_otp(new_email, otp.code)
+        logger.info(
+            "resend_email_change_otp send_pre_registration_otp result=%s user_id=%s new_email=%s",
+            sent,
+            user.id,
+            new_email,
+        )
+        if not sent:
+            otp.delete()
+            return Response(
+                {'error': 'Unable to send OTP email right now. Please try again later.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        return Response({'message': f'OTP resent to {new_email}', 'email': new_email})
+    except Exception as exc:
+        logger.exception(
+            "resend_email_change_otp failed for user_id=%s new_email=%s | error: %s",
+            user.id,
+            new_email,
+            exc,
+        )
+        return Response(
+            {'error': 'Unable to resend email change code right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])

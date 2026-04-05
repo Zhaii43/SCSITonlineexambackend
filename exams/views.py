@@ -152,6 +152,17 @@ def _notify_exam_approved(exam, approver, notify_creator=True):
         print(f"Warning: failed to send exam realtime updates: {exc}")
 
 
+def _publish_dean_exam_if_ready(exam, user):
+    if user.role != 'dean' or exam.created_by_id != user.id or not exam.is_approved:
+        return
+    if exam.questions.count() == 0:
+        return
+    try:
+        _notify_exam_approved(exam, user, notify_creator=False)
+    except Exception as exc:
+        print(f"Warning: failed to publish dean exam {exam.id}: {exc}")
+
+
 def _require_active_exam_session(request, exam, user):
     session_token = _extract_exam_session_token(request)
     if not session_token:
@@ -349,9 +360,10 @@ def get_available_exams(request):
     exams = Exam.objects.filter(
         Q(department=user.department) & 
         Q(is_approved=True) &
+        Q(questions__isnull=False) &
         Q(is_practice=False) &
         (Q(year_level__contains=user.year_level) | Q(year_level='ALL'))
-    )
+    ).distinct()
     
     exam_list = []
     for exam in exams:
@@ -1037,10 +1049,6 @@ def create_exam(request):
 
         if auto_approve:
             try:
-                _notify_exam_approved(exam, user, notify_creator=False)
-            except Exception as exc:
-                print(f"Warning: failed to run auto-approval notifications for dean exam {exam.id}: {exc}")
-            try:
                 send_dean_exam_created_email(user, exam)
             except Exception as exc:
                 print(f"Warning: failed to send dean exam created email for exam {exam.id}: {exc}")
@@ -1079,6 +1087,7 @@ def save_questions(request, exam_id):
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
+        had_questions = exam.questions.exists()
         
         # Delete existing questions
         exam.questions.all().delete()
@@ -1094,7 +1103,9 @@ def save_questions(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
-        
+        if exam.is_approved and not had_questions and questions_data:
+            _publish_dean_exam_if_ready(exam, user)
+
         return Response({'message': 'Questions saved successfully'}, status=status.HTTP_201_CREATED)
     
     except Exam.DoesNotExist:
@@ -1157,6 +1168,7 @@ def import_questions_csv(request, exam_id):
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
+        had_questions = exam.questions.exists()
         
         # Delete existing questions
         exam.questions.all().delete()
@@ -1172,6 +1184,8 @@ def import_questions_csv(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
+        if exam.is_approved and not had_questions and questions_data:
+            _publish_dean_exam_if_ready(exam, user)
         
         return Response({
             'message': f'{len(questions_data)} questions imported successfully',

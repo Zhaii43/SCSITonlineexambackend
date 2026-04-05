@@ -317,7 +317,7 @@ class ExamModelAndApiTests(TestCase):
         self.assertEqual(exam.created_by, self.dean)
         self.assertEqual(exam.approved_by, self.dean)
         mock_dean_email.assert_called_once()
-        self.assertTrue(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
+        self.assertFalse(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
 
     def test_dean_can_import_questions_for_own_exam(self):
         exam = self.create_exam(created_by=self.dean, is_approved=False, approved_by=None, approved_at=None)
@@ -337,6 +337,36 @@ class ExamModelAndApiTests(TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(exam.questions.count(), 1)
+
+    def test_dean_first_question_save_publishes_exam_to_students(self):
+        exam = self.create_exam(
+            created_by=self.dean,
+            is_approved=True,
+            approved_by=self.dean,
+            approved_at=timezone.now(),
+            total_points=5,
+        )
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_exam_scheduled_email'), patch('exams.views.send_push_to_users'):
+            response = self.client.post(
+                f'/api/exams/{exam.id}/questions/',
+                {
+                    'questions': [
+                        {
+                            'question': 'What is 2 + 2?',
+                            'type': 'multiple_choice',
+                            'options': ['3', '4', '5'],
+                            'correct_answer': '4',
+                            'points': 5,
+                        }
+                    ]
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
 
     def test_import_questions_csv_requires_total_points_match(self):
         exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=10)

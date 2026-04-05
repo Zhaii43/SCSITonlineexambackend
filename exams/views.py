@@ -79,6 +79,14 @@ def _can_modify_exam_questions(user, exam):
     return user.role == 'dean' and exam.created_by_id == user.id
 
 
+def _can_modify_exam_definition(user, exam):
+    if not exam.is_approved:
+        return True
+    if user.role == 'dean' and exam.created_by_id == user.id:
+        return not exam.questions.exists() and not exam.results.exists()
+    return False
+
+
 def _validate_question_total_points(exam, questions_data):
     total_question_points = sum(int(q.get('points', 0)) for q in questions_data)
     if total_question_points != exam.total_points:
@@ -617,7 +625,7 @@ def update_exam(request, exam_id):
         
         exam = _get_staff_exam_or_404(user, exam_id)
         
-        if exam.is_approved:
+        if not _can_modify_exam_definition(user, exam):
             return Response({'error': 'Cannot edit approved exams'}, 
                            status=status.HTTP_403_FORBIDDEN)
         

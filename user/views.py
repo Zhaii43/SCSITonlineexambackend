@@ -2010,3 +2010,30 @@ def get_enrolled_record(request, student_id):
         })
     except EnrolledStudent.DoesNotExist:
         return Response({'found': False, 'record': None})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def test_email_config(request):
+    """Diagnostic endpoint — tests SMTP connection and returns config + exact error."""
+    from django.conf import settings as s
+    from django.core.mail import get_connection
+    config_info = {
+        'EMAIL_BACKEND': s.EMAIL_BACKEND,
+        'EMAIL_HOST': s.EMAIL_HOST,
+        'EMAIL_PORT': s.EMAIL_PORT,
+        'EMAIL_USE_TLS': s.EMAIL_USE_TLS,
+        'EMAIL_USE_SSL': getattr(s, 'EMAIL_USE_SSL', False),
+        'EMAIL_HOST_USER': s.EMAIL_HOST_USER,
+        'EMAIL_HOST_PASSWORD_length': len(s.EMAIL_HOST_PASSWORD or ''),
+        'EMAIL_HOST_PASSWORD_set': bool(s.EMAIL_HOST_PASSWORD),
+        'DEFAULT_FROM_EMAIL': s.DEFAULT_FROM_EMAIL,
+        'EMAIL_TIMEOUT': getattr(s, 'EMAIL_TIMEOUT', None),
+    }
+    try:
+        conn = get_connection(fail_silently=False)
+        conn.open()
+        conn.close()
+        return Response({'status': 'ok', 'config': config_info})
+    except Exception as exc:
+        return Response({'status': 'error', 'error': str(exc), 'config': config_info}, status=500)

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    RegisterView, CustomLoginView, get_user_profile,
+    RegisterView, CustomLoginView, get_user_profile, test_email_config,
     get_department_users, get_pending_students, approve_student, reject_student,
     update_profile, change_password, bulk_approve_students,
     request_password_reset, reset_password, validate_reset_token, verify_reset_code,
@@ -59,4 +59,5 @@ urlpatterns = [
     path('enrolled-records/import/', import_enrolled_students_csv, name='import_enrolled_students_csv'),
     path('enrolled-records/template/', download_enrolled_template, name='download_enrolled_template'),
     path('enrolled-records/<int:record_id>/delete/', delete_enrolled_student, name='delete_enrolled_student'),
+    path('debug/email/', test_email_config, name='test_email_config'),
 ]

@@ -2,7 +2,7 @@ import logging
 from email.utils import parseaddr
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, get_connection
+from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
@@ -36,19 +36,14 @@ def _send_html_email(subject, recipient, html_message, plain_message=None):
         plain_message = strip_tags(html_message)
 
     try:
-        connection = get_connection(
-            fail_silently=False,
-            timeout=getattr(__import__('django.conf', fromlist=['settings']).settings, 'EMAIL_TIMEOUT', 20),
-        )
-        message = EmailMultiAlternatives(
+        send_mail(
             subject=subject,
-            body=plain_message,
+            message=plain_message,
             from_email=from_email,
-            to=[recipient],
-            connection=connection,
+            recipient_list=[recipient],
+            html_message=html_message,
+            fail_silently=False,
         )
-        message.attach_alternative(html_message, "text/html")
-        message.send(fail_silently=False)
         logger.info("Email sent successfully to %s with subject %s", recipient, subject)
         return True
     except Exception as exc:

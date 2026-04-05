@@ -96,13 +96,16 @@ def _validate_question_total_points(exam, questions_data):
 
 def _notify_exam_approved(exam, approver, notify_creator=True):
     if notify_creator and exam.created_by_id != approver.id:
-        Notification.objects.create(
-            user=exam.created_by,
-            type='exam_approved',
-            title='Exam Approved',
-            message=f'Your exam "{exam.title}" has been approved by {approver.get_full_name() or approver.username}.',
-            link=f'/exam/{exam.id}/edit'
-        )
+        try:
+            Notification.objects.create(
+                user=exam.created_by,
+                type='exam_approved',
+                title='Exam Approved',
+                message=f'Your exam "{exam.title}" has been approved by {approver.get_full_name() or approver.username}.',
+                link=f'/exam/{exam.id}/edit'
+            )
+        except Exception as exc:
+            print(f"Warning: failed to notify exam creator about approval: {exc}")
 
     students = User.objects.filter(
         department=exam.department,
@@ -117,24 +120,36 @@ def _notify_exam_approved(exam, approver, notify_creator=True):
     student_list = list(students)
 
     for student in student_list:
-        Notification.objects.create(
-            user=student,
-            type='exam_scheduled',
-            title='New Exam Scheduled',
-            message=f'A new {exam.exam_type} exam "{exam.title}" has been scheduled for {exam.scheduled_date.strftime("%B %d, %Y")}.',
-            link=f'/exam/{exam.id}/instructions'
+        try:
+            Notification.objects.create(
+                user=student,
+                type='exam_scheduled',
+                title='New Exam Scheduled',
+                message=f'A new {exam.exam_type} exam "{exam.title}" has been scheduled for {exam.scheduled_date.strftime("%B %d, %Y")}.',
+                link=f'/exam/{exam.id}/instructions'
+            )
+        except Exception as exc:
+            print(f"Warning: failed to create exam notification for student {student.id}: {exc}")
+        try:
+            send_exam_scheduled_email(student, exam)
+        except Exception as exc:
+            print(f"Warning: failed to send exam scheduled email to student {student.id}: {exc}")
+
+    try:
+        send_push_to_users(
+            student_list,
+            'New Exam Scheduled',
+            f'{exam.exam_type.capitalize()} exam "{exam.title}" scheduled for {exam.scheduled_date.strftime("%b %d, %Y")}.',
         )
-        send_exam_scheduled_email(student, exam)
+    except Exception as exc:
+        print(f"Warning: failed to send exam scheduled push notifications: {exc}")
 
-    send_push_to_users(
-        student_list,
-        'New Exam Scheduled',
-        f'{exam.exam_type.capitalize()} exam "{exam.title}" scheduled for {exam.scheduled_date.strftime("%b %d, %Y")}.',
-    )
-
-    send_exam_update(f"exams_user_{exam.created_by_id}", "approved", exam.id)
-    send_exam_update(f"exams_dean_{exam.department}", "approved", exam.id)
-    send_exam_update(f"exams_students_{exam.department}", "available", exam.id)
+    try:
+        send_exam_update(f"exams_user_{exam.created_by_id}", "approved", exam.id)
+        send_exam_update(f"exams_dean_{exam.department}", "approved", exam.id)
+        send_exam_update(f"exams_students_{exam.department}", "available", exam.id)
+    except Exception as exc:
+        print(f"Warning: failed to send exam realtime updates: {exc}")
 
 
 def _require_active_exam_session(request, exam, user):
@@ -1021,8 +1036,14 @@ def create_exam(request):
             send_exam_update(f"exams_dean_{department}", "pending_created", exam.id)
 
         if auto_approve:
-            _notify_exam_approved(exam, user, notify_creator=False)
-            send_dean_exam_created_email(user, exam)
+            try:
+                _notify_exam_approved(exam, user, notify_creator=False)
+            except Exception as exc:
+                print(f"Warning: failed to run auto-approval notifications for dean exam {exam.id}: {exc}")
+            try:
+                send_dean_exam_created_email(user, exam)
+            except Exception as exc:
+                print(f"Warning: failed to send dean exam created email for exam {exam.id}: {exc}")
             log_activity(user, 'exam_approved', f'Auto-approved own dean exam: {exam_title}', request, {'exam_id': exam.id})
 
         log_activity(user, 'exam_created', f'Created exam: {exam_title}', request, {'exam_id': exam.id})

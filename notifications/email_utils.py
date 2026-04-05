@@ -11,14 +11,18 @@ logger = logging.getLogger(__name__)
 
 def _normalized_from_email():
     configured = (getattr(settings, 'DEFAULT_FROM_EMAIL', '') or '').strip()
+    resend_key = (getattr(settings, 'RESEND_API_KEY', '') or '').strip()
+    resend_from = (getattr(settings, 'RESEND_FROM_EMAIL', '') or '').strip()
     smtp_user = (getattr(settings, 'EMAIL_HOST_USER', '') or '').strip()
     email_host = (getattr(settings, 'EMAIL_HOST', '') or '').strip().lower()
+    if resend_key and resend_from:
+        return resend_from
     if email_host == 'smtp.gmail.com' and smtp_user:
         return smtp_user
     sender_email = parseaddr(configured)[1]
     if sender_email:
         return configured
-    return smtp_user
+    return smtp_user or resend_from
 
 
 def _send_html_email(subject, recipient, html_message, plain_message=None):

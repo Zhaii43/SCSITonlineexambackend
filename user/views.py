@@ -2111,6 +2111,8 @@ def test_email_config(request):
         'EMAIL_HOST_USER': s.EMAIL_HOST_USER,
         'EMAIL_HOST_PASSWORD_length': len(s.EMAIL_HOST_PASSWORD or ''),
         'EMAIL_HOST_PASSWORD_set': bool(s.EMAIL_HOST_PASSWORD),
+        'RESEND_API_KEY_set': bool(getattr(s, 'RESEND_API_KEY', '')),
+        'RESEND_FROM_EMAIL': getattr(s, 'RESEND_FROM_EMAIL', ''),
         'DEFAULT_FROM_EMAIL': s.DEFAULT_FROM_EMAIL,
         'EMAIL_TIMEOUT': getattr(s, 'EMAIL_TIMEOUT', None),
     }

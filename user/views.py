@@ -374,6 +374,7 @@ class RegisterView(APIView):
 @permission_classes([AllowAny])
 def pre_verify_email(request):
     """Send OTP to an email address for registration verification — no user created yet"""
+    email = ''
     try:
         from django.utils import timezone as tz
         email = str(request.data.get('email', '')).strip().lower()
@@ -1333,6 +1334,7 @@ def change_password(request):
 @permission_classes([AllowAny])
 def request_password_reset(request):
     """Step 1 — send a 6-digit OTP code to the user's email"""
+    email = ''
     try:
         from django.utils import timezone as tz
         email = request.data.get('email', '').strip().lower()
@@ -1409,6 +1411,7 @@ def request_password_reset(request):
 @permission_classes([AllowAny])
 def request_password_reset_direct(request):
     """Minimal fallback endpoint for password reset email sending."""
+    email = ''
     try:
         email = str(request.data.get('email', '')).strip().lower()
         if not email:
@@ -1438,7 +1441,7 @@ def request_password_reset_direct(request):
 
         return Response({'message': f'A 6-digit verification code has been sent to {email}'})
     except Exception as exc:
-        logger.exception("request_password_reset_direct failed for email=%s | error: %s", request.data.get('email', ''), exc)
+        logger.exception("request_password_reset_direct failed for email=%s | error: %s", email, exc)
         return Response(
             {'error': 'Unable to process password reset right now. Please try again later.'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -63,6 +63,59 @@ def _extract_exam_session_token(request):
     return str(request.query_params.get('session_token', '')).strip()
 
 
+def _is_staff_exam_owner(user, exam):
+    return user.role in ('instructor', 'dean') and exam.created_by_id == user.id
+
+
+def _get_staff_exam_or_404(user, exam_id):
+    if user.role not in ('instructor', 'dean'):
+        raise Exam.DoesNotExist
+    return Exam.objects.get(id=exam_id, created_by=user)
+
+
+def _notify_exam_approved(exam, approver, notify_creator=True):
+    if notify_creator and exam.created_by_id != approver.id:
+        Notification.objects.create(
+            user=exam.created_by,
+            type='exam_approved',
+            title='Exam Approved',
+            message=f'Your exam "{exam.title}" has been approved by {approver.get_full_name() or approver.username}.',
+            link=f'/exam/{exam.id}/edit'
+        )
+
+    students = User.objects.filter(
+        department=exam.department,
+        role='student',
+        is_approved=True
+    )
+
+    if exam.year_level != 'ALL':
+        year_levels = exam.year_level.split(',')
+        students = students.filter(year_level__in=year_levels)
+
+    student_list = list(students)
+
+    for student in student_list:
+        Notification.objects.create(
+            user=student,
+            type='exam_scheduled',
+            title='New Exam Scheduled',
+            message=f'A new {exam.exam_type} exam "{exam.title}" has been scheduled for {exam.scheduled_date.strftime("%B %d, %Y")}.',
+            link=f'/exam/{exam.id}/instructions'
+        )
+        send_exam_scheduled_email(student, exam)
+
+    send_push_to_users(
+        student_list,
+        'New Exam Scheduled',
+        f'{exam.exam_type.capitalize()} exam "{exam.title}" scheduled for {exam.scheduled_date.strftime("%b %d, %Y")}.',
+    )
+
+    send_exam_update(f"exams_user_{exam.created_by_id}", "approved", exam.id)
+    send_exam_update(f"exams_dean_{exam.department}", "approved", exam.id)
+    send_exam_update(f"exams_students_{exam.department}", "available", exam.id)
+
+
 def _require_active_exam_session(request, exam, user):
     session_token = _extract_exam_session_token(request)
     if not session_token:
@@ -434,12 +487,12 @@ def get_exam_detail_for_instructor(request, exam_id):
     '''Get exam details for editing'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can access this endpoint'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can access this endpoint'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
-        exam = Exam.objects.get(id=exam_id, created_by=user)
+        exam = _get_staff_exam_or_404(user, exam_id)
         return Response({
             'id': exam.id,
             'title': exam.title,
@@ -481,14 +534,14 @@ def update_exam(request, exam_id):
     '''Update exam details (only if not approved)'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can update exams'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can update exams'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
         from datetime import datetime
         
-        exam = Exam.objects.get(id=exam_id, created_by=user)
+        exam = _get_staff_exam_or_404(user, exam_id)
         
         if exam.is_approved:
             return Response({'error': 'Cannot edit approved exams'}, 
@@ -497,7 +550,8 @@ def update_exam(request, exam_id):
         import json
         exam.title = request.data.get('title', exam.title)
         exam.subject = request.data.get('subject', exam.subject)
-        exam.department = request.data.get('department', exam.department)
+        if user.role != 'dean':
+            exam.department = request.data.get('department', exam.department)
         exam.exam_type = request.data.get('exam_type', exam.exam_type)
         exam.question_type = request.data.get('question_type', exam.question_type)
         
@@ -644,6 +698,7 @@ def get_pending_exams(request):
             'duration_minutes': exam.duration_minutes,
             'total_points': exam.total_points,
             'year_level': exam.year_level,
+            'created_by_id': exam.created_by_id,
             'created_by': exam.created_by.get_full_name() or exam.created_by.username,
         })
     
@@ -850,6 +905,7 @@ def get_approved_exams(request):
             'duration_minutes': exam.duration_minutes,
             'total_points': exam.total_points,
             'year_level': exam.year_level,
+            'created_by_id': exam.created_by_id,
             'created_by': exam.created_by.get_full_name() or exam.created_by.username,
             'approved_by': exam.approved_by.get_full_name() or exam.approved_by.username if exam.approved_by else 'N/A',
             'approved_at': exam.approved_at.isoformat() if exam.approved_at else None,
@@ -861,11 +917,11 @@ def get_approved_exams(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_exam(request):
-    '''Create a new exam (instructors only)'''
+    '''Create a new exam for instructors or deans'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can create exams'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can create exams'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
@@ -874,7 +930,8 @@ def create_exam(request):
         # Parse the datetime string as naive datetime (no timezone conversion)
         scheduled_date_str = request.data.get('scheduled_date')
         naive_dt = datetime.fromisoformat(scheduled_date_str.replace('Z', ''))
-        department = request.data.get('department')
+        requested_department = request.data.get('department')
+        department = user.department if user.role == 'dean' else requested_department
         
         # Check for duplicate exam at same date/hour in same department
         # Round down to the hour to prevent exams within the same hour
@@ -900,8 +957,9 @@ def create_exam(request):
         
         exam_type = request.data.get('exam_type')
         is_practice = exam_type == 'practice'
-        department = request.data.get('department')
+        department = user.department if user.role == 'dean' else request.data.get('department')
         
+        auto_approve = user.role == 'dean'
         exam_title = request.data.get('title')
         import json
         sample_questions = request.data.get('sample_questions')
@@ -931,7 +989,9 @@ def create_exam(request):
               question_pool_size=int(request.data.get('question_pool_size', 0)),
               shuffle_options=request.data.get('shuffle_options', True),
               created_by=user,
-              is_approved=False,
+              is_approved=auto_approve,
+              approved_by=user if auto_approve else None,
+              approved_at=timezone.now() if auto_approve else None,
               is_practice=is_practice,
           )
 
@@ -939,11 +999,16 @@ def create_exam(request):
         if department:
             send_exam_update(f"exams_dean_{department}", "pending_created", exam.id)
 
+        if auto_approve:
+            _notify_exam_approved(exam, user, notify_creator=False)
+            log_activity(user, 'exam_approved', f'Auto-approved own dean exam: {exam_title}', request, {'exam_id': exam.id})
+
         log_activity(user, 'exam_created', f'Created exam: {exam_title}', request, {'exam_id': exam.id})
         
         return Response({
-            'message': 'Exam created successfully and sent for dean approval',
+            'message': 'Exam created successfully and approved automatically' if auto_approve else 'Exam created successfully and sent for dean approval',
             'exam_id': exam.id,
+            'is_approved': exam.is_approved,
         }, status=status.HTTP_201_CREATED)
     
     except Exception as e:
@@ -956,12 +1021,12 @@ def save_questions(request, exam_id):
     '''Save questions for an exam'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can add questions'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can add questions'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
-        exam = Exam.objects.get(id=exam_id, created_by=user)
+        exam = _get_staff_exam_or_404(user, exam_id)
         
         if exam.is_approved:
             return Response({'error': 'Cannot add questions to approved exams'}, 
@@ -998,15 +1063,15 @@ def import_questions_csv(request, exam_id):
     '''Import questions from CSV file'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can import questions'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can import questions'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
         import csv
         import io
         
-        exam = Exam.objects.get(id=exam_id, created_by=user)
+        exam = _get_staff_exam_or_404(user, exam_id)
         
         if exam.is_approved:
             return Response({'error': 'Cannot import questions to approved exams'}, 
@@ -1074,15 +1139,15 @@ def import_questions_csv(request, exam_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_exam_results_for_instructor(request, exam_id):
-    '''Get all results for a specific exam (instructors only)'''
+    '''Get all results for a specific exam owned by the current instructor or dean'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can access this endpoint'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can access this endpoint'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
-        exam = Exam.objects.get(id=exam_id, created_by=user)
+        exam = _get_staff_exam_or_404(user, exam_id)
         results = ExamResult.objects.filter(exam=exam).select_related('student')
         
         result_list = []
@@ -1557,16 +1622,16 @@ def grade_exam_result(request, result_id):
     '''Grade essay/enumeration questions for a specific exam result'''
     user = request.user
     
-    if user.role != 'instructor':
-        return Response({'error': 'Only instructors can grade exams'}, 
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can grade exams'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     try:
         result = ExamResult.objects.get(id=result_id)
         exam = result.exam
         
-        # Verify instructor owns this exam
-        if exam.created_by != user:
+        # Verify current staff user owns this exam
+        if not _is_staff_exam_owner(user, exam):
             return Response({'error': 'You can only grade your own exams'}, 
                            status=status.HTTP_403_FORBIDDEN)
         

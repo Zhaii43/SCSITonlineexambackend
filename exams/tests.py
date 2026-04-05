@@ -286,3 +286,89 @@ class ExamModelAndApiTests(TestCase):
         report.refresh_from_db()
         self.assertEqual(report.status, 'resolved')
         self.assertEqual(QuestionIssueMessage.objects.filter(report=report).count(), 2)
+
+    def test_dean_created_exam_is_auto_approved(self):
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_exam_scheduled_email'), patch('exams.views.send_push_to_users'):
+            response = self.client.post(
+                '/api/exams/create/',
+                {
+                    'title': 'Dean Exam',
+                    'subject': 'Programming',
+                    'department': 'BSIT',
+                    'year_level': '1',
+                    'exam_type': 'quiz',
+                    'question_type': 'multiple_choice',
+                    'scheduled_date': (timezone.now() + timedelta(days=1)).isoformat(),
+                    'duration_minutes': 30,
+                    'total_points': 10,
+                    'passing_score': 7,
+                    'instructions': 'Dean-created exam',
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, 201)
+        exam = Exam.objects.get(id=response.data['exam_id'])
+        self.assertTrue(exam.is_approved)
+        self.assertEqual(exam.created_by, self.dean)
+        self.assertEqual(exam.approved_by, self.dean)
+        self.assertTrue(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
+
+    def test_dean_can_import_questions_for_own_exam(self):
+        exam = self.create_exam(created_by=self.dean, is_approved=False, approved_by=None, approved_at=None)
+        self.authenticate(self.dean)
+
+        csv_content = (
+            "question,type,options,correct_answer,points\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5\n"
+        )
+        upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
+
+        response = self.client.post(
+            f'/api/exams/{exam.id}/questions/import/',
+            {'file': upload},
+            format='multipart',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(exam.questions.count(), 1)
+
+    def test_dean_can_grade_own_exam_result(self):
+        exam = self.create_exam(
+            created_by=self.dean,
+            is_approved=True,
+            approved_by=self.dean,
+            approved_at=timezone.now(),
+            total_points=10,
+        )
+        question = Question.objects.create(
+            exam=exam,
+            question='Explain polymorphism.',
+            type='essay',
+            correct_answer='Varies',
+            points=10,
+            order=1,
+        )
+        result = ExamResult.objects.create(
+            exam=exam,
+            student=self.student,
+            score=0,
+            total_points=10,
+            answers={str(question.id): 'Sample answer'},
+            is_graded=False,
+        )
+        self.authenticate(self.dean)
+
+        with patch('exams.views.send_results_published_email'), patch('exams.views.send_push_notification'):
+            response = self.client.post(
+                f'/api/exams/result/{result.id}/grade/',
+                {'manual_scores': {str(question.id): 8}},
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, 200)
+        result.refresh_from_db()
+        self.assertTrue(result.is_graded)
+        self.assertEqual(result.score, 8)

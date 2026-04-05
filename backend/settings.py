@@ -228,14 +228,7 @@ SECURE_HSTS_SECONDS = config('DJANGO_SECURE_HSTS_SECONDS', default=0 if DEBUG el
 SECURE_HSTS_INCLUDE_SUBDOMAINS = config('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', default=not DEBUG, cast=bool)
 SECURE_HSTS_PRELOAD = config('DJANGO_SECURE_HSTS_PRELOAD', default=not DEBUG, cast=bool)
 
-RESEND_API_KEY = config('RESEND_API_KEY', default='').strip()
-
-# Use Resend HTTPS backend when API key is set (works on Render free tier).
-# Falls back to SMTP for local development.
-if RESEND_API_KEY:
-    EMAIL_BACKEND = 'backend.resend_backend.ResendEmailBackend'
-else:
-    EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)

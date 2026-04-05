@@ -91,14 +91,14 @@ class PasswordResetToken(models.Model):
     expires_at = models.DateTimeField()
     is_used = models.BooleanField(default=False)
 
-    EXPIRY_HOURS = 1  # default for password reset
+    EXPIRY_MINUTES = 15  # matches email copy and expected OTP-style reset flow
 
     def save(self, *args, **kwargs):
         if not self.token:
             import random
             self.token = f"{random.randint(0, 999999):06d}"
         if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(hours=self.EXPIRY_HOURS)
+            self.expires_at = timezone.now() + timedelta(minutes=self.EXPIRY_MINUTES)
         super().save(*args, **kwargs)
 
     def is_valid(self):

@@ -94,6 +94,32 @@ def _validate_question_total_points(exam, questions_data):
     return None
 
 
+def _validate_question_types(exam, questions_data):
+    allowed_types = {'multiple_choice', 'identification', 'enumeration', 'essay'}
+    exam_type = exam.question_type
+
+    for index, question in enumerate(questions_data, start=1):
+        question_type = str(question.get('type', '')).strip()
+        if question_type not in allowed_types:
+            return Response(
+                {'error': f'Question {index} has an invalid type "{question_type}".'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if exam_type != 'mixed' and question_type != exam_type:
+            return Response(
+                {
+                    'error': (
+                        f'Question {index} type "{question_type}" does not match the exam '
+                        f'question type "{exam_type}".'
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    return None
+
+
 def _notify_exam_approved(exam, approver, notify_creator=True):
     if notify_creator and exam.created_by_id != approver.id:
         try:
@@ -1084,6 +1110,9 @@ def save_questions(request, exam_id):
                            status=status.HTTP_403_FORBIDDEN)
         
         questions_data = request.data.get('questions', [])
+        question_type_error = _validate_question_types(exam, questions_data)
+        if question_type_error:
+            return question_type_error
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
@@ -1164,6 +1193,10 @@ def import_questions_csv(request, exam_id):
         
         if not questions_data:
             return Response({'error': 'No valid questions found in CSV'}, status=status.HTTP_400_BAD_REQUEST)
+
+        question_type_error = _validate_question_types(exam, questions_data)
+        if question_type_error:
+            return question_type_error
 
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:

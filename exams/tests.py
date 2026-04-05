@@ -290,7 +290,7 @@ class ExamModelAndApiTests(TestCase):
     def test_dean_created_exam_is_auto_approved(self):
         self.authenticate(self.dean)
 
-        with patch('exams.views.send_exam_scheduled_email'), patch('exams.views.send_push_to_users'):
+        with patch('exams.views.send_exam_scheduled_email'), patch('exams.views.send_push_to_users'), patch('exams.views.send_dean_exam_created_email') as mock_dean_email:
             response = self.client.post(
                 '/api/exams/create/',
                 {
@@ -314,6 +314,7 @@ class ExamModelAndApiTests(TestCase):
         self.assertTrue(exam.is_approved)
         self.assertEqual(exam.created_by, self.dean)
         self.assertEqual(exam.approved_by, self.dean)
+        mock_dean_email.assert_called_once()
         self.assertTrue(Notification.objects.filter(user=self.student, type='exam_scheduled').exists())
 
     def test_dean_can_import_questions_for_own_exam(self):

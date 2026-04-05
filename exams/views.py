@@ -11,7 +11,7 @@ from audit.models import AuditLog
 from .utils import safe_delete_field
 from user.models import User
 from notifications.models import Notification
-from notifications.email_utils import send_exam_scheduled_email, send_results_published_email, send_exam_rejected_email, send_time_extension_email, send_issue_report_email
+from notifications.email_utils import send_exam_scheduled_email, send_results_published_email, send_exam_rejected_email, send_time_extension_email, send_issue_report_email, send_dean_exam_created_email
 from notifications.push_utils import send_push_notification, send_push_to_users
 from notifications.realtime import send_notification
 from .realtime import send_exam_update
@@ -1007,6 +1007,7 @@ def create_exam(request):
 
         if auto_approve:
             _notify_exam_approved(exam, user, notify_creator=False)
+            send_dean_exam_created_email(user, exam)
             log_activity(user, 'exam_approved', f'Auto-approved own dean exam: {exam_title}', request, {'exam_id': exam.id})
 
         log_activity(user, 'exam_created', f'Created exam: {exam_title}', request, {'exam_id': exam.id})

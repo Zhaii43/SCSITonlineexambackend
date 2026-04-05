@@ -133,6 +133,60 @@ def send_exam_scheduled_email(user, exam):
         return False
 
 
+def send_dean_exam_created_email(user, exam):
+    """Send confirmation email when a dean successfully creates an exam."""
+    subject = f'Exam Created Successfully: {exam.title}'
+    exam_link = f"{settings.FRONTEND_URL}/exam/questions/{exam.id}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard/dean"
+    html_message = f"""
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a;">
+          <h2 style="margin-bottom: 8px;">Exam Created Successfully</h2>
+          <p>Hello {user.get_full_name() or user.username},</p>
+          <p>Your exam <strong>{exam.title}</strong> for <strong>{exam.subject}</strong> was created successfully.</p>
+          <p>Because you created it as dean, it was approved automatically and is ready for question setup.</p>
+          <ul style="padding-left: 18px;">
+            <li><strong>Department:</strong> {exam.department}</li>
+            <li><strong>Type:</strong> {exam.exam_type}</li>
+            <li><strong>Schedule:</strong> {exam.scheduled_date.strftime('%B %d, %Y %I:%M %p')}</li>
+            <li><strong>Year Level:</strong> {exam.year_level}</li>
+          </ul>
+          <p style="margin-top: 20px;">
+            <a href="{exam_link}" style="background:#0f172a;color:#ffffff;padding:10px 16px;border-radius:8px;text-decoration:none;margin-right:8px;">
+              Add Questions
+            </a>
+            <a href="{dashboard_link}" style="background:#e2e8f0;color:#0f172a;padding:10px 16px;border-radius:8px;text-decoration:none;">
+              Open Dashboard
+            </a>
+          </p>
+        </div>
+    """
+    plain_message = (
+        f"Exam Created Successfully\n\n"
+        f"Hello {user.get_full_name() or user.username},\n\n"
+        f"Your exam '{exam.title}' for '{exam.subject}' was created successfully.\n"
+        f"Because you created it as dean, it was approved automatically and is ready for question setup.\n\n"
+        f"Department: {exam.department}\n"
+        f"Type: {exam.exam_type}\n"
+        f"Schedule: {exam.scheduled_date.strftime('%B %d, %Y %I:%M %p')}\n"
+        f"Year Level: {exam.year_level}\n\n"
+        f"Add questions: {exam_link}\n"
+        f"Dashboard: {dashboard_link}"
+    )
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Failed to send dean exam created email: {e}")
+        return False
+
+
 def send_results_published_email(user, result):
     """Send email when exam results are published"""
     subject = f'📊 Results Available: {result.exam_title}'

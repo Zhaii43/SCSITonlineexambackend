@@ -228,7 +228,7 @@ SECURE_HSTS_SECONDS = config('DJANGO_SECURE_HSTS_SECONDS', default=0 if DEBUG el
 SECURE_HSTS_INCLUDE_SUBDOMAINS = config('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', default=not DEBUG, cast=bool)
 SECURE_HSTS_PRELOAD = config('DJANGO_SECURE_HSTS_PRELOAD', default=not DEBUG, cast=bool)
 
-RESEND_API_KEY = config('RESEND_API_KEY', default='')
+RESEND_API_KEY = config('RESEND_API_KEY', default='').strip()
 
 # Use Resend HTTPS backend when API key is set (works on Render free tier).
 # Falls back to SMTP for local development.
@@ -241,6 +241,11 @@ EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
+if EMAIL_USE_SSL:
+    EMAIL_USE_TLS = False
+elif EMAIL_PORT == 465:
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='').strip()
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='').strip().replace(' ', '')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)

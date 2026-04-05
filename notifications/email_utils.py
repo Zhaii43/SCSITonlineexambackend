@@ -51,22 +51,69 @@ def _send_html_email(subject, recipient, html_message, plain_message=None):
         return False
 
 
+def _send_plain_email(subject, recipient, message):
+    recipient = (recipient or '').strip()
+    if not recipient:
+        logger.warning("Skipping plain email with empty recipient for subject %s", subject)
+        return False
+
+    from_email = _normalized_from_email()
+    if not from_email:
+        logger.error("Plain email send aborted because DEFAULT_FROM_EMAIL/EMAIL_HOST_USER is not configured")
+        return False
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=[recipient],
+            fail_silently=False,
+        )
+        logger.info("Plain email sent successfully to %s with subject %s", recipient, subject)
+        return True
+    except Exception as exc:
+        logger.exception("Failed to send plain email to %s | subject: %s | error: %s", recipient, subject, exc)
+        return False
+
+
 def send_email_verification_otp(user, otp_code):
     subject = 'Verify Your Email - SCSIT Online Exam'
-    html_message = render_to_string('emails/email_verification.html', {
-        'user': user,
-        'otp_code': otp_code,
-    })
-    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
+    recipient = getattr(user, 'email', '')
+    plain_message = (
+        f"Hello {(getattr(user, 'first_name', '') or '').strip() or 'there'},\n\n"
+        f"Your SCSIT Online Exam verification code is: {otp_code}\n\n"
+        "This code expires in 10 minutes."
+    )
+    try:
+        html_message = render_to_string('emails/email_verification.html', {
+            'user': user,
+            'otp_code': otp_code,
+        })
+        if _send_html_email(subject, recipient, html_message, plain_message):
+            return True
+    except Exception as exc:
+        logger.exception("Failed to render/send HTML verification OTP to %s | error: %s", recipient, exc)
+    return _send_plain_email(subject, recipient, plain_message)
 
 
 def send_pre_registration_otp(email, otp_code):
     subject = 'Verify Your Email - SCSIT Online Exam'
-    html_message = render_to_string('emails/email_verification.html', {
-        'user': None,
-        'otp_code': otp_code,
-    })
-    return _send_html_email(subject, email, html_message)
+    plain_message = (
+        "Hello,\n\n"
+        f"Your SCSIT Online Exam verification code is: {otp_code}\n\n"
+        "This code expires in 10 minutes."
+    )
+    try:
+        html_message = render_to_string('emails/email_verification.html', {
+            'user': None,
+            'otp_code': otp_code,
+        })
+        if _send_html_email(subject, email, html_message, plain_message):
+            return True
+    except Exception as exc:
+        logger.exception("Failed to render/send HTML pre-registration OTP to %s | error: %s", email, exc)
+    return _send_plain_email(subject, email, plain_message)
 
 
 def send_student_approval_email(user):
@@ -150,12 +197,24 @@ def send_results_published_email(user, result):
 
 def send_password_reset_email(user, reset_code):
     subject = 'Password Reset Request'
-    html_message = render_to_string('emails/password_reset.html', {
-        'user': user,
-        'reset_code': reset_code,
-        'frontend_url': settings.FRONTEND_URL,
-    })
-    return _send_html_email(subject, getattr(user, 'email', ''), html_message)
+    recipient = getattr(user, 'email', '')
+    plain_message = (
+        f"Hello {(getattr(user, 'first_name', '') or '').strip() or 'there'},\n\n"
+        f"Your SCSIT Online Exam password reset code is: {reset_code}\n\n"
+        "This code expires in 15 minutes.\n"
+        f"Reset page: {settings.FRONTEND_URL}/reset-password?token={reset_code}"
+    )
+    try:
+        html_message = render_to_string('emails/password_reset.html', {
+            'user': user,
+            'reset_code': reset_code,
+            'frontend_url': settings.FRONTEND_URL,
+        })
+        if _send_html_email(subject, recipient, html_message, plain_message):
+            return True
+    except Exception as exc:
+        logger.exception("Failed to render/send HTML password reset email to %s | error: %s", recipient, exc)
+    return _send_plain_email(subject, recipient, plain_message)
 
 
 def send_bulk_import_email(user, set_password_token):

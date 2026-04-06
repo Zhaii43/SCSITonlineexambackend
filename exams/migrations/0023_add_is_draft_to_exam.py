@@ -3,6 +3,12 @@
 from django.db import migrations, models
 
 
+def backfill_is_draft(apps, schema_editor):
+    """All exams that already have questions are not drafts."""
+    Exam = apps.get_model('exams', 'Exam')
+    Exam.objects.filter(questions__isnull=False).distinct().update(is_draft=False)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,4 +21,5 @@ class Migration(migrations.Migration):
             name='is_draft',
             field=models.BooleanField(default=True, help_text='True until questions are successfully saved. Draft exams are not visible to students or the approval queue.'),
         ),
+        migrations.RunPython(backfill_is_draft, migrations.RunPython.noop),
     ]

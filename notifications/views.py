@@ -3,17 +3,21 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Notification, Announcement
+from .email_utils import send_announcement_email
 from .realtime import send_notification
 from user.models import User
 
 
 def _get_announcement_recipients(target_audience, department=None):
-    recipients = User.objects.filter(is_approved=True, is_active=True)
+    from django.db.models import Q
+    qs = User.objects.filter(is_active=True).filter(
+        Q(is_approved=True) | Q(role__in=['instructor', 'dean'])
+    )
     if target_audience != 'all':
-        recipients = recipients.filter(role=target_audience)
+        qs = qs.filter(role=target_audience)
     if department:
-        recipients = recipients.filter(department=department)
-    return recipients
+        qs = qs.filter(department=department)
+    return qs.exclude(email='').filter(email__isnull=False)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -126,6 +130,19 @@ def create_announcement(request):
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
     recipients = list(_get_announcement_recipients(target_audience, department))
+
+    import threading
+    def _send_emails():
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info('Sending announcement emails to %d recipients', len(recipients))
+        for recipient in recipients:
+            try:
+                send_announcement_email(recipient, announcement, created_by_name)
+            except Exception as exc:
+                logger.exception('Failed to send announcement email to %s: %s', getattr(recipient, 'email', ''), exc)
+    t = threading.Thread(target=_send_emails, daemon=False)
+    t.start()
 
     link = '/dashboard/student' if target_audience in ['all', 'student'] else '/dashboard'
     notifications = Notification.objects.bulk_create([

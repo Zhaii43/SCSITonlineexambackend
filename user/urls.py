@@ -7,7 +7,7 @@ from .views import (
     bulk_import_students, download_student_template, upload_documents,
     save_push_token,
     verify_registration_email, resend_registration_email_otp, update_registration_email,
-    pre_verify_email, confirm_pre_verify_email,
+    pre_verify_email, confirm_pre_verify_email, generate_pre_verify_otp,
     get_enrolled_record, update_student_school_id, resubmit_registration,
     get_department_stats,
     request_email_change, resend_email_change_otp, verify_email_change, generate_email_change_otp,
@@ -20,6 +20,7 @@ from .views import (
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('register/pre-verify-email/', pre_verify_email, name='pre_verify_email'),
+    path('register/generate-pre-verify-otp/', generate_pre_verify_otp, name='generate_pre_verify_otp'),
     path('register/confirm-pre-verify/', confirm_pre_verify_email, name='confirm_pre_verify_email'),
     path('register/verify-email/', verify_registration_email, name='verify_registration_email'),
     path('register/resend-email-otp/', resend_registration_email_otp, name='resend_registration_email_otp'),

@@ -1,45 +1,21 @@
 """
 email_utils.py
 - send_staff_approval_email: calls Next.js Nodemailer endpoint
-- OTP-based account emails: sent directly by Django so secrets never leave backend responses
 - All other functions: no-op stubs handled by Next.js proxy routes
 """
 
 import logging
-
 import requests
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 
 logger = logging.getLogger(__name__)
 
 
-def _send_templated_email(to, subject, template_name, context, text_body):
-    if not to:
-        return False
-
-    try:
-        html_body = render_to_string(template_name, context)
-        message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", ""),
-            to=[to],
-        )
-        message.attach_alternative(html_body, "text/html")
-        return bool(message.send())
-    except Exception as exc:
-        logger.exception("Email send failed for %s | subject=%s | error=%s", to, subject, exc)
-        return False
-
-
 def send_staff_approval_email(user):
-    """Called by Django signal; POSTs to Next.js to send via Nodemailer."""
+    """Called by Django signal - POSTs to Next.js to send via Nodemailer."""
     to = getattr(user, "email", "")
     if not to:
         return False
-
     name = (getattr(user, "first_name", "") or "").strip() or "there"
     role = getattr(user, "role", "Staff")
     frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
@@ -47,7 +23,6 @@ def send_staff_approval_email(user):
     if not secret or not frontend_url:
         logger.error("EMAIL_BRIDGE_SECRET or FRONTEND_URL not configured")
         return False
-
     try:
         resp = requests.post(
             f"{frontend_url}/api/internal/staff-approved",
@@ -65,68 +40,15 @@ def send_staff_approval_email(user):
         return False
 
 
-def send_email_verification_otp(user, otp_code):
-    to = getattr(user, "email", "")
-    first_name = (getattr(user, "first_name", "") or "").strip()
-    last_name = (getattr(user, "last_name", "") or "").strip()
-    display_name = " ".join(part for part in [first_name, last_name] if part).strip()
-    text_body = (
-        f"Hello {display_name or 'there'},\n\n"
-        f"Your SCSIT Online Exam verification code is: {otp_code}\n\n"
-        "This code expires in 10 minutes.\n\n"
-        "If you did not request this, you can safely ignore this email."
-    )
-    return _send_templated_email(
-        to,
-        "Verify Your Email - SCSIT Online Exam",
-        "emails/email_verification.html",
-        {"user": user, "otp_code": otp_code},
-        text_body,
-    )
-
-
-def send_pre_registration_otp(email, otp_code):
-    text_body = (
-        "Hello,\n\n"
-        f"Your SCSIT Online Exam verification code is: {otp_code}\n\n"
-        "This code expires in 10 minutes.\n\n"
-        "If you did not request this, you can safely ignore this email."
-    )
-    return _send_templated_email(
-        email,
-        "Verify Your Email - SCSIT Online Exam",
-        "emails/email_verification.html",
-        {"user": None, "otp_code": otp_code},
-        text_body,
-    )
-
-
-def send_password_reset_email(user, reset_code):
-    to = getattr(user, "email", "")
-    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
-    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
-    reset_link = f"{frontend_url}/reset-password?token={reset_code}" if frontend_url else reset_code
-    text_body = (
-        f"Hello {first_name},\n\n"
-        f"Your password reset code is: {reset_code}\n\n"
-        "This code expires in 15 minutes.\n\n"
-        f"Reset page: {reset_link}\n\n"
-        "If you did not request a password reset, you can safely ignore this email."
-    )
-    return _send_templated_email(
-        to,
-        "Password Reset Request - SCSIT Online Exam",
-        "emails/password_reset.html",
-        {"user": user, "reset_code": reset_code, "frontend_url": frontend_url},
-        text_body,
-    )
-
-
+# No-op stubs - all other emails handled by Next.js Nodemailer proxies
+def send_email_verification_otp(user, otp_code): pass
+def send_pre_registration_otp(email, otp_code): pass
 def send_student_approval_email(user): pass
 def send_student_rejected_email(user, rejection_reason=None): pass
 def send_exam_scheduled_email(user, exam): pass
 def send_dean_exam_created_email(user, exam): pass
 def send_results_published_email(user, result): pass
+def send_password_reset_email(user, reset_code): pass
 def send_bulk_import_email(user, set_password_token): pass
 def send_bulk_exam_notification(users, exam): return 0
 def send_announcement_email(user, announcement, created_by): pass

@@ -1499,15 +1499,57 @@ def request_password_reset_direct(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def generate_pre_verify_otp(request):
-    """Legacy endpoint kept for compatibility; now delegates to the safe email-sending flow."""
-    return pre_verify_email(request)
+    """Generate a pre-registration OTP and return it - email sending handled by Next.js frontend."""
+    email = ''
+    try:
+        email = str(request.data.get('email', '')).strip().lower()
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=email).exists():
+            return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        PreRegistrationOTP.objects.filter(email__iexact=email).delete()
+        otp = PreRegistrationOTP.objects.create(email=email, token=secrets.token_urlsafe(32))
+
+        return Response({'otp': otp.code, 'email': email})
+    except Exception as exc:
+        logger.exception("generate_pre_verify_otp failed for email=%s | error: %s", email, exc)
+        return Response(
+            {'error': 'Unable to generate OTP right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def generate_password_reset_otp(request):
-    """Legacy endpoint kept for compatibility; now delegates to the safe email-sending flow."""
-    return request_password_reset(request)
+    """Generate a password reset OTP and return it - email sending is handled by the Next.js frontend."""
+    email = ''
+    try:
+        email = str(request.data.get('email', '')).strip().lower()
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        PasswordResetToken.objects.filter(user=user).delete()
+        reset_token = PasswordResetToken.objects.create(user=user)
+
+        return Response({
+            'otp': reset_token.token,
+            'first_name': (user.first_name or '').strip() or user.username,
+            'frontend_url': getattr(__import__('django.conf', fromlist=['settings']).settings, 'FRONTEND_URL', ''),
+        })
+    except Exception as exc:
+        logger.exception("generate_password_reset_otp failed for email=%s | error: %s", email, exc)
+        return Response(
+            {'error': 'Unable to generate OTP right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])

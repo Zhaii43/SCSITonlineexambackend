@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Notification, Announcement
@@ -189,3 +189,34 @@ def get_my_announcements(request):
     } for a in announcements]
 
     return Response({'announcements': data})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def test_email_bridge(request):
+    """Diagnostic — sends a real test email through the bridge. POST {"to": "you@example.com"}"""
+    import requests as req
+    from django.conf import settings as s
+    to = request.data.get('to', '').strip()
+    if not to:
+        return Response({'error': 'to is required'}, status=400)
+    secret = getattr(s, 'EMAIL_BRIDGE_SECRET', '')
+    frontend_url = getattr(s, 'FRONTEND_URL', '').rstrip('/')
+    bridge_url = f"{frontend_url}/api/email-bridge"
+    if not secret:
+        return Response({'error': 'EMAIL_BRIDGE_SECRET not set on Django side', 'bridge_url': bridge_url})
+    try:
+        resp = req.post(
+            bridge_url,
+            json={"emailType": "student_approval", "to": to, "firstName": "Test", "frontendUrl": frontend_url},
+            headers={"x-email-bridge-secret": secret, "Content-Type": "application/json"},
+            timeout=20,
+        )
+        return Response({
+            'bridge_url': bridge_url,
+            'secret_length': len(secret),
+            'status_code': resp.status_code,
+            'response': resp.text[:500],
+        })
+    except Exception as exc:
+        return Response({'bridge_url': bridge_url, 'error': str(exc)}, status=500)

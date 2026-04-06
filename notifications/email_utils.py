@@ -19,20 +19,27 @@ def _send(email_type: str, payload: dict) -> bool:
     if not secret:
         logger.error("EMAIL_BRIDGE_SECRET is not configured – email not sent (%s)", email_type)
         return False
+    url = _bridge_url()
     try:
         resp = requests.post(
-            _bridge_url(),
+            url,
             json={"emailType": email_type, **payload},
             headers={"x-email-bridge-secret": secret, "Content-Type": "application/json"},
-            timeout=15,
+            timeout=20,
         )
         if resp.ok:
             logger.info("Email sent via bridge: %s → %s", email_type, payload.get("to"))
             return True
-        logger.error("Bridge rejected %s: %s %s", email_type, resp.status_code, resp.text)
+        logger.error("Bridge rejected %s to %s: %s %s", email_type, url, resp.status_code, resp.text[:300])
+        return False
+    except requests.exceptions.Timeout:
+        logger.error("Bridge timeout for %s – URL: %s", email_type, url)
+        return False
+    except requests.exceptions.ConnectionError as exc:
+        logger.error("Bridge connection error for %s – URL: %s – %s", email_type, url, exc)
         return False
     except Exception as exc:
-        logger.exception("Failed to reach email bridge for %s: %s", email_type, exc)
+        logger.exception("Bridge unexpected error for %s: %s", email_type, exc)
         return False
 
 

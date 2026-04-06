@@ -412,7 +412,7 @@ def pre_verify_email(request):
         # Delete all old OTPs for this email before creating a new one
         PreRegistrationOTP.objects.filter(email__iexact=email).delete()
 
-        otp = PreRegistrationOTP.objects.create(email=email)
+        otp = PreRegistrationOTP.objects.create(email=email, token=secrets.token_urlsafe(32))
         sent = send_pre_registration_otp(email, otp.code)
         logger.info("pre_verify_email send_pre_registration_otp result=%s email=%s", sent, email)
         if not sent:
@@ -1510,7 +1510,7 @@ def generate_pre_verify_otp(request):
             return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
 
         PreRegistrationOTP.objects.filter(email__iexact=email).delete()
-        otp = PreRegistrationOTP.objects.create(email=email)
+        otp = PreRegistrationOTP.objects.create(email=email, token=secrets.token_urlsafe(32))
 
         return Response({'otp': otp.code, 'email': email})
     except Exception as exc:
@@ -1911,7 +1911,7 @@ def resend_registration_email_otp(request):
         return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
     PreRegistrationOTP.objects.filter(email__iexact=user.email, is_verified=False).delete()
-    otp = PreRegistrationOTP.objects.create(email=user.email)
+    otp = PreRegistrationOTP.objects.create(email=user.email, token=secrets.token_urlsafe(32))
     if not send_email_verification_otp(user, otp.code):
         otp.delete()
         return Response(
@@ -1944,7 +1944,7 @@ def update_registration_email(request):
     user.save(update_fields=['email'])
 
     PreRegistrationOTP.objects.filter(email__iexact=user.email, is_verified=False).delete()
-    otp = PreRegistrationOTP.objects.create(email=user.email)
+    otp = PreRegistrationOTP.objects.create(email=user.email, token=secrets.token_urlsafe(32))
     if not send_email_verification_otp(user, otp.code):
         otp.delete()
         return Response(

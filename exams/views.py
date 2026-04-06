@@ -1225,12 +1225,24 @@ def import_questions_csv(request, exam_id):
         reader = csv.DictReader(io_string)
         
         questions_data = []
-        for row in reader:
+        mismatched_rows = []
+        for row_num, row in enumerate(reader, start=2):
+            # Validate department column if present — must match exam department
+            row_dept = (row.get('department') or '').strip().upper()
+            if row_dept and row_dept != exam.department.upper():
+                mismatched_rows.append({
+                    'row': row_num,
+                    'question': (row.get('question') or '')[:60],
+                    'department': row_dept,
+                    'expected': exam.department,
+                })
+                continue
+
             # Parse options for multiple choice
             options = None
             if row.get('type') == 'multiple_choice' and row.get('options'):
                 options = [opt.strip() for opt in row['options'].split('|')]
-            
+
             questions_data.append({
                 'question': row['question'],
                 'type': row['type'],
@@ -1238,7 +1250,17 @@ def import_questions_csv(request, exam_id):
                 'correct_answer': row['correct_answer'],
                 'points': int(row['points'])
             })
-        
+
+        if mismatched_rows:
+            return Response({
+                'error': (
+                    f"{len(mismatched_rows)} row(s) were rejected because their department "
+                    f"does not match this exam's department ({exam.department}). "
+                    f"Make sure every row has department={exam.department} or leave the department column blank."
+                ),
+                'mismatched_rows': mismatched_rows,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         if not questions_data:
             return Response({'error': 'No valid questions found in CSV'}, status=status.HTTP_400_BAD_REQUEST)
 

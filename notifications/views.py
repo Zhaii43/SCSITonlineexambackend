@@ -3,7 +3,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Notification, Announcement
-from .email_utils import send_announcement_email
 from .realtime import send_notification
 from user.models import User
 
@@ -127,8 +126,6 @@ def create_announcement(request):
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
     recipients = list(_get_announcement_recipients(target_audience, department))
-    for user in recipients:
-        send_announcement_email(user, announcement, created_by_name)
 
     link = '/dashboard/student' if target_audience in ['all', 'student'] else '/dashboard'
     notifications = Notification.objects.bulk_create([

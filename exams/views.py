@@ -1110,10 +1110,24 @@ def create_exam(request):
 
         log_activity(user, 'exam_created', f'Created exam: {exam_title}', request, {'exam_id': exam.id})
         
+        dean_email_data = None
+        if auto_approve:
+            dean_email_data = {
+                'to': user.email,
+                'fullName': (user.first_name + ' ' + user.last_name).strip() or user.username,
+                'examId': exam.id,
+                'examTitle': exam.title,
+                'subject': exam.subject,
+                'department': exam.department,
+                'examType': exam.exam_type,
+                'scheduledDate': exam.scheduled_date.strftime('%B %d, %Y %I:%M %p'),
+                'yearLevel': exam.year_level,
+            }
         return Response({
             'message': 'Exam created successfully and approved automatically' if auto_approve else 'Exam created successfully and sent for dean approval',
             'exam_id': exam.id,
             'is_approved': exam.is_approved,
+            'dean_email_data': dean_email_data,
         }, status=status.HTTP_201_CREATED)
     
     except Exception as e:
@@ -1715,6 +1729,19 @@ def submit_exam(request, exam_id):
         # End the exam session
         ExamSession.objects.filter(exam=exam, student=user).delete()
 
+        email_data = None
+        if not has_manual_grading:
+            email_data = {
+                'to': user.email,
+                'firstName': user.first_name or 'there',
+                'examTitle': exam.title,
+                'subject': exam.subject,
+                'score': adjusted_score,
+                'totalItems': pool_total,
+                'percentage': round(result.percentage, 1),
+                'passed': result.remarks == 'Passed',
+                'dateTaken': result.submitted_at.strftime('%B %d, %Y %I:%M %p'),
+            }
         return Response({
             'message': 'Exam submitted successfully',
             'score': adjusted_score if not has_manual_grading else None,
@@ -1725,6 +1752,7 @@ def submit_exam(request, exam_id):
             'grade': result.grade if not has_manual_grading else None,
             'is_graded': not has_manual_grading,
             'needs_manual_grading': has_manual_grading,
+            'email_data': email_data,
         }, status=status.HTTP_201_CREATED)
     
     except Exam.DoesNotExist:
@@ -1815,6 +1843,17 @@ def grade_exam_result(request, result_id):
             'percentage': result.percentage,
             'grade': result.grade,
             'remarks': result.remarks,
+            'email_data': {
+                'to': result.student.email,
+                'firstName': result.student.first_name or 'there',
+                'examTitle': exam.title,
+                'subject': exam.subject,
+                'score': result.score,
+                'totalItems': result.total_points,
+                'percentage': round(result.percentage, 1),
+                'passed': result.remarks == 'Passed',
+                'dateTaken': result.submitted_at.strftime('%B %d, %Y %I:%M %p'),
+            },
         })
     
     except ExamResult.DoesNotExist:
@@ -1952,7 +1991,7 @@ def create_question_issue_report(request, exam_id):
         {'exam_id': exam.id, 'question_id': question.id, 'report_id': report.id}
     )
 
-    return Response({'report': _serialize_issue_report_detail(report, user)}, status=status.HTTP_201_CREATED)
+    return Response({'report': _serialize_issue_report_detail(report, user), 'instructor_email_data': {'to': instructor.email, 'firstName': instructor.first_name or 'there', 'reportId': report.id, 'examTitle': exam.title, 'questionOrder': question.order, 'issueType': report.get_issue_type_display(), 'reportedAnswer': report.reported_answer or None, 'description': report.description, 'actorName': actor_name, 'role': instructor.role}}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])
@@ -2802,7 +2841,7 @@ def extend_exam_time(request, exam_id):
             )
             send_time_extension_email(student, exam, extra_minutes, reason)
             log_activity(user, 'exam_time_extended', f'Extended time for {student.username} in {exam.title} by {extra_minutes}m', request)
-            return Response({'message': f'Time extended by {extra_minutes} minute(s) for {student.get_full_name() or student.username}'})
+            return Response({'message': f'Time extended by {extra_minutes} minute(s) for {student.get_full_name() or student.username}', 'email_data': [{'to': student.email, 'firstName': student.first_name or 'there', 'examTitle': exam.title, 'examSubject': exam.subject, 'scheduledDate': exam.scheduled_date.strftime('%B %d, %Y %I:%M %p'), 'extraMinutes': extra_minutes, 'reason': reason or 'No reason provided.'}]})
 
         else:
             # Bulk extension — all eligible students
@@ -2840,7 +2879,8 @@ def extend_exam_time(request, exam_id):
             for student in students:
                 send_time_extension_email(student, exam, extra_minutes, reason)
             log_activity(user, 'exam_time_extended_bulk', f'Bulk extended time in {exam.title} by {extra_minutes}m for {len(extensions)} students', request)
-            return Response({'message': f'Time extended by {extra_minutes} minute(s) for {len(extensions)} student(s)'})
+            email_data = [{'to': s.email, 'firstName': s.first_name or 'there', 'examTitle': exam.title, 'examSubject': exam.subject, 'scheduledDate': exam.scheduled_date.strftime('%B %d, %Y %I:%M %p'), 'extraMinutes': extra_minutes, 'reason': reason or 'No reason provided.'} for s in students if s.email]
+            return Response({'message': f'Time extended by {extra_minutes} minute(s) for {len(extensions)} student(s)', 'email_data': email_data})
 
     except Exam.DoesNotExist:
         return Response({'error': 'Exam not found'}, status=status.HTTP_404_NOT_FOUND)

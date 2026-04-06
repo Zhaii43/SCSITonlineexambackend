@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Notification, Announcement
-from .email_utils import send_announcement_email
+from .email_utils import send_announcement_email, _build_announcement_message
 from .realtime import send_notification
 from user.models import User
 
@@ -130,11 +130,20 @@ def create_announcement(request):
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
     recipients = list(_get_announcement_recipients(target_audience, department))
+
+    # Build all messages then send in one SMTP session
+    from .email_utils import send_bulk_emails
+    messages = []
     for recipient in recipients:
         try:
-            send_announcement_email(recipient, announcement, created_by_name)
+            msg = _build_announcement_message(recipient, announcement, created_by_name)
+            if msg:
+                messages.append(msg)
         except Exception:
             pass
+    if messages:
+        import threading
+        threading.Thread(target=send_bulk_emails, args=(messages,), daemon=False).start()
 
     link = '/dashboard/student' if target_audience in ['all', 'student'] else '/dashboard'
     notifications = Notification.objects.bulk_create([

@@ -1,64 +1,43 @@
 """
 email_utils.py
-- send_staff_approval_email: direct SMTP (triggered by Django admin signal, no frontend proxy)
-- All other functions: no-op stubs — emails handled by Next.js Nodemailer proxy routes
+- send_staff_approval_email: calls Next.js Nodemailer endpoint
+- All other functions: no-op stubs handled by Next.js proxy routes
 """
 
 import logging
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import requests
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
-def _send_direct(to, subject, html, text=""):
+def send_staff_approval_email(user):
+    """Called by Django signal — POSTs to Next.js to send via Nodemailer."""
+    to = getattr(user, "email", "")
     if not to:
         return False
-    user = getattr(settings, "MAILER_GMAIL_USER", "").strip()
-    password = getattr(settings, "MAILER_GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
-    from_name = getattr(settings, "MAILER_FROM_NAME", "SCSIT Online Exam").strip()
-    if not user or not password:
-        logger.error("MAILER_GMAIL_USER or MAILER_GMAIL_APP_PASSWORD not configured")
-        return False
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = f"{from_name} <{user}>"
-    msg["To"] = to
-    if text:
-        msg.attach(MIMEText(text, "plain"))
-    msg.attach(MIMEText(html, "html"))
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as smtp:
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.login(user, password)
-            smtp.sendmail(user, [to], msg.as_string())
-        logger.info("Email sent: %s to %s", subject, to)
-        return True
-    except Exception as exc:
-        logger.exception("Email failed to %s: %s", to, exc)
-        return False
-
-
-def send_staff_approval_email(user):
-    """Called by Django signal when admin approves a staff account."""
     name = (getattr(user, "first_name", "") or "").strip() or "there"
     role = getattr(user, "role", "Staff")
-    frontend_url = getattr(settings, "FRONTEND_URL", "")
-    html = f"""<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.7;padding:24px">
-      <h2>Staff Account Approved</h2>
-      <p>Hello <strong>{name}</strong>,</p>
-      <p>Your SCSIT Online Exam staff account has been approved with the role of <strong>{role}</strong>.</p>
-      <p><a href="{frontend_url}/login" style="background:#0f172a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Go to Dashboard</a></p>
-    </div>"""
-    return _send_direct(
-        getattr(user, "email", ""),
-        "Your Staff Account Has Been Approved - SCSIT Online Exam",
-        html,
-        f"Hello {name},\n\nYour staff account ({role}) has been approved.\nLog in at {frontend_url}/login",
-    )
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    secret = getattr(settings, "EMAIL_BRIDGE_SECRET", "")
+    if not secret or not frontend_url:
+        logger.error("EMAIL_BRIDGE_SECRET or FRONTEND_URL not configured")
+        return False
+    try:
+        resp = requests.post(
+            f"{frontend_url}/api/internal/staff-approved",
+            json={"to": to, "firstName": name, "role": role},
+            headers={"x-email-bridge-secret": secret, "Content-Type": "application/json"},
+            timeout=15,
+        )
+        if resp.ok:
+            logger.info("Staff approval email sent to %s", to)
+            return True
+        logger.error("Staff approval email failed: %s %s", resp.status_code, resp.text[:200])
+        return False
+    except Exception as exc:
+        logger.exception("Staff approval email error for %s: %s", to, exc)
+        return False
 
 
 # ── No-op stubs — all other emails handled by Next.js Nodemailer proxies ──────

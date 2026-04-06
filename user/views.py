@@ -9,6 +9,7 @@ from rest_framework import serializers
 import secrets
 import logging
 from datetime import timedelta
+from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -33,6 +34,14 @@ import cloudinary
 from cloudinary import utils as cloudinary_utils, api as cloudinary_api
 
 logger = logging.getLogger(__name__)
+
+
+def _require_internal_email_bridge_secret(request):
+    expected_secret = (getattr(settings, 'EMAIL_BRIDGE_SECRET', '') or '').strip()
+    received_secret = (request.headers.get('x-email-bridge-secret') or '').strip()
+    if not expected_secret or received_secret != expected_secret:
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+    return None
 
 
 def _file_url(request, field):
@@ -1500,6 +1509,10 @@ def request_password_reset_direct(request):
 @permission_classes([AllowAny])
 def generate_pre_verify_otp(request):
     """Generate a pre-registration OTP and return it - email sending handled by Next.js frontend."""
+    unauthorized = _require_internal_email_bridge_secret(request)
+    if unauthorized:
+        return unauthorized
+
     email = ''
     try:
         email = str(request.data.get('email', '')).strip().lower()
@@ -1525,6 +1538,10 @@ def generate_pre_verify_otp(request):
 @permission_classes([AllowAny])
 def generate_password_reset_otp(request):
     """Generate a password reset OTP and return it - email sending is handled by the Next.js frontend."""
+    unauthorized = _require_internal_email_bridge_secret(request)
+    if unauthorized:
+        return unauthorized
+
     email = ''
     try:
         email = str(request.data.get('email', '')).strip().lower()

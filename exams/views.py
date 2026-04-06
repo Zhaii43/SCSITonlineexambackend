@@ -412,6 +412,7 @@ def get_available_exams(request):
     
     exams = Exam.objects.filter(
         department=user.department,
+        is_draft=False,
         is_approved=True,
         questions__isnull=False,
         is_practice=False,
@@ -548,7 +549,7 @@ def get_instructor_exams(request):
         return Response({'error': 'Only instructors can access this endpoint'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
-    exams = Exam.objects.filter(created_by=user)
+    exams = Exam.objects.filter(created_by=user, is_draft=False)
     
     exam_list = []
     for exam in exams:
@@ -731,7 +732,7 @@ def get_department_exam_stats(request):
         return Response({'error': 'Only deans can access this endpoint'},
                        status=status.HTTP_403_FORBIDDEN)
 
-    exams = Exam.objects.filter(department=user.department, is_approved=True)
+    exams = Exam.objects.filter(department=user.department, is_draft=False, is_approved=True)
 
     stats = []
     for exam in exams:
@@ -780,7 +781,8 @@ def get_pending_exams(request):
     
     # Filter exams by dean's department and only show exams with questions
     exams = Exam.objects.filter(
-        department=user.department, 
+        department=user.department,
+        is_draft=False,
         is_approved=False
     ).annotate(
         question_count=models.Count('questions')
@@ -993,7 +995,7 @@ def get_approved_exams(request):
         return Response({'error': 'Only deans can access this endpoint'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
-    exams = Exam.objects.filter(department=user.department, is_approved=True)
+    exams = Exam.objects.filter(department=user.department, is_draft=False, is_approved=True)
     
     exam_list = []
     for exam in exams:
@@ -1158,22 +1160,28 @@ def save_questions(request, exam_id):
         total_points_error = _validate_question_total_points(exam, questions_data)
         if total_points_error:
             return total_points_error
-        # Delete existing questions
-        exam.questions.all().delete()
-        
-        # Add new questions
-        for idx, q_data in enumerate(questions_data):
-            Question.objects.create(
-                exam=exam,
-                question=q_data['question'],
-                type=q_data['type'],
-                options=q_data.get('options'),
-                correct_answer=q_data['correct_answer'],
-                points=q_data['points'],
-                order=idx + 1,
-            )
-        if exam.is_approved and questions_data:
-            _publish_dean_exam_if_ready(exam, user)
+        from django.db import transaction
+        with transaction.atomic():
+            # Delete existing questions
+            exam.questions.all().delete()
+            
+            # Add new questions
+            for idx, q_data in enumerate(questions_data):
+                Question.objects.create(
+                    exam=exam,
+                    question=q_data['question'],
+                    type=q_data['type'],
+                    options=q_data.get('options'),
+                    correct_answer=q_data['correct_answer'],
+                    points=q_data['points'],
+                    order=idx + 1,
+                )
+            # Mark exam as no longer a draft — questions saved successfully
+            if exam.is_draft:
+                exam.is_draft = False
+                exam.save(update_fields=['is_draft'])
+            if exam.is_approved and questions_data:
+                _publish_dean_exam_if_ready(exam, user)
 
         return Response({'message': 'Questions saved successfully'}, status=status.HTTP_201_CREATED)
     
@@ -1257,6 +1265,10 @@ def import_questions_csv(request, exam_id):
             )
         if exam.is_approved and questions_data:
             _publish_dean_exam_if_ready(exam, user)
+        # Mark exam as no longer a draft — questions imported successfully
+        if exam.is_draft:
+            exam.is_draft = False
+            exam.save(update_fields=['is_draft'])
         
         return Response({
             'message': f'{len(questions_data)} questions imported successfully',
@@ -3205,7 +3217,7 @@ def get_instructor_monitoring(request):
     if user.role == 'dean':
         exams = Exam.objects.filter(department=user.department)
     else:
-        exams = Exam.objects.filter(created_by=user)
+        exams = Exam.objects.filter(created_by=user, is_draft=False)
 
     exam_ids = list(exams.values_list('id', flat=True))
     if not exam_ids:
@@ -3292,3 +3304,39 @@ def get_instructor_monitoring(request):
         'activity_logs': activity_list,
         'today_schedule': today_schedule,
     })
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_draft_exams(request):
+    '''Return all draft (incomplete) exams created by the requesting instructor or dean.'''
+    user = request.user
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can access drafts'}, status=status.HTTP_403_FORBIDDEN)
+    drafts = Exam.objects.filter(created_by=user, is_draft=True).order_by('-created_at')
+    return Response([{
+        'id': d.id,
+        'title': d.title,
+        'subject': d.subject,
+        'exam_type': d.exam_type,
+        'question_type': d.question_type,
+        'scheduled_date': d.scheduled_date.isoformat(),
+        'total_points': d.total_points,
+        'created_at': d.created_at.isoformat(),
+    } for d in drafts])
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def discard_draft_exam(request, exam_id):
+    '''Delete a draft exam that was never completed with questions.'''
+    user = request.user
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can discard exams'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        exam = Exam.objects.get(id=exam_id, created_by=user, is_draft=True)
+        exam.delete()
+        return Response({'message': 'Draft exam discarded'}, status=status.HTTP_204_NO_CONTENT)
+    except Exam.DoesNotExist:
+        return Response({'error': 'Draft exam not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -16,6 +16,8 @@ from .views import (
     get_instructor_monitoring,
     list_question_issue_reports, create_question_issue_report, get_question_issue_report_detail,
     add_question_issue_message, update_question_issue_status,
+    discard_draft_exam,
+    get_draft_exams,
 )
 
 urlpatterns = [
@@ -30,6 +32,8 @@ urlpatterns = [
     path('results/', get_exam_results, name='exam_results'),
     path('results/pending/', get_pending_results, name='pending_results'),
     path('create/', create_exam, name='create_exam'),
+    path('drafts/', get_draft_exams, name='get_draft_exams'),
+    path('<int:exam_id>/discard-draft/', discard_draft_exam, name='discard_draft_exam'),
     path('instructor/', get_instructor_exams, name='instructor_exams'),
     path('pending/', get_pending_exams, name='pending_exams'),
     path('approved/', get_approved_exams, name='approved_exams'),

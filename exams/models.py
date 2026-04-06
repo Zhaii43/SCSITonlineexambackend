@@ -57,6 +57,7 @@ class Exam(models.Model):
     shuffle_options = models.BooleanField(default=True, help_text='Shuffle multiple choice options per student.')
     is_approved = models.BooleanField(default=False)
     is_practice = models.BooleanField(default=False)
+    is_draft = models.BooleanField(default=True, help_text='True until questions are successfully saved. Draft exams are not visible to students or the approval queue.')
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_exams')
     approved_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_exams')

@@ -1498,6 +1498,66 @@ def request_password_reset_direct(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def generate_password_reset_otp(request):
+    """Generate a password reset OTP and return it — email sending is handled by the Next.js frontend."""
+    email = ''
+    try:
+        email = str(request.data.get('email', '')).strip().lower()
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        reset_token = PasswordResetToken.objects.create(user=user)
+
+        return Response({
+            'otp': reset_token.token,
+            'first_name': (user.first_name or '').strip() or user.username,
+            'frontend_url': getattr(__import__('django.conf', fromlist=['settings']).settings, 'FRONTEND_URL', ''),
+        })
+    except Exception as exc:
+        logger.exception("generate_password_reset_otp failed for email=%s | error: %s", email, exc)
+        return Response(
+            {'error': 'Unable to generate OTP right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_email_change_otp(request):
+    """Generate an email change OTP and return it — email sending is handled by the Next.js frontend."""
+    user = request.user
+    new_email = ''
+    try:
+        new_email = str(request.data.get('email', '')).strip().lower()
+        if not new_email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.email and new_email == user.email.lower():
+            return Response({'error': 'New email must be different from your current email.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
+            return Response({'error': 'Email already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        EmailChangeOTP.objects.filter(user=user, is_used=False).delete()
+        otp = EmailChangeOTP.objects.create(user=user, new_email=new_email)
+
+        return Response({'otp': otp.code, 'email': new_email})
+    except Exception as exc:
+        logger.exception("generate_email_change_otp failed for user_id=%s new_email=%s | error: %s", user.id, new_email, exc)
+        return Response(
+            {'error': 'Unable to generate OTP right now. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def verify_reset_code(request):
     """Step 2 — verify the 6-digit code, return the token for step 3"""
     email = request.data.get('email', '').strip().lower()

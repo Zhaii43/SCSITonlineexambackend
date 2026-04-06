@@ -1419,8 +1419,8 @@ def request_password_reset(request):
                 status=status.HTTP_429_TOO_MANY_REQUESTS
             )
 
-        # Delete old unused tokens and create a fresh 6-digit code
-        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        # Delete all old tokens (including used) to prevent unique constraint collision on 6-digit code
+        PasswordResetToken.objects.filter(user=user).delete()
         reset_token = PasswordResetToken.objects.create(user=user)
         sent = send_password_reset_email(user, reset_token.token)
         logger.info(
@@ -1470,7 +1470,7 @@ def request_password_reset_direct(request):
         except User.DoesNotExist:
             return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        PasswordResetToken.objects.filter(user=user).delete()
         reset_token = PasswordResetToken.objects.create(user=user)
 
         sent = send_password_reset_email(user, reset_token.token)
@@ -1536,7 +1536,7 @@ def generate_password_reset_otp(request):
         except User.DoesNotExist:
             return Response({'error': 'No account found with that email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        PasswordResetToken.objects.filter(user=user, is_used=False).delete()
+        PasswordResetToken.objects.filter(user=user).delete()
         reset_token = PasswordResetToken.objects.create(user=user)
 
         return Response({

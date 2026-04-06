@@ -97,7 +97,7 @@ def send_exam_scheduled_email(user, exam):
             "department": str(exam.department),
             "examType": str(exam.exam_type),
             "scheduledDate": exam.scheduled_date.strftime("%B %d, %Y %I:%M %p"),
-            "duration": int(exam.duration),
+            "duration": int(exam.duration_minutes),
             "yearLevel": str(exam.year_level),
         },
         "frontendUrl": settings.FRONTEND_URL,
@@ -126,25 +126,28 @@ def send_results_published_email(user, result):
         "to": getattr(user, "email", ""),
         "firstName": _first_name(user),
         "result": {
-            "examTitle": str(result.exam_title),
-            "subject": str(getattr(result, "subject", "")),
+            "examTitle": str(result.exam.title),
+            "subject": str(result.exam.subject),
             "score": int(result.score),
-            "totalItems": int(result.total_items),
+            "totalItems": int(result.total_points),
             "percentage": round(float(result.percentage), 1),
-            "passed": bool(result.passed),
-            "dateTaken": result.date_taken.strftime("%B %d, %Y %I:%M %p"),
+            "passed": result.remarks == "Passed",
+            "dateTaken": result.submitted_at.strftime("%B %d, %Y %I:%M %p"),
         },
         "frontendUrl": settings.FRONTEND_URL,
     })
 
 
 def send_password_reset_email(user, reset_code):
-    # Password reset is handled by the Next.js /api/password-reset/request route directly.
-    # This fallback is kept for any direct Django-side calls.
-    return _send("email_verification_otp", {
+    # Password reset emails are sent by the Next.js /api/password-reset/request route.
+    # This path is only hit by the legacy request_password_reset Django view.
+    from django.conf import settings as _s
+    frontend_url = getattr(_s, 'FRONTEND_URL', '')
+    return _send("password_reset", {
         "to": getattr(user, "email", ""),
         "firstName": _first_name(user),
         "otp": reset_code,
+        "frontendUrl": frontend_url,
     })
 
 

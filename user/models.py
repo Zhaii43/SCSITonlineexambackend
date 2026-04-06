@@ -171,7 +171,7 @@ class PreRegistrationOTP(models.Model):
     """Stores OTP for email verification BEFORE a user account is created."""
     email = models.EmailField()
     code = models.CharField(max_length=6)
-    token = models.CharField(max_length=64, unique=True, blank=True, null=True)  # returned after successful verify
+    token = models.CharField(max_length=64, blank=True, default='')  # returned after successful verify
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_verified = models.BooleanField(default=False)

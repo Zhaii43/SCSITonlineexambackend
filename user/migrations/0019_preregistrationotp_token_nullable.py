@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='preregistrationotp',
             name='token',
-            field=models.CharField(blank=True, max_length=64, null=True, unique=True),
+            field=models.CharField(blank=True, default='', max_length=64),
         ),
     ]

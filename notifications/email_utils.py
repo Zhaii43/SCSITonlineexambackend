@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import threading
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -17,7 +18,8 @@ def _get_gmail_config():
     return user, password, from_name
 
 
-def _send_email(to: str, subject: str, html: str, text: str = "") -> bool:
+def _send_email_sync(to: str, subject: str, html: str, text: str = "") -> bool:
+    """Send email synchronously via Gmail SMTP."""
     if not to:
         logger.warning("Skipping email — empty recipient for subject: %s", subject)
         return False
@@ -49,6 +51,12 @@ def _send_email(to: str, subject: str, html: str, text: str = "") -> bool:
     except Exception as exc:
         logger.exception("Failed to send email to %s | subject: %s | error: %s", to, subject, exc)
         return False
+
+
+def _send_email(to: str, subject: str, html: str, text: str = "") -> None:
+    """Fire-and-forget: send email in a background thread so it never blocks the request."""
+    t = threading.Thread(target=_send_email_sync, args=(to, subject, html, text), daemon=False)
+    t.start()
 
 
 # ─── Shared HTML layout ────────────────────────────────────────────────────────

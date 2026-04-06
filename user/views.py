@@ -2232,27 +2232,65 @@ def get_enrolled_record(request, student_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def test_email_config(request):
-    """Diagnostic endpoint — tests SMTP connection and returns config + exact error."""
+    """Diagnostic — tests Gmail SMTP credentials and sends a real test email."""
+    import smtplib
     from django.conf import settings as s
-    from django.core.mail import get_connection
+
+    to = request.GET.get('to', '').strip()
+    gmail_user = getattr(s, 'MAILER_GMAIL_USER', '').strip()
+    gmail_pass = getattr(s, 'MAILER_GMAIL_APP_PASSWORD', '').replace(' ', '').strip()
+    from_name = getattr(s, 'MAILER_FROM_NAME', 'SCSIT Online Exam').strip()
+
     config_info = {
-        'EMAIL_BACKEND': s.EMAIL_BACKEND,
-        'EMAIL_HOST': s.EMAIL_HOST,
-        'EMAIL_PORT': s.EMAIL_PORT,
-        'EMAIL_USE_TLS': s.EMAIL_USE_TLS,
-        'EMAIL_USE_SSL': getattr(s, 'EMAIL_USE_SSL', False),
-        'EMAIL_HOST_USER': s.EMAIL_HOST_USER,
-        'EMAIL_HOST_PASSWORD_length': len(s.EMAIL_HOST_PASSWORD or ''),
-        'EMAIL_HOST_PASSWORD_set': bool(s.EMAIL_HOST_PASSWORD),
-        'RESEND_API_KEY_set': bool(getattr(s, 'RESEND_API_KEY', '')),
-        'RESEND_FROM_EMAIL': getattr(s, 'RESEND_FROM_EMAIL', ''),
-        'DEFAULT_FROM_EMAIL': s.DEFAULT_FROM_EMAIL,
-        'EMAIL_TIMEOUT': getattr(s, 'EMAIL_TIMEOUT', None),
+        'MAILER_GMAIL_USER': gmail_user or '(not set)',
+        'MAILER_GMAIL_APP_PASSWORD_length': len(gmail_pass),
+        'MAILER_GMAIL_APP_PASSWORD_set': bool(gmail_pass),
+        'MAILER_FROM_NAME': from_name,
+        'test_recipient': to or '(not provided — add ?to=your@email.com)',
     }
+
+    if not gmail_user or not gmail_pass:
+        return Response({
+            'status': 'error',
+            'error': 'MAILER_GMAIL_USER or MAILER_GMAIL_APP_PASSWORD not set on Render.',
+            'config': config_info,
+        }, status=500)
+
+    # Test SMTP connection
     try:
-        conn = get_connection(fail_silently=False)
-        conn.open()
-        conn.close()
-        return Response({'status': 'ok', 'config': config_info})
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(gmail_user, gmail_pass)
+    except smtplib.SMTPAuthenticationError:
+        return Response({
+            'status': 'error',
+            'error': 'Gmail authentication failed. Check MAILER_GMAIL_USER and MAILER_GMAIL_APP_PASSWORD on Render.',
+            'config': config_info,
+        }, status=500)
     except Exception as exc:
-        return Response({'status': 'error', 'error': str(exc), 'config': config_info}, status=500)
+        return Response({
+            'status': 'error',
+            'error': f'SMTP connection failed: {exc}',
+            'config': config_info,
+        }, status=500)
+
+    # Optionally send a real test email
+    if to:
+        from notifications.email_utils import _send_email_sync
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText
+        sent = _send_email_sync(
+            to,
+            'SCSIT Online Exam — Email Test',
+            '<h2>Email test successful!</h2><p>Gmail SMTP is working correctly on Render.</p>',
+            'Email test successful! Gmail SMTP is working correctly on Render.',
+        )
+        return Response({
+            'status': 'ok' if sent else 'send_failed',
+            'smtp_login': 'success',
+            'email_sent': sent,
+            'config': config_info,
+        })
+
+    return Response({'status': 'ok', 'smtp_login': 'success', 'config': config_info})

@@ -130,19 +130,11 @@ def create_announcement(request):
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
     recipients = list(_get_announcement_recipients(target_audience, department))
-
-    import threading
-    def _send_emails():
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info('Sending announcement emails to %d recipients', len(recipients))
-        for recipient in recipients:
-            try:
-                send_announcement_email(recipient, announcement, created_by_name)
-            except Exception as exc:
-                logger.exception('Failed to send announcement email to %s: %s', getattr(recipient, 'email', ''), exc)
-    t = threading.Thread(target=_send_emails, daemon=False)
-    t.start()
+    for recipient in recipients:
+        try:
+            send_announcement_email(recipient, announcement, created_by_name)
+        except Exception:
+            pass
 
     link = '/dashboard/student' if target_audience in ['all', 'student'] else '/dashboard'
     notifications = Notification.objects.bulk_create([

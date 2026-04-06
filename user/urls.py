@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     RegisterView, CustomLoginView, get_user_profile, test_email_config,
-    get_department_users, get_pending_students, approve_student, reject_student,
+    get_department_users, get_pending_students, get_rejected_students, approve_student, reject_student,
     update_profile, change_password, bulk_approve_students,
     request_password_reset, request_password_reset_direct, generate_password_reset_otp, reset_password, validate_reset_token, verify_reset_code,
     bulk_import_students, download_student_template, upload_documents,
@@ -44,6 +44,7 @@ urlpatterns = [
     path('department/users/', get_department_users, name='department_users'),
     path('stats/department/', get_department_stats, name='department_stats'),
     path('students/pending/', get_pending_students, name='pending_students'),
+    path('students/rejected/', get_rejected_students, name='rejected_students'),
     path('students/bulk-approve/', bulk_approve_students, name='bulk_approve_students'),
     path('profile/upload-documents/', upload_documents, name='upload_documents'),
     path('students/bulk-import/', bulk_import_students, name='bulk_import_students'),

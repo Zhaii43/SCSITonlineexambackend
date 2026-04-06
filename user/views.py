@@ -602,6 +602,39 @@ def get_pending_students(request):
     return Response(students_list)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_rejected_students(request):
+    """Get rejected student registrations for dean's department"""
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+
+    rejected = User.objects.filter(
+        department=user.department,
+        role='student',
+        is_rejected=True,
+        is_approved=False,
+    ).order_by('-date_joined')
+
+    for s in rejected:
+        _normalize_cloudinary_field(s, 'study_load')
+
+    return Response([{
+        'id': s.id,
+        'username': s.username,
+        'email': s.email,
+        'first_name': s.first_name,
+        'last_name': s.last_name,
+        'school_id': s.school_id,
+        'year_level': s.year_level,
+        'contact_number': s.contact_number,
+        'date_joined': s.date_joined.isoformat(),
+        'rejection_reason': s.rejection_reason,
+        'profile_picture': _file_url(request, s.profile_picture),
+    } for s in rejected])
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def approve_student(request, student_id):

@@ -255,6 +255,11 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 FRONTEND_URL = config('FRONTEND_URL')
 EMAIL_BRIDGE_SECRET = config('EMAIL_BRIDGE_SECRET', default='')
 
+# Gmail credentials for direct SMTP email sending
+MAILER_GMAIL_USER = config('MAILER_GMAIL_USER', default='')
+MAILER_GMAIL_APP_PASSWORD = config('MAILER_GMAIL_APP_PASSWORD', default='')
+MAILER_FROM_NAME = config('MAILER_FROM_NAME', default='SCSIT Online Exam')
+
 # Exam termination policy
 # 1st termination: warning, allow retry
 # 2nd termination: final warning, allow one last retry

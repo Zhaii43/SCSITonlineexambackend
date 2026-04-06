@@ -640,7 +640,7 @@ def approve_student(request, student_id):
         log_activity(user, 'student_approved', f'Approved student {student.username}', request, {'student_id': student.id})
         send_student_verification_update(user.department, 'approved', student.id)
 
-        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name})
+        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name, 'student_last_name': student.last_name, 'student_username': student.username, 'student_school_id': student.school_id or '', 'student_department': student.department or '', 'student_year_level': student.year_level or '', 'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else ''})
     except User.DoesNotExist:
         return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 

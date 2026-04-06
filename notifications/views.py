@@ -8,7 +8,7 @@ from .realtime import send_notification
 from user.models import User
 
 
-def _get_announcement_recipients(target_audience, department=None):
+def _get_announcement_recipients(target_audience, department=None, year_level=None):
     from django.db.models import Q
     qs = User.objects.filter(is_active=True).filter(
         Q(is_approved=True) | Q(role__in=['instructor', 'dean'])
@@ -17,6 +17,8 @@ def _get_announcement_recipients(target_audience, department=None):
         qs = qs.filter(role=target_audience)
     if department:
         qs = qs.filter(department=department)
+    if year_level and target_audience in ['student', 'all']:
+        qs = qs.filter(Q(role='student', year_level=year_level) | ~Q(role='student'))
     return qs.exclude(email='').filter(email__isnull=False)
 
 @api_view(['GET'])
@@ -82,11 +84,16 @@ def get_announcements(request):
         target_audience__in=['all', user.role],
     )
 
-    # Filter by department (show dept-specific + global ones)
     from django.db.models import Q
     qs = qs.filter(
         Q(department=user.department) | Q(department__isnull=True) | Q(department='')
-    ).order_by('-created_at')[:50]
+    )
+    # Filter by year_level: only hide if announcement targets a specific year and user is a student with a different year
+    if user.role == 'student':
+        qs = qs.filter(
+            Q(year_level__isnull=True) | Q(year_level='') | Q(year_level=user.year_level)
+        )
+    qs = qs.order_by('-created_at')[:50]
 
     data = [{
         'id': a.id,
@@ -94,6 +101,7 @@ def get_announcements(request):
         'message': a.message,
         'target_audience': a.target_audience,
         'department': a.department,
+        'year_level': a.year_level,
         'created_by': f"{a.created_by.first_name} {a.created_by.last_name}".strip() or a.created_by.username,
         'created_by_role': a.created_by.role,
         'created_at': a.created_at.isoformat(),
@@ -113,6 +121,7 @@ def create_announcement(request):
     message = request.data.get('message', '').strip()
     target_audience = request.data.get('target_audience', 'all')
     department = request.data.get('department', '').strip() or None
+    year_level = request.data.get('year_level', '').strip() or None
 
     if not title or not message:
         return Response({'error': 'Title and message are required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -120,16 +129,24 @@ def create_announcement(request):
     if target_audience not in ['all', 'student', 'instructor']:
         return Response({'error': 'Invalid target audience'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if year_level and year_level not in ['1', '2', '3', '4']:
+        return Response({'error': 'Invalid year level'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # year_level only applies when targeting students
+    if target_audience == 'instructor':
+        year_level = None
+
     announcement = Announcement.objects.create(
         title=title,
         message=message,
         target_audience=target_audience,
         department=department,
+        year_level=year_level,
         created_by=request.user,
     )
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-    recipients = list(_get_announcement_recipients(target_audience, department))
+    recipients = list(_get_announcement_recipients(target_audience, department, year_level))
 
     # Build all messages then send in one SMTP session
     from .email_utils import send_bulk_emails
@@ -165,6 +182,7 @@ def create_announcement(request):
         'message': announcement.message,
         'target_audience': announcement.target_audience,
         'department': announcement.department,
+        'year_level': announcement.year_level,
         'created_at': announcement.created_at.isoformat(),
     }, status=status.HTTP_201_CREATED)
 
@@ -199,6 +217,7 @@ def get_my_announcements(request):
         'message': a.message,
         'target_audience': a.target_audience,
         'department': a.department,
+        'year_level': a.year_level,
         'is_active': a.is_active,
         'created_at': a.created_at.isoformat(),
     } for a in announcements]

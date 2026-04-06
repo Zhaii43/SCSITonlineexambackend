@@ -9,10 +9,18 @@ class Announcement(models.Model):
         ('instructor', 'Instructors Only'),
     ]
 
+    YEAR_LEVEL_CHOICES = [
+        ('1', '1st Year'),
+        ('2', '2nd Year'),
+        ('3', '3rd Year'),
+        ('4', '4th Year'),
+    ]
+
     title = models.CharField(max_length=255)
     message = models.TextField()
     target_audience = models.CharField(max_length=20, choices=TARGET_CHOICES, default='all')
     department = models.CharField(max_length=10, blank=True, null=True, help_text='Leave blank for all departments')
+    year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES, blank=True, null=True, help_text='Leave blank for all year levels (students only)')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

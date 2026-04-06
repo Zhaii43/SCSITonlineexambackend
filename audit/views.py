@@ -67,6 +67,34 @@ def get_audit_count(request):
 
     return Response({'count': count})
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_audit_log(request, pk):
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can delete audit logs'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        log = AuditLog.objects.get(pk=pk, user__department=user.department)
+        log.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except AuditLog.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def bulk_delete_audit_logs(request):
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can delete audit logs'}, status=status.HTTP_403_FORBIDDEN)
+    ids = request.data.get('ids')  # list of ids, or None to delete all
+    qs = AuditLog.objects.filter(user__department=user.department)
+    if ids is not None:
+        qs = qs.filter(pk__in=ids)
+    deleted, _ = qs.delete()
+    return Response({'deleted': deleted})
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def export_audit_logs(request):

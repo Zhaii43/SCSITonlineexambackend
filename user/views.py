@@ -640,7 +640,7 @@ def approve_student(request, student_id):
         log_activity(user, 'student_approved', f'Approved student {student.username}', request, {'student_id': student.id})
         send_student_verification_update(user.department, 'approved', student.id)
 
-        return Response({'message': 'Student approved successfully'})
+        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name})
     except User.DoesNotExist:
         return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -851,7 +851,7 @@ def reject_student(request, student_id):
         log_activity(user, 'student_rejected', f'Rejected student {student.username}: {rejection_reason}', request, {'student_id': student_id})
         send_student_verification_update(user.department, 'rejected', student.id)
 
-        return Response({'message': 'Student registration rejected'})
+        return Response({'message': 'Student registration rejected', 'student_email': student.email, 'student_first_name': student.first_name, 'rejection_reason': rejection_reason})
     except User.DoesNotExist:
         return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 

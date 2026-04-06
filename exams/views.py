@@ -978,7 +978,7 @@ def reject_exam(request, exam_id):
         
         log_activity(user, 'exam_rejected', f'Rejected exam: {exam_title}', request, {'exam_id': exam_id})
         
-        return Response({'message': 'Exam rejected successfully'})
+        return Response({'message': 'Exam rejected successfully', 'exam_title': exam_title, 'creator_email': exam_creator.email, 'creator_first_name': exam_creator.first_name})
     except Exam.DoesNotExist:
         return Response({'error': 'Exam not found'}, status=status.HTTP_404_NOT_FOUND)
 

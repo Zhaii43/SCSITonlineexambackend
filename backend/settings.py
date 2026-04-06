@@ -253,6 +253,7 @@ DEFAULT_FROM_EMAIL = config(
 ).strip()
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 FRONTEND_URL = config('FRONTEND_URL')
+EMAIL_BRIDGE_SECRET = config('EMAIL_BRIDGE_SECRET', default='')
 
 # Exam termination policy
 # 1st termination: warning, allow retry

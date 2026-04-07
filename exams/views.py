@@ -652,13 +652,7 @@ def update_exam(request, exam_id):
         exam.title = request.data.get('title', exam.title)
         exam.subject = request.data.get('subject', exam.subject)
         if user.role != 'dean':
-            new_department = request.data.get('department', exam.department)
-            if new_department != exam.department and exam.questions.exists():
-                return Response(
-                    {'error': 'Cannot change department after questions have been added. Remove all questions first or keep the original department.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            exam.department = new_department
+            exam.department = request.data.get('department', exam.department)
         exam.exam_type = request.data.get('exam_type', exam.exam_type)
         exam.question_type = request.data.get('question_type', exam.question_type)
         

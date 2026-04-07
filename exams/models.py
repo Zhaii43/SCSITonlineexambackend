@@ -10,6 +10,7 @@ class Exam(models.Model):
     EXAM_TYPE_CHOICES = [
         ('prelim', 'Prelim'),
         ('midterm', 'Midterm'),
+        ('semifinal', 'Semi-Final'),
         ('final', 'Final'),
         ('quiz', 'Quiz'),
         ('practice', 'Practice'),

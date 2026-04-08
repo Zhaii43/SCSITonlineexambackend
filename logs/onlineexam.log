@@ -875,3 +875,1459 @@ django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0o
 2026-04-08 13:49:33,680 WARNING django.request Not Found: /ws/exams/
 2026-04-08 13:49:39,484 WARNING django.request Not Found: /ws/exams/
 2026-04-08 13:49:39,750 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:14,035 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-08 13:50:16,786 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:16,816 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:22,633 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:25,269 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:26,966 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:30,798 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:34,946 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:39,157 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:43,416 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:44,852 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:50,878 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:50:51,293 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:58,413 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:50:59,644 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:04,867 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:06,301 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:09,818 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:11,600 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:14,034 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:19,618 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:19,647 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:25,073 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:27,260 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:32,474 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:32,785 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:37,291 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:42,352 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:49,060 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:53,853 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:53,884 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:53,914 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:51:54,941 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:54,960 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:51:57,984 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:01,003 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:04,019 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:07,376 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:10,745 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:13,769 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:16,805 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:20,749 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:23,776 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:26,810 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:31,573 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:31,605 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:34,660 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:52:37,840 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:52:37,866 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:52:37,898 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:52:58,167 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:01,752 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:05,762 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:09,752 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:13,774 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:14,715 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:14,738 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:17,760 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:17,789 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:21,760 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:21,789 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:25,773 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:25,794 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:29,763 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:29,791 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:33,757 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:33,784 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:37,775 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:37,807 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:41,762 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:41,792 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:44,804 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:44,900 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:48,790 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:48,834 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:52,792 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:52,822 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:56,066 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:56,091 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:53:59,157 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:53:59,391 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:02,229 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:02,494 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:05,366 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:05,704 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:08,991 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:09,646 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:13,311 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:13,713 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:16,864 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:17,771 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:24,973 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:30,439 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:38,477 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:44,144 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:51,838 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:54:57,688 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:54:58,666 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:05,710 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:05,865 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:11,300 ERROR django.request Internal Server Error: /api/exams/drafts/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1624, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-08 13:55:11,489 ERROR django.request Internal Server Error: /api/exams/monitoring/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 258, in connect
+    self.init_connection_state()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 402, in init_connection_state
+    commit = self._configure_connection(self.connection)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 374, in _configure_connection
+    commit_tz = self._configure_timezone(connection)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 357, in _configure_timezone
+    cursor.execute(self.ops.set_time_zone_sql(), [timezone_name])
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 258, in connect
+    self.init_connection_state()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 402, in init_connection_state
+    commit = self._configure_connection(self.connection)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 374, in _configure_connection
+    commit_tz = self._configure_timezone(connection)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 357, in _configure_timezone
+    cursor.execute(self.ops.set_time_zone_sql(), [timezone_name])
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-08 13:55:11,562 ERROR django.request Internal Server Error: /api/department/users/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: Software caused connection abort (0x00002745/10053)
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: Software caused connection abort (0x00002745/10053)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2026-04-08 13:55:11,622 ERROR django.request Internal Server Error: /api/profile/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-08 13:55:11,720 ERROR django.request Internal Server Error: /api/students/rejected/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-08 13:55:11,761 ERROR django.request Internal Server Error: /api/audit/count/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: connection to server at "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" (35.227.164.209), port 5432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-08 13:55:12,857 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:13,094 ERROR django.request Internal Server Error: /api/enrolled-records/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,201 ERROR django.request Internal Server Error: /api/profile/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,214 ERROR django.request Internal Server Error: /api/department/users/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,459 ERROR django.request Internal Server Error: /api/profile/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,479 ERROR django.request Internal Server Error: /api/enrolled-records/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,557 ERROR django.request Internal Server Error: /api/department/users/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 420, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 330, in perform_authentication
+    request.user
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 232, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\request.py", line 385, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 51, in authenticate
+    return self.get_user(validated_token), validated_token
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework_simplejwt\authentication.py", line 132, in get_user
+    user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 635, in get
+    num = len(clone)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 372, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2000, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 95, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\postgresql\base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d75us0shg0os73bbopp0-a.oregon-postgres.render.com" to address: Name or service not known
+
+2026-04-08 13:55:13,574 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:20,293 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:21,228 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:25,521 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:27,333 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:30,687 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:35,140 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:35,352 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:40,522 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:41,680 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:44,754 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:49,121 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:50,903 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:55:57,007 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:55:58,389 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:01,479 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:03,526 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:06,573 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:10,373 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:12,140 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:18,032 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:18,602 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:22,480 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:24,872 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:29,541 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:33,859 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:33,940 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:37,991 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:39,143 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:43,745 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:44,278 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:49,944 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:50,477 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:56:56,139 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:56:57,732 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:01,865 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:05,612 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:07,393 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:11,830 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:14,346 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:19,733 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:20,331 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:24,762 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:26,972 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:32,161 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:34,880 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:39,456 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:42,004 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:43,945 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:47,856 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:50,234 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:57:52,137 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:57:57,093 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:00,104 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:04,742 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:06,642 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:12,106 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:13,791 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:19,248 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:19,952 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:23,751 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:24,812 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:29,853 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:31,254 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:35,485 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:36,969 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:41,878 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:43,013 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:48,748 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:50,096 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:58:57,599 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:58:59,363 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:59:04,235 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:59:06,112 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:59:11,503 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:59:13,792 WARNING django.request Not Found: /ws/exams/
+2026-04-08 13:59:16,059 WARNING django.request Not Found: /ws/notifications/
+2026-04-08 13:59:21,304 WARNING django.request Not Found: /ws/exams/

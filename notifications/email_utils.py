@@ -207,7 +207,7 @@ def send_bulk_import_email(user, set_password_token):
     if bridge_result is True:
         return True
 
-    set_password_link = f"{frontend_url}/reset-password?token={set_password_token}" if frontend_url else set_password_token
+    set_password_link = f"{frontend_url}/forgot-password?token={set_password_token}" if frontend_url else set_password_token
     text_body = (
         f"Hello {first_name},\n\n"
         "Your student account has been approved.\n\n"

@@ -177,6 +177,7 @@ def _parse_subject_list(raw_value):
 def _create_password_setup_token(user, validity_days=7):
     from user.password_reset import _now as _password_reset_now
 
+    PasswordResetToken.objects.filter(user=user).delete()
     reset_token = PasswordResetToken(
         user=user,
         expires_at=_password_reset_now() + timedelta(days=validity_days),

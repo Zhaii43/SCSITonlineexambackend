@@ -2305,7 +2305,7 @@ def import_enrolled_students_csv(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_enrolled_template(request):
-    """Download CSV template for masterlist import."""
+    """Download CSV template for enrolled student import"""
     user = request.user
     if user.role != 'dean':
         return Response({'error': 'Only deans can download this template'}, status=status.HTTP_403_FORBIDDEN)
@@ -2313,7 +2313,7 @@ def download_enrolled_template(request):
     import csv
     from django.http import HttpResponse
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="masterlist_template.csv"'
+    response['Content-Disposition'] = 'attachment; filename="enrolled_students_template.csv"'
     writer = csv.writer(response)
     writer.writerow(['school_id', 'first_name', 'last_name', 'year_level', 'course', 'subjects', 'email', 'contact_number'])
     writer.writerow(['2024-001', 'Juan', 'Dela Cruz', '1st', 'BSIT', 'Math 101|Programming 1|NSTP', 'juan@example.com', '09123456789'])

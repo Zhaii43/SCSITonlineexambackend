@@ -184,8 +184,45 @@ def send_password_reset_email(user, reset_code):
     )
 
 
-# No-op stubs - all other emails handled by Next.js Nodemailer proxies
-def send_student_approval_email(user): pass
+def send_student_approval_email(user):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    approved_at = getattr(user, "approved_at", None)
+    return _post_email_bridge({
+        "emailType": "student_approval",
+        "to": to,
+        "firstName": first_name,
+        "fullName": f"{user.first_name} {user.last_name}".strip(),
+        "username": getattr(user, "username", ""),
+        "email": to,
+        "schoolId": getattr(user, "school_id", "") or "",
+        "department": getattr(user, "department", "") or "",
+        "yearLevel": getattr(user, "year_level", "") or "",
+        "approvedAt": approved_at.strftime("%B %d, %Y %I:%M %p") if approved_at else "",
+        "frontendUrl": frontend_url,
+    })
+
+
+def send_masterlist_approval_email(user):
+    """Send approval email for masterlist-imported students with their temporary credentials."""
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    return _post_email_bridge({
+        "emailType": "masterlist_approval",
+        "to": to,
+        "firstName": first_name,
+        "username": getattr(user, "school_id", "") or getattr(user, "username", ""),
+        "schoolId": getattr(user, "school_id", "") or "",
+        "frontendUrl": frontend_url,
+    })
+
+
 def send_student_rejected_email(user, rejection_reason=None): pass
 def send_exam_scheduled_email(user, exam): pass
 def send_dean_exam_created_email(user, exam): pass

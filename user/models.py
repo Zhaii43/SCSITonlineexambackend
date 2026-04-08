@@ -81,6 +81,9 @@ class User(AbstractUser):
     # Rejection status
     is_rejected = models.BooleanField(default=False, help_text="Whether the student registration was rejected")
 
+    # Force password change on next login (masterlist imports)
+    force_password_change = models.BooleanField(default=False)
+
     
     def save(self, *args, **kwargs):
         # Students require dean approval

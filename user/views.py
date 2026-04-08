@@ -21,7 +21,7 @@ from .serializers import RegisterSerializer
 from .models import User, PasswordResetToken, PreRegistrationOTP, EnrolledStudent, EmailChangeOTP
 from exams.models import Exam
 from notifications.models import Notification
-from notifications.email_utils import send_student_approval_email, send_password_reset_email, send_bulk_import_email, send_student_rejected_email, send_email_verification_otp, send_pre_registration_otp
+from notifications.email_utils import send_student_approval_email, send_password_reset_email, send_bulk_import_email, send_student_rejected_email, send_email_verification_otp, send_pre_registration_otp, send_masterlist_approval_email
 from .models import EnrolledStudent
 from notifications.push_utils import send_push_notification
 from notifications.realtime import send_notification
@@ -186,19 +186,15 @@ def _create_password_setup_token(user, validity_days=7):
     return reset_token
 
 
-def _send_masterlist_activation(student, send_email=True):
-    reset_token = _create_password_setup_token(student)
+def _send_masterlist_activation(student):
     notification = Notification.objects.create(
         user=student,
         type='account_approved',
         title='Account Approved',
-        message='Your account has been approved. Check your email to set your password and activate your access.',
+        message='Your account has been approved. Log in using your School ID as both your username and password.',
         link='/login'
     )
     send_notification(notification)
-    if send_email and student.email:
-        send_bulk_import_email(student, reset_token.token)
-    return reset_token
 
 
 class CustomLoginView(APIView):
@@ -281,7 +277,11 @@ class CustomLoginView(APIView):
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
         log_activity(user, 'login', f'{user.username} logged in', request)
-        return Response({'access': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'force_password_change': user.force_password_change,
+        }, status=status.HTTP_200_OK)
 
 
 # Keep for compatibility but unused
@@ -573,6 +573,7 @@ def get_user_profile(request):
         'is_active': user.is_active,
         'is_rejected': user.is_rejected,
         'rejection_reason': user.rejection_reason,
+        'force_password_change': user.force_password_change,
     })
 
 
@@ -741,10 +742,13 @@ def approve_student(request, student_id):
         student.approved_at = timezone.now()
         student.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
 
-        reset_token = None
         try:
             if student.account_source == 'masterlist_import':
-                reset_token = _send_masterlist_activation(student, send_email=False)
+                student.set_password(student.school_id)
+                student.force_password_change = True
+                student.save(update_fields=['password', 'force_password_change'])
+                _send_masterlist_activation(student)
+                send_masterlist_approval_email(student)
             else:
                 notification = Notification.objects.create(
                     user=student,
@@ -781,34 +785,7 @@ def approve_student(request, student_id):
             'student_year_level': student.year_level or '',
             'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else '',
             'student_account_source': student.account_source,
-            'student_reset_token': reset_token.token if reset_token else '',
         })
-
-        if student.account_source == 'masterlist_import':
-            _send_masterlist_activation(student)
-        else:
-            Notification.objects.create(
-                user=student,
-                type='account_approved',
-                title='Account Approved',
-                message='Your account has been approved. You can now log in and access the system.',
-                link='/login'
-            )
-            
-            # Send approval email
-            send_student_approval_email(student)
-
-        # Send push notification
-        send_push_notification(
-            student.expo_push_token,
-            '✅ Account Approved',
-            'Your account has been approved. You can now access exams.',
-        )
-        
-        log_activity(user, 'student_approved', f'Approved student {student.username}', request, {'student_id': student.id})
-        send_student_verification_update(user.department, 'approved', student.id)
-
-        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name, 'student_last_name': student.last_name, 'student_username': student.username, 'student_school_id': student.school_id or '', 'student_department': student.department or '', 'student_year_level': student.year_level or '', 'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else ''})
     except User.DoesNotExist:
         return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -972,7 +949,11 @@ def bulk_approve_students(request):
             for student in student_list:
                 try:
                     if student.account_source == 'masterlist_import':
-                        reset_token = _send_masterlist_activation(student, send_email=False)
+                        student.set_password(student.school_id)
+                        student.force_password_change = True
+                        student.save(update_fields=['password', 'force_password_change'])
+                        _send_masterlist_activation(student)
+                        send_masterlist_approval_email(student)
                         approved_students.append({
                             'id': student.id,
                             'email': student.email,
@@ -983,7 +964,6 @@ def bulk_approve_students(request):
                             'department': student.department or '',
                             'year_level': student.year_level or '',
                             'account_source': student.account_source,
-                            'reset_token': reset_token.token,
                         })
                     else:
                         notifications.append(
@@ -1006,7 +986,6 @@ def bulk_approve_students(request):
                             'department': student.department or '',
                             'year_level': student.year_level or '',
                             'account_source': student.account_source,
-                            'reset_token': '',
                         })
                 except Exception:
                     logger.exception("Post-approval notifications failed during bulk approval for student_id=%s", student.id)
@@ -1606,6 +1585,7 @@ def change_password(request):
         return Response({'error': ' '.join(exc.messages)}, status=status.HTTP_400_BAD_REQUEST)
     
     user.set_password(new_password)
+    user.force_password_change = False
     user.save()
     
     log_activity(user, 'password_changed', f'{user.username} changed password', request)

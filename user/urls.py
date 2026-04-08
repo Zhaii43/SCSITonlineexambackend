@@ -12,7 +12,7 @@ from .views import (
     get_department_stats,
     request_email_change, resend_email_change_otp, verify_email_change, generate_email_change_otp,
     list_enrolled_students, add_enrolled_student, delete_enrolled_student,
-    import_enrolled_students_csv, download_enrolled_template,
+    import_enrolled_students_csv, download_enrolled_template, sync_masterlist_accounts,
     set_extra_approval, set_declaration_verification, set_id_photo_verification, get_study_load_signed_url, proxy_study_load,
     StrictTokenRefreshView,
 )
@@ -62,6 +62,7 @@ urlpatterns = [
     path('enrolled-records/', list_enrolled_students, name='list_enrolled_students'),
     path('enrolled-records/add/', add_enrolled_student, name='add_enrolled_student'),
     path('enrolled-records/import/', import_enrolled_students_csv, name='import_enrolled_students_csv'),
+    path('enrolled-records/sync-accounts/', sync_masterlist_accounts, name='sync_masterlist_accounts'),
     path('enrolled-records/template/', download_enrolled_template, name='download_enrolled_template'),
     path('enrolled-records/<int:record_id>/delete/', delete_enrolled_student, name='delete_enrolled_student'),
     path('debug/email/', test_email_config, name='test_email_config'),

@@ -2161,6 +2161,8 @@ def list_enrolled_students(request):
         'last_name': r.last_name,
         'department': r.department,
         'year_level': r.year_level,
+        'course': r.course,
+        'enrolled_subjects': r.enrolled_subjects or [],
         'email': r.email,
         'contact_number': r.contact_number,
         'added_at': r.added_at.isoformat(),
@@ -2179,11 +2181,13 @@ def add_enrolled_student(request):
     first_name = request.data.get('first_name', '').strip()
     last_name = request.data.get('last_name', '').strip()
     year_level = request.data.get('year_level', '').strip()
+    course = request.data.get('course', '').strip()
+    subjects = _parse_subject_list(request.data.get('subjects'))
     email = request.data.get('email', '').strip() or None
     contact_number = request.data.get('contact_number', '').strip() or None
 
-    if not all([school_id, first_name, last_name, year_level]):
-        return Response({'error': 'school_id, first_name, last_name, and year_level are required'}, status=status.HTTP_400_BAD_REQUEST)
+    if not all([school_id, first_name, last_name, year_level, course]) or not subjects:
+        return Response({'error': 'school_id, first_name, last_name, year_level, course, and subjects are required'}, status=status.HTTP_400_BAD_REQUEST)
 
     if EnrolledStudent.objects.filter(school_id=school_id).exists():
         return Response({'error': f'School ID "{school_id}" already exists in enrollment records'}, status=status.HTTP_400_BAD_REQUEST)
@@ -2194,6 +2198,8 @@ def add_enrolled_student(request):
         last_name=last_name,
         department=user.department,
         year_level=year_level,
+        course=course,
+        enrolled_subjects=subjects,
         email=email,
         contact_number=contact_number,
     )
@@ -2248,7 +2254,7 @@ def import_enrolled_students_csv(request):
 
         for row_num, row in enumerate(reader, start=2):
             row = {k: (v.strip() if v else v) for k, v in row.items()}
-            required = ['school_id', 'first_name', 'last_name', 'year_level']
+            required = ['school_id', 'first_name', 'last_name', 'year_level', 'course', 'subjects']
             missing = [f for f in required if not row.get(f)]
             if missing:
                 errors.append({'row': row_num, 'error': f'Missing: {", ".join(missing)}'})
@@ -2272,6 +2278,8 @@ def import_enrolled_students_csv(request):
                 last_name=row['last_name'],
                 department=user.department,
                 year_level=year_map[row['year_level']],
+                course=row.get('course', ''),
+                enrolled_subjects=_parse_subject_list(row.get('subjects')),
                 email=row.get('email') or None,
                 contact_number=row.get('contact_number') or None,
             )
@@ -2297,7 +2305,7 @@ def import_enrolled_students_csv(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_enrolled_template(request):
-    """Download CSV template for enrolled student import"""
+    """Download CSV template for masterlist import."""
     user = request.user
     if user.role != 'dean':
         return Response({'error': 'Only deans can download this template'}, status=status.HTTP_403_FORBIDDEN)
@@ -2305,11 +2313,87 @@ def download_enrolled_template(request):
     import csv
     from django.http import HttpResponse
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="enrolled_students_template.csv"'
+    response['Content-Disposition'] = 'attachment; filename="masterlist_template.csv"'
     writer = csv.writer(response)
-    writer.writerow(['school_id', 'first_name', 'last_name', 'year_level', 'email', 'contact_number'])
-    writer.writerow(['2024-001', 'Juan', 'Dela Cruz', '1st', 'juan@example.com', '09123456789'])
+    writer.writerow(['school_id', 'first_name', 'last_name', 'year_level', 'course', 'subjects', 'email', 'contact_number'])
+    writer.writerow(['2024-001', 'Juan', 'Dela Cruz', '1st', 'BSIT', 'Math 101|Programming 1|NSTP', 'juan@example.com', '09123456789'])
     return response
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def sync_masterlist_accounts(request):
+    """Create or update student accounts from the official masterlist."""
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can sync masterlist accounts'}, status=status.HTTP_403_FORBIDDEN)
+
+    created_count = 0
+    updated_count = 0
+    unchanged_count = 0
+
+    records = EnrolledStudent.objects.filter(department=user.department).order_by('last_name', 'first_name')
+    for record in records:
+        defaults = {
+            'username': record.school_id,
+            'email': record.email or '',
+            'first_name': record.first_name,
+            'last_name': record.last_name,
+            'department': user.department,
+            'year_level': record.year_level,
+            'contact_number': record.contact_number,
+            'course': record.course,
+            'enrolled_subjects': record.enrolled_subjects or [],
+            'account_source': 'masterlist_import',
+            'role': 'student',
+        }
+
+        student = User.objects.filter(role='student', school_id=record.school_id).first()
+        if student is None:
+            student = User(**defaults, school_id=record.school_id, is_approved=False)
+            student.set_unusable_password()
+            student.save()
+            Notification.objects.create(
+                user=student,
+                type='account_approved',
+                title='Account Imported',
+                message='Your account has been created from the official masterlist and is waiting for dean approval.',
+                link='/login'
+            )
+            created_count += 1
+            continue
+
+        changed_fields = []
+        for field, value in defaults.items():
+            if getattr(student, field) != value:
+                setattr(student, field, value)
+                changed_fields.append(field)
+
+        if changed_fields:
+            student.save(update_fields=changed_fields)
+            updated_count += 1
+        else:
+            unchanged_count += 1
+
+    log_activity(
+        user,
+        'bulk_import_students',
+        f'Synced masterlist accounts: {created_count} created, {updated_count} updated, {unchanged_count} unchanged',
+        request,
+        {'created_count': created_count, 'updated_count': updated_count, 'unchanged_count': unchanged_count},
+    )
+    send_enrollment_records_update(
+        user.department,
+        'accounts_synced',
+        {'created_count': created_count, 'updated_count': updated_count, 'unchanged_count': unchanged_count},
+    )
+
+    return Response({
+        'message': f'Masterlist sync completed: {created_count} created, {updated_count} updated, {unchanged_count} unchanged',
+        'created_count': created_count,
+        'updated_count': updated_count,
+        'unchanged_count': unchanged_count,
+    })
 
 
 @api_view(['GET'])
@@ -2338,6 +2422,8 @@ def get_enrolled_record(request, student_id):
                 'last_name': record.last_name,
                 'department': record.department,
                 'year_level': record.year_level,
+                'course': record.course,
+                'enrolled_subjects': record.enrolled_subjects or [],
                 'email': record.email,
                 'contact_number': record.contact_number,
             }

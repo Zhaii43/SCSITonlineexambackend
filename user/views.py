@@ -185,7 +185,7 @@ def _create_password_setup_token(user, validity_days=7):
     return reset_token
 
 
-def _send_masterlist_activation(student):
+def _send_masterlist_activation(student, send_email=True):
     reset_token = _create_password_setup_token(student)
     notification = Notification.objects.create(
         user=student,
@@ -195,7 +195,7 @@ def _send_masterlist_activation(student):
         link='/login'
     )
     send_notification(notification)
-    if student.email:
+    if send_email and student.email:
         send_bulk_import_email(student, reset_token.token)
     return reset_token
 
@@ -740,9 +740,10 @@ def approve_student(request, student_id):
         student.approved_at = timezone.now()
         student.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
 
+        reset_token = None
         try:
             if student.account_source == 'masterlist_import':
-                _send_masterlist_activation(student)
+                reset_token = _send_masterlist_activation(student, send_email=False)
             else:
                 notification = Notification.objects.create(
                     user=student,
@@ -768,7 +769,19 @@ def approve_student(request, student_id):
         except Exception:
             logger.exception("Failed to broadcast approval update for student_id=%s", student.id)
 
-        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name, 'student_last_name': student.last_name, 'student_username': student.username, 'student_school_id': student.school_id or '', 'student_department': student.department or '', 'student_year_level': student.year_level or '', 'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else ''})
+        return Response({
+            'message': 'Student approved successfully',
+            'student_email': student.email,
+            'student_first_name': student.first_name,
+            'student_last_name': student.last_name,
+            'student_username': student.username,
+            'student_school_id': student.school_id or '',
+            'student_department': student.department or '',
+            'student_year_level': student.year_level or '',
+            'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else '',
+            'student_account_source': student.account_source,
+            'student_reset_token': reset_token.token if reset_token else '',
+        })
 
         if student.account_source == 'masterlist_import':
             _send_masterlist_activation(student)
@@ -952,12 +965,25 @@ def bulk_approve_students(request):
             approved_at=timezone.now(),
         )
 
+        approved_students = []
         if count > 0:
             notifications = []
             for student in student_list:
                 try:
                     if student.account_source == 'masterlist_import':
-                        _send_masterlist_activation(student)
+                        reset_token = _send_masterlist_activation(student, send_email=False)
+                        approved_students.append({
+                            'id': student.id,
+                            'email': student.email,
+                            'first_name': student.first_name,
+                            'last_name': student.last_name,
+                            'username': student.username,
+                            'school_id': student.school_id or '',
+                            'department': student.department or '',
+                            'year_level': student.year_level or '',
+                            'account_source': student.account_source,
+                            'reset_token': reset_token.token,
+                        })
                     else:
                         notifications.append(
                             Notification(
@@ -969,6 +995,18 @@ def bulk_approve_students(request):
                             )
                         )
                         send_student_approval_email(student)
+                        approved_students.append({
+                            'id': student.id,
+                            'email': student.email,
+                            'first_name': student.first_name,
+                            'last_name': student.last_name,
+                            'username': student.username,
+                            'school_id': student.school_id or '',
+                            'department': student.department or '',
+                            'year_level': student.year_level or '',
+                            'account_source': student.account_source,
+                            'reset_token': '',
+                        })
                 except Exception:
                     logger.exception("Post-approval notifications failed during bulk approval for student_id=%s", student.id)
 
@@ -986,7 +1024,8 @@ def bulk_approve_students(request):
 
         return Response({
             'message': f'{count} student(s) approved successfully',
-            'count': count
+            'count': count,
+            'approved_students': approved_students,
         })
 
         if count > 0:

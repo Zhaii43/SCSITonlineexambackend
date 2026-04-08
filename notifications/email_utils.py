@@ -185,7 +185,28 @@ def send_password_reset_email(user, reset_code):
 
 
 # No-op stubs - all other emails handled by Next.js Nodemailer proxies
-def send_student_approval_email(user): pass
+def send_student_approval_email(user):
+    to = getattr(user, "email", "")
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    full_name = (getattr(user, "get_full_name", lambda: "")() or "").strip() or None
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+
+    bridge_result = _post_email_bridge(
+        {
+            "emailType": "student_approval",
+            "to": to,
+            "firstName": first_name,
+            "fullName": full_name,
+            "username": getattr(user, "username", "") or "",
+            "email": to,
+            "schoolId": getattr(user, "school_id", "") or "",
+            "department": getattr(user, "department", "") or "",
+            "yearLevel": getattr(user, "year_level", "") or "",
+            "approvedAt": getattr(getattr(user, "approved_at", None), "strftime", lambda *_: "")('%B %d, %Y %I:%M %p') if getattr(user, "approved_at", None) else "",
+            "frontendUrl": frontend_url,
+        }
+    )
+    return bridge_result is True
 def send_student_rejected_email(user, rejection_reason=None): pass
 def send_exam_scheduled_email(user, exam): pass
 def send_dean_exam_created_email(user, exam): pass

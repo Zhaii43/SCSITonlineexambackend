@@ -606,6 +606,7 @@ def get_exam_detail_for_instructor(request, exam_id):
     
     try:
         exam = _get_staff_exam_or_404(user, exam_id)
+        eligible_students = _eligible_students_for_exam(exam)
         return Response({
             'id': exam.id,
             'title': exam.title,
@@ -627,6 +628,18 @@ def get_exam_detail_for_instructor(request, exam_id):
             'question_pool_size': exam.question_pool_size,
             'shuffle_options': exam.shuffle_options,
             'is_approved': exam.is_approved,
+            'eligible_students': [{
+                'id': student.id,
+                'username': student.username,
+                'email': student.email,
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'school_id': student.school_id,
+                'year_level': student.year_level,
+                'course': student.course,
+                'contact_number': student.contact_number,
+            } for student in eligible_students],
+            'total_eligible_students': len(eligible_students),
             'questions': [{
                 'id': q.id,
                 'question': q.question,

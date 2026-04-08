@@ -256,15 +256,40 @@ class UserAndNotificationApiTests(TestCase):
         masterlist_student.save()
 
         self.client.force_authenticate(user=self.dean)
-        with patch('user.views.send_bulk_import_email'), patch('user.views.send_push_notification'):
+        with patch('user.views.send_bulk_import_email') as send_bulk_import_email, patch('user.views.send_push_notification'):
             response = self.client.post(f'/api/students/{masterlist_student.id}/approve/', {}, format='json')
 
         self.assertEqual(response.status_code, 200)
         masterlist_student.refresh_from_db()
         self.assertTrue(masterlist_student.is_approved)
+        send_bulk_import_email.assert_called_once()
         self.assertTrue(Notification.objects.filter(user=masterlist_student, type='account_approved').exists())
 
-    def test_bulk_import_students_sets_student_id_as_initial_password(self):
+    def test_login_requires_password_setup_for_approved_masterlist_student(self):
+        masterlist_student = User.objects.create_user(
+            username='2024-ML-02',
+            email='masterlistapproved@example.com',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='2024-ML-02',
+            contact_number='09170000020',
+            account_source='masterlist_import',
+            is_approved=True,
+        )
+        masterlist_student.set_unusable_password()
+        masterlist_student.save()
+
+        response = self.client.post(
+            '/api/login/',
+            {'username': masterlist_student.school_id, 'password': 'wrong-password'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['code'], 'password_setup_required')
+
+    def test_bulk_import_students_create_accounts_without_usable_password(self):
         self.client.force_authenticate(user=self.dean)
         csv_content = (
             "school_id,email,first_name,last_name,year_level,course,subjects,contact_number\n"
@@ -277,7 +302,7 @@ class UserAndNotificationApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         imported_student = User.objects.get(school_id='2024-CSV-01')
         self.assertEqual(imported_student.account_source, 'masterlist_import')
-        self.assertTrue(imported_student.check_password('2024-CSV-01'))
+        self.assertFalse(imported_student.has_usable_password())
 
     def test_notifications_endpoint_returns_user_notifications(self):
         Notification.objects.create(

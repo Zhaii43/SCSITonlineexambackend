@@ -245,6 +245,20 @@ class CustomLoginView(APIView):
             if (
                 lookup_user
                 and lookup_user.role == 'student'
+                and lookup_user.account_source == 'masterlist_import'
+                and lookup_user.is_approved
+                and not lookup_user.has_usable_password()
+            ):
+                return Response(
+                    {
+                        'error': 'Set your password first using the reset link sent to your email before logging in.',
+                        'code': 'password_setup_required',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if (
+                lookup_user
+                and lookup_user.role == 'student'
                 and lookup_user.is_rejected
                 and not lookup_user.has_usable_password()
             ):
@@ -727,7 +741,7 @@ def approve_student(request, student_id):
         student.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
 
         try:
-            if student.account_source == 'masterlist_import' and not student.has_usable_password():
+            if student.account_source == 'masterlist_import':
                 _send_masterlist_activation(student)
             else:
                 notification = Notification.objects.create(
@@ -756,7 +770,7 @@ def approve_student(request, student_id):
 
         return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name, 'student_last_name': student.last_name, 'student_username': student.username, 'student_school_id': student.school_id or '', 'student_department': student.department or '', 'student_year_level': student.year_level or '', 'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else ''})
 
-        if student.account_source == 'masterlist_import' and not student.has_usable_password():
+        if student.account_source == 'masterlist_import':
             _send_masterlist_activation(student)
         else:
             Notification.objects.create(
@@ -942,7 +956,7 @@ def bulk_approve_students(request):
             notifications = []
             for student in student_list:
                 try:
-                    if student.account_source == 'masterlist_import' and not student.has_usable_password():
+                    if student.account_source == 'masterlist_import':
                         _send_masterlist_activation(student)
                     else:
                         notifications.append(
@@ -978,7 +992,7 @@ def bulk_approve_students(request):
         if count > 0:
             notifications = []
             for student in student_list:
-                if student.account_source == 'masterlist_import' and not student.has_usable_password():
+                if student.account_source == 'masterlist_import':
                     _send_masterlist_activation(student)
                 else:
                     notifications.append(
@@ -2008,8 +2022,6 @@ def bulk_import_students(request):
                     error_count += 1
                     continue
 
-                initial_password = row['school_id']
-
                 student = User(
                     username=username,
                     email=row['email'],
@@ -2025,14 +2037,14 @@ def bulk_import_students(request):
                     course=row.get('course', ''),
                     enrolled_subjects=_parse_subject_list(row.get('subjects')),
                 )
-                student.set_password(initial_password)
+                student.set_unusable_password()
                 student.save()
 
                 Notification.objects.create(
                     user=student,
                     type='account_approved',
                     title='Account Imported',
-                    message='Your account has been imported from the official masterlist and is waiting for dean approval. Your initial password is your Student ID.',
+                    message='Your account has been imported from the official masterlist and is waiting for dean approval.',
                     link='/login'
                 )
                 success_count += 1

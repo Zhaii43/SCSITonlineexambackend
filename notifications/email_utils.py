@@ -190,7 +190,37 @@ def send_student_rejected_email(user, rejection_reason=None): pass
 def send_exam_scheduled_email(user, exam): pass
 def send_dean_exam_created_email(user, exam): pass
 def send_results_published_email(user, result): pass
-def send_bulk_import_email(user, set_password_token): pass
+def send_bulk_import_email(user, set_password_token):
+    to = getattr(user, "email", "")
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+
+    bridge_result = _post_email_bridge(
+        {
+            "emailType": "bulk_import",
+            "to": to,
+            "firstName": first_name,
+            "setPasswordToken": set_password_token,
+            "frontendUrl": frontend_url,
+        }
+    )
+    if bridge_result is True:
+        return True
+
+    set_password_link = f"{frontend_url}/reset-password?token={set_password_token}" if frontend_url else set_password_token
+    text_body = (
+        f"Hello {first_name},\n\n"
+        "Your student account has been approved.\n\n"
+        f"Set your password here: {set_password_link}\n\n"
+        "After setting your password, log in using your Student ID and new password."
+    )
+    return _send_templated_email(
+        to,
+        "Your Student Account Has Been Approved - SCSIT Online Exam",
+        "emails/bulk_import.html",
+        {"user": user, "set_password_token": set_password_token, "frontend_url": frontend_url},
+        text_body,
+    )
 def send_bulk_exam_notification(users, exam): return 0
 def send_announcement_email(user, announcement, created_by): pass
 def _build_announcement_message(user, announcement, created_by): return None

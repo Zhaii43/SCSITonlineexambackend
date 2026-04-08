@@ -154,6 +154,52 @@ def _resolve_resource_location(public_id, fmt, hint_type=None):
     return resource_hint, (hint_type or 'upload')
 
 
+def _parse_subject_list(raw_value):
+    if isinstance(raw_value, list):
+        values = raw_value
+    else:
+        values = re.split(r'[|,;\n]+', str(raw_value or ''))
+
+    subjects = []
+    seen = set()
+    for value in values:
+        cleaned = str(value or '').strip()
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        subjects.append(cleaned)
+    return subjects
+
+
+def _create_password_setup_token(user, validity_days=7):
+    from user.password_reset import _now as _password_reset_now
+
+    reset_token = PasswordResetToken(
+        user=user,
+        expires_at=_password_reset_now() + timedelta(days=validity_days),
+    )
+    reset_token.save()
+    return reset_token
+
+
+def _send_masterlist_activation(student):
+    reset_token = _create_password_setup_token(student)
+    notification = Notification.objects.create(
+        user=student,
+        type='account_approved',
+        title='Account Approved',
+        message='Your account has been approved. Check your email to set your password and activate your access.',
+        link='/login'
+    )
+    send_notification(notification)
+    if student.email:
+        send_bulk_import_email(student, reset_token.token)
+    return reset_token
+
+
 class CustomLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -176,18 +222,22 @@ class CustomLoginView(APIView):
         if not username or not password:
             return Response({'error': 'Username and password are required.', 'code': 'missing_fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Resolve email to username
+        # Resolve email, Student ID, or username to the internal username
         if '@' in username:
             try:
                 lookup_user = User.objects.get(email=username)
                 username = lookup_user.username
             except User.DoesNotExist:
-                return Response({'error': 'No account found with that email. Please check your credentials or register.', 'code': 'account_not_found'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'No account found with that email. Please check your credentials or contact your dean.', 'code': 'account_not_found'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 lookup_user = User.objects.get(username=username)
             except User.DoesNotExist:
-                return Response({'error': 'No account found with that username. Please check your credentials or register.', 'code': 'account_not_found'}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    lookup_user = User.objects.get(school_id=username)
+                    username = lookup_user.username
+                except User.DoesNotExist:
+                    return Response({'error': 'No account found with that username or Student ID. Please check your credentials or contact your dean.', 'code': 'account_not_found'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=username, password=password)
 
@@ -210,12 +260,8 @@ class CustomLoginView(APIView):
         if not user.is_active:
             return Response({'error': 'Your account has been deactivated. Please contact support.', 'code': 'account_disabled'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user.is_approved:
-            if user.role == 'student' and (not user.study_load or user.is_rejected):
-                # Bulk-imported student with no study load, or rejected student — allow through so they can fix their info
-                pass
-            else:
-                return Response({'error': 'Your account is pending approval. Please wait for your dean to review your registration.', 'code': 'pending_approval'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_approved and not (user.role == 'student' and user.account_source == 'self_registration' and user.is_rejected):
+            return Response({'error': 'Your account is pending dean approval. Please wait for the approval email before logging in.', 'code': 'pending_approval'}, status=status.HTTP_400_BAD_REQUEST)
 
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
@@ -284,6 +330,15 @@ class RegisterView(APIView):
             return Response(
                 {"error": "Invalid or expired OTP. Please request a new one."},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.data.get('role') == 'student':
+            return Response(
+                {
+                    "error": "Student self-registration is disabled. Student accounts are now created from the approved masterlist.",
+                    "code": "student_registration_disabled",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Check for duplicate email
@@ -487,9 +542,12 @@ def get_user_profile(request):
         'first_name': user.first_name,
         'last_name': user.last_name,
         'role': user.role,
+        'account_source': user.account_source,
         'department': user.department,
         'school_id': user.school_id,
         'year_level': user.year_level,
+        'course': user.course,
+        'enrolled_subjects': user.enrolled_subjects or [],
         'contact_number': user.contact_number,
         'profile_picture': _file_url(request, user.profile_picture),
         'id_photo': _file_url(request, user.id_photo),
@@ -588,6 +646,9 @@ def get_pending_students(request):
         'last_name': s.last_name,
         'school_id': s.school_id,
         'year_level': s.year_level,
+        'course': s.course,
+        'enrolled_subjects': s.enrolled_subjects or [],
+        'account_source': s.account_source,
         'contact_number': s.contact_number,
         'date_joined': s.date_joined.isoformat(),
         'profile_picture': _file_url(request, s.profile_picture),
@@ -628,6 +689,9 @@ def get_rejected_students(request):
         'last_name': s.last_name,
         'school_id': s.school_id,
         'year_level': s.year_level,
+        'course': s.course,
+        'enrolled_subjects': s.enrolled_subjects or [],
+        'account_source': s.account_source,
         'contact_number': s.contact_number,
         'date_joined': s.date_joined.isoformat(),
         'rejection_reason': s.rejection_reason,
@@ -649,28 +713,32 @@ def approve_student(request, student_id):
         from django.utils import timezone
         student = User.objects.get(id=student_id, department=user.department, role='student')
 
-        if not student.id_photo:
-            return Response({'error': 'Student must upload an ID photo before approval.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not student.id_verified:
-            return Response({'error': 'Student ID photo must be verified before approval.'}, status=status.HTTP_400_BAD_REQUEST)
-        if (student.is_transferee or student.is_irregular) and not student.declaration_verified:
-            return Response({'error': 'Student declaration must be verified before approval.'}, status=status.HTTP_400_BAD_REQUEST)
+        if student.account_source != 'masterlist_import':
+            if not student.id_photo:
+                return Response({'error': 'Student must upload an ID photo before approval.'}, status=status.HTTP_400_BAD_REQUEST)
+            if not student.id_verified:
+                return Response({'error': 'Student ID photo must be verified before approval.'}, status=status.HTTP_400_BAD_REQUEST)
+            if (student.is_transferee or student.is_irregular) and not student.declaration_verified:
+                return Response({'error': 'Student declaration must be verified before approval.'}, status=status.HTTP_400_BAD_REQUEST)
 
         student.is_approved = True
         student.approved_by = user
         student.approved_at = timezone.now()
         student.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
 
-        Notification.objects.create(
-            user=student,
-            type='account_approved',
-            title='Account Approved',
-            message='Your account has been approved. You can now log in and access the system.',
-            link='/login'
-        )
-        
-        # Send approval email
-        send_student_approval_email(student)
+        if student.account_source == 'masterlist_import' and not student.has_usable_password():
+            _send_masterlist_activation(student)
+        else:
+            Notification.objects.create(
+                user=student,
+                type='account_approved',
+                title='Account Approved',
+                message='Your account has been approved. You can now log in and access the system.',
+                link='/login'
+            )
+            
+            # Send approval email
+            send_student_approval_email(student)
 
         # Send push notification
         send_push_notification(
@@ -759,8 +827,11 @@ def bulk_approve_students(request):
             role='student'
         )
 
-        # Block transferee/irregular students without declaration verification
-        unverified_decl = students.filter(
+        masterlist_students = students.filter(account_source='masterlist_import')
+        self_registered_students = students.exclude(account_source='masterlist_import')
+
+        # Keep the stricter document workflow for legacy self-registered students only.
+        unverified_decl = self_registered_students.filter(
             models.Q(is_transferee=True) | models.Q(is_irregular=True),
             declaration_verified=False
         )
@@ -771,7 +842,7 @@ def bulk_approve_students(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        missing_id_photo = students.filter(models.Q(id_photo='') | models.Q(id_photo__isnull=True))
+        missing_id_photo = self_registered_students.filter(models.Q(id_photo='') | models.Q(id_photo__isnull=True))
         if missing_id_photo.exists():
             names = ', '.join([s.get_full_name() or s.username for s in missing_id_photo])
             return Response(
@@ -779,7 +850,7 @@ def bulk_approve_students(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        unverified_ids = students.filter(id_verified=False)
+        unverified_ids = self_registered_students.filter(id_verified=False)
         if unverified_ids.exists():
             names = ', '.join([s.get_full_name() or s.username for s in unverified_ids])
             return Response(
@@ -787,8 +858,7 @@ def bulk_approve_students(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Block any without study load
-        incomplete = students.filter(models.Q(study_load='') | models.Q(study_load__isnull=True))
+        incomplete = self_registered_students.filter(models.Q(study_load='') | models.Q(study_load__isnull=True))
         if incomplete.exists():
             names = ', '.join([s.get_full_name() or s.username for s in incomplete])
             return Response(
@@ -803,8 +873,8 @@ def bulk_approve_students(request):
             return ''.join([c for c in str(value or '') if c.isdigit()])
 
         invalid = []
-        valid_students = []
-        for student in students:
+        valid_students = list(masterlist_students)
+        for student in self_registered_students:
             if not student.school_id:
                 invalid.append(student)
                 continue
@@ -841,17 +911,19 @@ def bulk_approve_students(request):
         if count > 0:
             notifications = []
             for student in student_list:
-                notifications.append(
-                    Notification(
-                        user=student,
-                        type='account_approved',
-                        title='Account Approved',
-                        message='Your account has been approved. You can now log in and access the system.',
-                        link='/login'
+                if student.account_source == 'masterlist_import' and not student.has_usable_password():
+                    _send_masterlist_activation(student)
+                else:
+                    notifications.append(
+                        Notification(
+                            user=student,
+                            type='account_approved',
+                            title='Account Approved',
+                            message='Your account has been approved. You can now log in and access the system.',
+                            link='/login'
+                        )
                     )
-                )
-                # Send approval email to each student
-                send_student_approval_email(student)
+                    send_student_approval_email(student)
             
             created = Notification.objects.bulk_create(notifications)
             for n in created:
@@ -1833,7 +1905,7 @@ def bulk_import_students(request):
         for row_num, row in enumerate(reader, start=2):
             try:
                 row = {k: (v.strip() if v else v) for k, v in row.items()}
-                required_fields = ['username', 'email', 'first_name', 'last_name', 'school_id', 'year_level', 'contact_number']
+                required_fields = ['school_id', 'email', 'first_name', 'last_name', 'year_level', 'course', 'subjects']
                 missing_fields = [f for f in required_fields if not row.get(f)]
 
                 if missing_fields:
@@ -1841,8 +1913,10 @@ def bulk_import_students(request):
                     error_count += 1
                     continue
 
-                if User.objects.filter(username=row['username']).exists():
-                    errors.append({'row': row_num, 'error': f'Username "{row["username"]}" already exists', 'data': row})
+                username = row['school_id']
+
+                if User.objects.filter(username=username).exists():
+                    errors.append({'row': row_num, 'error': f'Username "{username}" already exists', 'data': row})
                     error_count += 1
                     continue
 
@@ -1856,7 +1930,7 @@ def bulk_import_students(request):
                     error_count += 1
                     continue
 
-                if User.objects.filter(contact_number=row['contact_number']).exists():
+                if row.get('contact_number') and User.objects.filter(contact_number=row['contact_number']).exists():
                     errors.append({'row': row_num, 'error': f'Contact number "{row["contact_number"]}" already exists', 'data': row})
                     error_count += 1
                     continue
@@ -1868,37 +1942,30 @@ def bulk_import_students(request):
                     continue
 
                 student = User(
-                    username=row['username'],
+                    username=username,
                     email=row['email'],
                     first_name=row['first_name'],
                     last_name=row['last_name'],
                     school_id=row['school_id'],
                     year_level=year_level_map[row['year_level']],
-                    contact_number=row['contact_number'],
+                    contact_number=row.get('contact_number') or None,
                     department=user.department,
                     role='student',
                     is_approved=False,
+                    account_source='masterlist_import',
+                    course=row.get('course', ''),
+                    enrolled_subjects=_parse_subject_list(row.get('subjects')),
                 )
                 student.set_unusable_password()
                 student.save()
 
-                # Create a 7-day token for setting password
-                from django.utils import timezone as tz
-                from user.password_reset import _now as _pr_now
-                reset_token = PasswordResetToken(
-                    user=student,
-                    expires_at=_pr_now() + timedelta(days=7),
-                )
-                reset_token.save()
-
                 Notification.objects.create(
                     user=student,
                     type='account_approved',
-                    title='Account Created — Action Required',
-                    message='Your account has been created. Please check your email to set your password.',
+                    title='Account Imported',
+                    message='Your account has been imported from the official masterlist and is waiting for dean approval.',
                     link='/login'
                 )
-                send_bulk_import_email(student, reset_token.token)
                 success_count += 1
 
             except Exception as e:
@@ -2035,9 +2102,9 @@ def download_student_template(request):
     response['Content-Disposition'] = 'attachment; filename="student_import_template.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['username', 'email', 'first_name', 'last_name', 'school_id', 'year_level', 'contact_number'])
-    writer.writerow(['jdoe2024', 'jdoe@example.com', 'John', 'Doe', '2024-001', '1st', '09123456789'])
-    writer.writerow(['msmith2024', 'msmith@example.com', 'Mary', 'Smith', '2024-002', '2nd', '09234567890'])
+    writer.writerow(['school_id', 'email', 'first_name', 'last_name', 'year_level', 'course', 'subjects', 'contact_number'])
+    writer.writerow(['2024-001', 'jdoe@example.com', 'John', 'Doe', '1st', 'BSIT', 'Math 101|Programming 1|NSTP', '09123456789'])
+    writer.writerow(['2024-002', 'msmith@example.com', 'Mary', 'Smith', '2nd', 'BSIT', 'Data Structures|Discrete Math|PE 2', '09234567890'])
     
     return response
 

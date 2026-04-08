@@ -10,6 +10,11 @@ class User(AbstractUser):
         ('instructor', 'Instructor'),
         ('dean', 'Dean'),
     ]
+
+    ACCOUNT_SOURCE_CHOICES = [
+        ('self_registration', 'Self Registration'),
+        ('masterlist_import', 'Masterlist Import'),
+    ]
     
     DEPARTMENT_CHOICES = [
         ('BSHM', 'Hospitality Management'),
@@ -33,9 +38,12 @@ class User(AbstractUser):
     
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
     department = models.CharField(max_length=10, choices=DEPARTMENT_CHOICES, default='GENERAL')
-    
+
     # Student/Instructor ID
     school_id = models.CharField(max_length=20, unique=True, blank=True, null=True, help_text="Student ID or Employee ID")
+    account_source = models.CharField(max_length=30, choices=ACCOUNT_SOURCE_CHOICES, default='self_registration')
+    course = models.CharField(max_length=120, blank=True)
+    enrolled_subjects = models.JSONField(default=list, blank=True)
     
     # Additional fields
     year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES, blank=True, null=True)
@@ -155,6 +163,8 @@ class EnrolledStudent(models.Model):
     last_name = models.CharField(max_length=100)
     department = models.CharField(max_length=10, choices=DEPARTMENT_CHOICES)
     year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES)
+    course = models.CharField(max_length=120, blank=True)
+    enrolled_subjects = models.JSONField(default=list, blank=True)
     email = models.EmailField(blank=True, null=True)
     contact_number = models.CharField(max_length=15, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)

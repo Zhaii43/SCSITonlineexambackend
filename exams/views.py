@@ -38,6 +38,30 @@ def _file_url(request, field):
         return None
 
 
+def _normalize_subject_label(value):
+    return ' '.join(str(value or '').strip().lower().split())
+
+
+def _student_matches_exam_subject(student, exam_subject):
+    subjects = getattr(student, 'enrolled_subjects', None) or []
+    if not subjects:
+        return True
+
+    normalized_exam_subject = _normalize_subject_label(exam_subject)
+    if not normalized_exam_subject:
+        return True
+
+    for subject in subjects:
+        normalized_subject = _normalize_subject_label(subject)
+        if not normalized_subject:
+            continue
+        if normalized_subject == normalized_exam_subject:
+            return True
+        if normalized_exam_subject in normalized_subject or normalized_subject in normalized_exam_subject:
+            return True
+    return False
+
+
 def _exam_access_error(user, exam):
     if not user.is_approved:
         return 'Your account is not approved yet'
@@ -47,6 +71,8 @@ def _exam_access_error(user, exam):
         user_level = user.year_level or ''
         if user_level not in exam.year_level.split(','):
             return 'This exam is not for your year level'
+    if not _student_matches_exam_subject(user, exam.subject):
+        return 'This exam is not part of your approved subject load'
     if (getattr(user, 'is_transferee', False) or getattr(user, 'is_irregular', False)) and not getattr(user, 'extra_approved', False):
         return 'Transferee/irregular students require additional dean approval to take this exam'
     return None
@@ -69,7 +95,7 @@ def _eligible_students_for_exam(exam):
     if year_levels:
         students = students.filter(year_level__in=year_levels)
 
-    return students
+    return [student for student in students if _student_matches_exam_subject(student, exam.subject)]
 
 
 def _extract_exam_session_token(request):
@@ -355,13 +381,7 @@ def get_public_stats(request):
         exam = active_exams[0]
         submitted = ExamResult.objects.filter(exam=exam).count()
         # Eligible students
-        from django.db.models import Q
-        eligible = User.objects.filter(
-            department=exam.department, role='student', is_approved=True
-        )
-        if exam.year_level != 'ALL':
-            eligible = eligible.filter(year_level__in=exam.year_level.split(','))
-        total_eligible = eligible.count()
+        total_eligible = len(_eligible_students_for_exam(exam))
         elapsed = (now - exam.scheduled_date).total_seconds() / 60
         remaining = max(0, exam.duration_minutes - elapsed)
         progress = round((submitted / total_eligible * 100), 1) if total_eligible > 0 else 0
@@ -554,15 +574,7 @@ def get_instructor_exams(request):
     exam_list = []
     for exam in exams:
         submitted_count = ExamResult.objects.filter(exam=exam).count()
-        eligible_students = User.objects.filter(
-            department=exam.department,
-            role='student',
-            is_approved=True
-        )
-        if exam.year_level != 'ALL':
-            year_levels = exam.year_level.split(',')
-            eligible_students = eligible_students.filter(year_level__in=year_levels)
-        total_students = eligible_students.count()
+        total_students = len(_eligible_students_for_exam(exam))
         exam_list.append({
             'id': exam.id,
             'title': exam.title,
@@ -822,15 +834,7 @@ def get_exam_detail_for_dean(request, exam_id):
         
         # Get eligible students based on year level
         from django.db.models import Q
-        eligible_students = User.objects.filter(
-            department=exam.department,
-            role='student',
-            is_approved=True
-        )
-        
-        if exam.year_level != 'ALL':
-            year_levels = exam.year_level.split(',')
-            eligible_students = eligible_students.filter(year_level__in=year_levels)
+        eligible_students = _eligible_students_for_exam(exam)
         
         students_data = []
         for student in eligible_students:

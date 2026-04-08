@@ -98,6 +98,28 @@ class UserAndNotificationApiTests(TestCase):
         self.assertIn('refresh', response.data)
         self.assertTrue(AuditLog.objects.filter(user=approved_student, action='login').exists())
 
+    def test_login_accepts_school_id_identifier(self):
+        approved_student = User.objects.create_user(
+            username='schoolidlogin',
+            email='schoolidlogin@example.com',
+            password='StrongPass123!',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='2024-LOGIN-01',
+            contact_number='09170000018',
+            is_approved=True,
+        )
+
+        response = self.client.post(
+            '/api/login/',
+            {'username': approved_student.school_id, 'password': 'StrongPass123!'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('access', response.data)
+
     def test_password_reset_flow_validates_and_changes_password(self):
         user = User.objects.create_user(
             username='resetstudent',
@@ -217,6 +239,30 @@ class UserAndNotificationApiTests(TestCase):
         self.student.refresh_from_db()
         self.assertTrue(self.student.is_approved)
         self.assertTrue(Notification.objects.filter(user=self.student, type='account_approved').exists())
+
+    def test_masterlist_student_approval_does_not_require_documents(self):
+        masterlist_student = User.objects.create_user(
+            username='2024-ML-01',
+            email='masterliststudent@example.com',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='2024-ML-01',
+            contact_number='09170000019',
+            account_source='masterlist_import',
+            is_approved=False,
+        )
+        masterlist_student.set_unusable_password()
+        masterlist_student.save()
+
+        self.client.force_authenticate(user=self.dean)
+        with patch('user.views.send_bulk_import_email'), patch('user.views.send_push_notification'):
+            response = self.client.post(f'/api/students/{masterlist_student.id}/approve/', {}, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        masterlist_student.refresh_from_db()
+        self.assertTrue(masterlist_student.is_approved)
+        self.assertTrue(Notification.objects.filter(user=masterlist_student, type='account_approved').exists())
 
     def test_notifications_endpoint_returns_user_notifications(self):
         Notification.objects.create(

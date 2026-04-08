@@ -726,6 +726,36 @@ def approve_student(request, student_id):
         student.approved_at = timezone.now()
         student.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
 
+        try:
+            if student.account_source == 'masterlist_import' and not student.has_usable_password():
+                _send_masterlist_activation(student)
+            else:
+                notification = Notification.objects.create(
+                    user=student,
+                    type='account_approved',
+                    title='Account Approved',
+                    message='Your account has been approved. You can now log in and access the system.',
+                    link='/login'
+                )
+                send_notification(notification)
+                send_student_approval_email(student)
+
+            send_push_notification(
+                student.expo_push_token,
+                'Account Approved',
+                'Your account has been approved. You can now access exams.',
+            )
+        except Exception:
+            logger.exception("Post-approval notifications failed for student_id=%s", student.id)
+
+        log_activity(user, 'student_approved', f'Approved student {student.username}', request, {'student_id': student.id})
+        try:
+            send_student_verification_update(user.department, 'approved', student.id)
+        except Exception:
+            logger.exception("Failed to broadcast approval update for student_id=%s", student.id)
+
+        return Response({'message': 'Student approved successfully', 'student_email': student.email, 'student_first_name': student.first_name, 'student_last_name': student.last_name, 'student_username': student.username, 'student_school_id': student.school_id or '', 'student_department': student.department or '', 'student_year_level': student.year_level or '', 'student_approved_at': student.approved_at.strftime('%B %d, %Y %I:%M %p') if student.approved_at else ''})
+
         if student.account_source == 'masterlist_import' and not student.has_usable_password():
             _send_masterlist_activation(student)
         else:
@@ -907,6 +937,43 @@ def bulk_approve_students(request):
             approved_by=user,
             approved_at=timezone.now(),
         )
+
+        if count > 0:
+            notifications = []
+            for student in student_list:
+                try:
+                    if student.account_source == 'masterlist_import' and not student.has_usable_password():
+                        _send_masterlist_activation(student)
+                    else:
+                        notifications.append(
+                            Notification(
+                                user=student,
+                                type='account_approved',
+                                title='Account Approved',
+                                message='Your account has been approved. You can now log in and access the system.',
+                                link='/login'
+                            )
+                        )
+                        send_student_approval_email(student)
+                except Exception:
+                    logger.exception("Post-approval notifications failed during bulk approval for student_id=%s", student.id)
+
+            created = Notification.objects.bulk_create(notifications)
+            for n in created:
+                try:
+                    send_notification(n)
+                except Exception:
+                    logger.exception("Failed to send realtime approval notification notification_id=%s", n.id)
+            for student in student_list:
+                try:
+                    send_student_verification_update(user.department, 'approved', student.id)
+                except Exception:
+                    logger.exception("Failed to broadcast bulk approval update for student_id=%s", student.id)
+
+        return Response({
+            'message': f'{count} student(s) approved successfully',
+            'count': count
+        })
 
         if count > 0:
             notifications = []

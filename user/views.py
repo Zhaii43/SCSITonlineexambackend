@@ -2008,6 +2008,8 @@ def bulk_import_students(request):
                     error_count += 1
                     continue
 
+                initial_password = row['school_id']
+
                 student = User(
                     username=username,
                     email=row['email'],
@@ -2023,14 +2025,14 @@ def bulk_import_students(request):
                     course=row.get('course', ''),
                     enrolled_subjects=_parse_subject_list(row.get('subjects')),
                 )
-                student.set_unusable_password()
+                student.set_password(initial_password)
                 student.save()
 
                 Notification.objects.create(
                     user=student,
                     type='account_approved',
                     title='Account Imported',
-                    message='Your account has been imported from the official masterlist and is waiting for dean approval.',
+                    message='Your account has been imported from the official masterlist and is waiting for dean approval. Your initial password is your Student ID.',
                     link='/login'
                 )
                 success_count += 1

@@ -264,6 +264,21 @@ class UserAndNotificationApiTests(TestCase):
         self.assertTrue(masterlist_student.is_approved)
         self.assertTrue(Notification.objects.filter(user=masterlist_student, type='account_approved').exists())
 
+    def test_bulk_import_students_sets_student_id_as_initial_password(self):
+        self.client.force_authenticate(user=self.dean)
+        csv_content = (
+            "school_id,email,first_name,last_name,year_level,course,subjects,contact_number\n"
+            "2024-CSV-01,csvstudent@example.com,Csv,Student,1st,BSIT,Math 101|Programming 1,09170000029\n"
+        )
+        upload = SimpleUploadedFile("students.csv", csv_content.encode("utf-8"), content_type="text/csv")
+
+        response = self.client.post('/api/students/bulk-import/', {'file': upload})
+
+        self.assertEqual(response.status_code, 200)
+        imported_student = User.objects.get(school_id='2024-CSV-01')
+        self.assertEqual(imported_student.account_source, 'masterlist_import')
+        self.assertTrue(imported_student.check_password('2024-CSV-01'))
+
     def test_notifications_endpoint_returns_user_notifications(self):
         Notification.objects.create(
             user=self.student,

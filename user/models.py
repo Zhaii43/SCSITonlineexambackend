@@ -180,6 +180,28 @@ class EnrolledStudent(models.Model):
         ordering = ['department', 'last_name']
 
 
+class SubjectAssignment(models.Model):
+    """Dean-managed mapping between instructors and the subjects they can handle."""
+
+    instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subject_assignments')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_subject_assignments')
+    department = models.CharField(max_length=10, choices=User.DEPARTMENT_CHOICES)
+    subject_name = models.CharField(max_length=120)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'subject_assignments'
+        ordering = ['department', 'subject_name']
+        constraints = [
+            models.UniqueConstraint(fields=['instructor', 'department', 'subject_name'], name='unique_instructor_subject_assignment')
+        ]
+
+    def __str__(self):
+        return f"{self.instructor.username} - {self.subject_name} ({self.department})"
+
+
 class PreRegistrationOTP(models.Model):
     """Stores OTP for email verification BEFORE a user account is created."""
     email = models.EmailField()

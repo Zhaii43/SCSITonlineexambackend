@@ -10,10 +10,12 @@ from .views import (
     pre_verify_email, confirm_pre_verify_email, generate_pre_verify_otp,
     get_enrolled_record, update_student_school_id, resubmit_registration,
     get_department_stats,
+    get_subject_assignments, create_subject_assignment, update_subject_assignment, delete_subject_assignment,
     request_email_change, resend_email_change_otp, verify_email_change, generate_email_change_otp,
     list_enrolled_students, add_enrolled_student, delete_enrolled_student,
     import_enrolled_students_csv, download_enrolled_template, sync_masterlist_accounts,
     set_extra_approval, set_declaration_verification, set_id_photo_verification, get_study_load_signed_url, proxy_study_load,
+    get_subject_year_levels,
     StrictTokenRefreshView,
 )
 
@@ -42,6 +44,10 @@ urlpatterns = [
     path('password-reset/reset/', reset_password, name='reset_password'),
     path('password-reset/validate/', validate_reset_token, name='validate_reset_token'),
     path('department/users/', get_department_users, name='department_users'),
+    path('department/subject-assignments/', get_subject_assignments, name='subject_assignments'),
+    path('department/subject-assignments/create/', create_subject_assignment, name='create_subject_assignment'),
+    path('department/subject-assignments/<int:assignment_id>/', update_subject_assignment, name='update_subject_assignment'),
+    path('department/subject-assignments/<int:assignment_id>/delete/', delete_subject_assignment, name='delete_subject_assignment'),
     path('stats/department/', get_department_stats, name='department_stats'),
     path('students/pending/', get_pending_students, name='pending_students'),
     path('students/rejected/', get_rejected_students, name='rejected_students'),
@@ -65,5 +71,6 @@ urlpatterns = [
     path('enrolled-records/sync-accounts/', sync_masterlist_accounts, name='sync_masterlist_accounts'),
     path('enrolled-records/template/', download_enrolled_template, name='download_enrolled_template'),
     path('enrolled-records/<int:record_id>/delete/', delete_enrolled_student, name='delete_enrolled_student'),
+    path('subject-year-levels/', get_subject_year_levels, name='subject_year_levels'),
     path('debug/email/', test_email_config, name='test_email_config'),
 ]

@@ -9,7 +9,7 @@ from django.db import models
 from .models import Exam, ExamResult, PracticeExamResult, Question, CheatingViolation, ExamTermination, ExamPhoto, ExamTimeExtension, QuestionBank, ExamSession, StudentExamSeed, QuestionIssueReport, QuestionIssueMessage
 from audit.models import AuditLog
 from .utils import safe_delete_field
-from user.models import User
+from user.models import User, SubjectAssignment
 from notifications.models import Notification
 from notifications.email_utils import send_exam_scheduled_email, send_results_published_email, send_exam_rejected_email, send_time_extension_email, send_issue_report_email, send_dean_exam_created_email, send_issue_report_reply_email
 from notifications.push_utils import send_push_notification, send_push_to_users
@@ -40,6 +40,74 @@ def _file_url(request, field):
 
 def _normalize_subject_label(value):
     return ' '.join(str(value or '').strip().lower().split())
+
+
+def _normalize_year_level_token(value):
+    normalized = ''.join(str(value or '').strip().lower().split())
+    mapping = {
+        '1': '1',
+        '1st': '1',
+        '1styr': '1',
+        '1styear': '1',
+        'first': '1',
+        'firstyear': '1',
+        '2': '2',
+        '2nd': '2',
+        '2ndyr': '2',
+        '2ndyear': '2',
+        'second': '2',
+        'secondyear': '2',
+        '3': '3',
+        '3rd': '3',
+        '3rdyr': '3',
+        '3rdyear': '3',
+        'third': '3',
+        'thirdyear': '3',
+        '4': '4',
+        '4th': '4',
+        '4thyr': '4',
+        '4thyear': '4',
+        'fourth': '4',
+        'fourthyear': '4',
+        'all': 'ALL',
+    }
+    return mapping.get(normalized, '')
+
+
+def _normalized_year_level_values(value):
+    raw_value = str(value or '').strip()
+    if not raw_value:
+        return []
+    return [
+        normalized
+        for normalized in (
+            _normalize_year_level_token(token)
+            for token in raw_value.split(',')
+        )
+        if normalized
+    ]
+
+
+def _format_expected_year_level(value):
+    normalized_values = _normalized_year_level_values(value)
+    if normalized_values:
+        return ','.join(normalized_values)
+    return str(value or '').strip()
+
+
+def _active_subject_assignments_for_instructor(user, department=None):
+    assignments = SubjectAssignment.objects.filter(instructor=user, is_active=True)
+    if department:
+        assignments = assignments.filter(department=department)
+    return list(assignments.order_by('subject_name'))
+
+
+def _instructor_subject_allowed(user, department, subject_name):
+    normalized_subject = _normalize_subject_label(subject_name)
+    if not normalized_subject:
+        return False
+    assignments = _active_subject_assignments_for_instructor(user, department)
+    return any(_normalize_subject_label(assignment.subject_name) == normalized_subject for assignment in assignments)
 
 
 def _student_matches_exam_subject(student, exam_subject):
@@ -122,15 +190,17 @@ def _get_staff_exam_or_404(user, exam_id):
 def _can_modify_exam_questions(user, exam):
     if not exam.is_approved:
         return True
-    return user.role == 'dean' and exam.created_by_id == user.id
+    if exam.created_by_id != user.id:
+        return False
+    return not exam.results.exists()
 
 
 def _can_modify_exam_definition(user, exam):
     if not exam.is_approved:
         return True
-    if user.role == 'dean' and exam.created_by_id == user.id:
-        return not exam.questions.exists() and not exam.results.exists()
-    return False
+    if exam.created_by_id != user.id:
+        return False
+    return not exam.results.exists()
 
 
 def _validate_question_total_points(exam, questions_data):
@@ -232,8 +302,8 @@ def _notify_exam_approved(exam, approver, notify_creator=True):
         print(f"Warning: failed to send exam realtime updates: {exc}")
 
 
-def _publish_dean_exam_if_ready(exam, user):
-    if user.role != 'dean' or exam.created_by_id != user.id or not exam.is_approved:
+def _publish_staff_exam_if_ready(exam, user):
+    if user.role not in ('instructor', 'dean') or exam.created_by_id != user.id or not exam.is_approved:
         return
     if exam.questions.count() == 0:
         return
@@ -241,7 +311,7 @@ def _publish_dean_exam_if_ready(exam, user):
         fresh_exam = Exam.objects.get(id=exam.id)
         _notify_exam_approved(fresh_exam, user, notify_creator=False)
     except Exception as exc:
-        print(f"Warning: failed to publish dean exam {exam.id}: {exc}")
+        print(f"Warning: failed to publish staff exam {exam.id}: {exc}")
 
 
 def _require_active_exam_session(request, exam, user):
@@ -657,7 +727,7 @@ def get_exam_detail_for_instructor(request, exam_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_exam(request, exam_id):
-    '''Update exam details (only if not approved)'''
+    '''Update exam details for an exam owner before results exist.'''
     user = request.user
     
     if user.role not in ('instructor', 'dean'):
@@ -670,14 +740,24 @@ def update_exam(request, exam_id):
         exam = _get_staff_exam_or_404(user, exam_id)
         
         if not _can_modify_exam_definition(user, exam):
-            return Response({'error': 'Cannot edit approved exams'}, 
+            return Response({'error': 'Cannot edit exams after students have submitted results'},
                            status=status.HTTP_403_FORBIDDEN)
         
         import json
-        exam.title = request.data.get('title', exam.title)
-        exam.subject = request.data.get('subject', exam.subject)
+        next_title = request.data.get('title', exam.title)
+        next_subject = request.data.get('subject', exam.subject)
+        next_department = exam.department if user.role == 'dean' else request.data.get('department', exam.department)
+
+        if user.role == 'instructor' and not _instructor_subject_allowed(user, next_department, next_subject):
+            return Response(
+                {'error': 'You can only save exams for your dean-assigned active subjects.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        exam.title = next_title
+        exam.subject = next_subject
         if user.role != 'dean':
-            exam.department = request.data.get('department', exam.department)
+            exam.department = next_department
         exam.exam_type = request.data.get('exam_type', exam.exam_type)
         exam.question_type = request.data.get('question_type', exam.question_type)
         
@@ -1053,6 +1133,16 @@ def create_exam(request):
         naive_dt = datetime.fromisoformat(scheduled_date_str.replace('Z', ''))
         requested_department = request.data.get('department')
         department = user.department if user.role == 'dean' else requested_department
+        subject_name = request.data.get('subject')
+
+        if user.role == 'instructor':
+            if not department:
+                return Response({'error': 'Department is required'}, status=status.HTTP_400_BAD_REQUEST)
+            if not _instructor_subject_allowed(user, department, subject_name):
+                return Response(
+                    {'error': 'You can only create exams for your dean-assigned active subjects.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # Check for duplicate exam at same date/hour in same department
         # Round down to the hour to prevent exams within the same hour
@@ -1080,7 +1170,7 @@ def create_exam(request):
         is_practice = exam_type == 'practice'
         department = user.department if user.role == 'dean' else request.data.get('department')
         
-        auto_approve = user.role == 'dean'
+        auto_approve = user.role in ('dean', 'instructor')
         exam_title = request.data.get('title')
         import json
         sample_questions = request.data.get('sample_questions')
@@ -1092,7 +1182,7 @@ def create_exam(request):
         
         exam = Exam.objects.create(
               title=exam_title,
-              subject=request.data.get('subject'),
+              subject=subject_name,
               department=department,
               exam_type=exam_type,
               question_type=request.data.get('question_type', 'multiple_choice'),
@@ -1117,15 +1207,15 @@ def create_exam(request):
           )
 
         send_exam_update(f"exams_user_{user.id}", "created", exam.id)
-        if department:
+        if department and not auto_approve:
             send_exam_update(f"exams_dean_{department}", "pending_created", exam.id)
 
         if auto_approve:
             try:
                 send_dean_exam_created_email(user, exam)
             except Exception as exc:
-                print(f"Warning: failed to send dean exam created email for exam {exam.id}: {exc}")
-            log_activity(user, 'exam_approved', f'Auto-approved own dean exam: {exam_title}', request, {'exam_id': exam.id})
+                print(f"Warning: failed to send exam created email for exam {exam.id}: {exc}")
+            log_activity(user, 'exam_approved', f'Auto-approved own exam: {exam_title}', request, {'exam_id': exam.id})
 
         log_activity(user, 'exam_created', f'Created exam: {exam_title}', request, {'exam_id': exam.id})
         
@@ -1167,7 +1257,7 @@ def save_questions(request, exam_id):
         exam = _get_staff_exam_or_404(user, exam_id)
         
         if not _can_modify_exam_questions(user, exam):
-            return Response({'error': 'Cannot add questions to approved exams'}, 
+            return Response({'error': 'Cannot change exam questions after students have submitted results'},
                            status=status.HTTP_403_FORBIDDEN)
         
         questions_data = request.data.get('questions', [])
@@ -1198,7 +1288,7 @@ def save_questions(request, exam_id):
                 exam.is_draft = False
                 exam.save(update_fields=['is_draft'])
             if exam.is_approved and questions_data:
-                _publish_dean_exam_if_ready(exam, user)
+                _publish_staff_exam_if_ready(exam, user)
 
         return Response({'message': 'Questions saved successfully'}, status=status.HTTP_201_CREATED)
     
@@ -1225,7 +1315,7 @@ def import_questions_csv(request, exam_id):
         exam = _get_staff_exam_or_404(user, exam_id)
         
         if not _can_modify_exam_questions(user, exam):
-            return Response({'error': 'Cannot import questions to approved exams'}, 
+            return Response({'error': 'Cannot import questions after students have submitted results'},
                            status=status.HTTP_403_FORBIDDEN)
         
         if 'file' not in request.FILES:
@@ -1237,21 +1327,57 @@ def import_questions_csv(request, exam_id):
             return Response({'error': 'File must be CSV format'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Read CSV
-        decoded_file = csv_file.read().decode('utf-8')
+        decoded_file = csv_file.read().decode('utf-8-sig')
         io_string = io.StringIO(decoded_file)
         reader = csv.DictReader(io_string)
+        required_columns = {'question', 'type', 'correct_answer', 'points', 'subject', 'year_level'}
+        csv_columns = {str(field or '').strip() for field in (reader.fieldnames or []) if str(field or '').strip()}
+        missing_columns = sorted(required_columns - csv_columns)
+        if missing_columns:
+            return Response(
+                {'error': f'Missing required column(s): {", ".join(missing_columns)}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         
         questions_data = []
         mismatched_rows = []
+        expected_subject = exam.subject.strip()
+        expected_subject_normalized = _normalize_subject_label(expected_subject)
+        expected_year_level = _format_expected_year_level(exam.year_level)
+        expected_year_level_values = _normalized_year_level_values(exam.year_level)
         for row_num, row in enumerate(reader, start=2):
+            row_mismatches = []
+
+            row_subject = (row.get('subject') or '').strip()
+            if _normalize_subject_label(row_subject) != expected_subject_normalized:
+                row_mismatches.append({
+                    'field': 'subject',
+                    'actual': row_subject or '[blank]',
+                    'expected': expected_subject,
+                })
+
+            row_year_level = (row.get('year_level') or '').strip()
+            row_year_level_values = _normalized_year_level_values(row_year_level)
+            if sorted(row_year_level_values) != sorted(expected_year_level_values):
+                row_mismatches.append({
+                    'field': 'year_level',
+                    'actual': row_year_level or '[blank]',
+                    'expected': expected_year_level,
+                })
             # Validate department column if present — must match exam department
             row_dept = (row.get('department') or '').strip().upper()
             if row_dept and row_dept != exam.department.upper():
+                row_mismatches.append({
+                    'field': 'department',
+                    'actual': row_dept,
+                    'expected': exam.department,
+                })
+
+            if row_mismatches:
                 mismatched_rows.append({
                     'row': row_num,
                     'question': (row.get('question') or '')[:60],
-                    'department': row_dept,
-                    'expected': exam.department,
+                    'mismatches': row_mismatches,
                 })
                 continue
 
@@ -1271,9 +1397,8 @@ def import_questions_csv(request, exam_id):
         if mismatched_rows:
             return Response({
                 'error': (
-                    f"{len(mismatched_rows)} row(s) were rejected because their department "
-                    f"does not match this exam's department ({exam.department}). "
-                    f"Make sure every row has department={exam.department} or leave the department column blank."
+                    f'CSV is invalid for this exam. Every row must match subject "{exam.subject}" '
+                    f'and year level "{expected_year_level}".'
                 ),
                 'mismatched_rows': mismatched_rows,
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -1302,8 +1427,8 @@ def import_questions_csv(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
-        if exam.is_approved and questions_data:
-            _publish_dean_exam_if_ready(exam, user)
+            if exam.is_approved and questions_data:
+                _publish_staff_exam_if_ready(exam, user)
         # Mark exam as no longer a draft — questions imported successfully
         if exam.is_draft:
             exam.is_draft = False
@@ -3020,8 +3145,8 @@ def import_from_question_bank(request, exam_id):
                        status=status.HTTP_403_FORBIDDEN)
     try:
         exam = Exam.objects.get(id=exam_id, created_by=user)
-        if exam.is_approved:
-            return Response({'error': 'Cannot add questions to approved exams'},
+        if not _can_modify_exam_questions(user, exam):
+            return Response({'error': 'Cannot change exam questions after students have submitted results'},
                            status=status.HTTP_403_FORBIDDEN)
 
         bank_ids = request.data.get('bank_ids', [])

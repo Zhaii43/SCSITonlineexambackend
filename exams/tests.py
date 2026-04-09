@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 
 from exams.models import Exam, ExamResult, ExamSession, Question, QuestionIssueMessage, QuestionIssueReport
 from notifications.models import Notification
-from user.models import User
+from user.models import SubjectAssignment, User
 
 
 TEST_STORAGES = {
@@ -73,6 +73,13 @@ class ExamModelAndApiTests(TestCase):
             school_id='D-1001',
             contact_number='09170000003',
             is_approved=True,
+        )
+        SubjectAssignment.objects.create(
+            instructor=self.instructor,
+            department='BSIT',
+            subject_name='Programming',
+            assigned_by=self.dean,
+            is_active=True,
         )
 
     def authenticate(self, user):
@@ -237,6 +244,80 @@ class ExamModelAndApiTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertIn('expired', response.data['error'].lower())
 
+    def test_instructor_can_update_auto_approved_exam_before_results_exist(self):
+        exam = self.create_exam(
+            is_approved=True,
+            approved_by=self.instructor,
+            approved_at=timezone.now(),
+        )
+        Question.objects.create(
+            exam=exam,
+            question='Old question',
+            type='multiple_choice',
+            options=['A', 'B'],
+            correct_answer='A',
+            points=10,
+            order=1,
+        )
+        self.authenticate(self.instructor)
+
+        response = self.client.put(
+            f'/api/exams/{exam.id}/update/',
+            {
+                'title': 'Updated Midterm Exam',
+                'subject': 'Programming',
+                'department': 'BSIT',
+                'questions': [
+                    {
+                        'question': 'Updated question',
+                        'type': 'multiple_choice',
+                        'options': ['A', 'B', 'C', 'D'],
+                        'correct_answer': 'B',
+                        'points': 10,
+                    }
+                ],
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        exam.refresh_from_db()
+        self.assertEqual(exam.title, 'Updated Midterm Exam')
+        self.assertEqual(exam.questions.count(), 1)
+        self.assertEqual(exam.questions.first().question, 'Updated question')
+
+    def test_instructor_cannot_update_exam_after_results_exist(self):
+        exam = self.create_exam(
+            is_approved=True,
+            approved_by=self.instructor,
+            approved_at=timezone.now(),
+        )
+        ExamResult.objects.create(
+            exam=exam,
+            student=self.student,
+            score=8,
+            total_points=10,
+            answers={},
+            is_graded=True,
+        )
+        self.authenticate(self.instructor)
+
+        response = self.client.put(
+            f'/api/exams/{exam.id}/update/',
+            {
+                'title': 'Should Stay Locked',
+                'subject': 'Programming',
+                'department': 'BSIT',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.data['error'],
+            'Cannot edit exams after students have submitted results',
+        )
+
     def test_issue_report_creation_and_reply_flow(self):
         exam = self.create_exam(total_points=5)
         question = Question.objects.create(
@@ -324,8 +405,8 @@ class ExamModelAndApiTests(TestCase):
         self.authenticate(self.dean)
 
         csv_content = (
-            "question,type,options,correct_answer,points\n"
-            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5\n"
+            "question,type,options,correct_answer,points,subject,year_level\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5,Programming,1\n"
         )
         upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
 
@@ -411,8 +492,8 @@ class ExamModelAndApiTests(TestCase):
         self.authenticate(self.instructor)
 
         csv_content = (
-            "question,type,options,correct_answer,points\n"
-            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5\n"
+            "question,type,options,correct_answer,points,subject,year_level\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5,Programming,1\n"
         )
         upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
 
@@ -436,8 +517,8 @@ class ExamModelAndApiTests(TestCase):
         self.authenticate(self.instructor)
 
         csv_content = (
-            "question,type,options,correct_answer,points\n"
-            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5\n"
+            "question,type,options,correct_answer,points,subject,year_level\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5,Programming,1\n"
         )
         upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
 
@@ -449,6 +530,46 @@ class ExamModelAndApiTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn('does not match the exam question type', response.data['error'])
+
+    def test_import_questions_csv_rejects_subject_mismatch(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=5)
+        self.authenticate(self.instructor)
+
+        csv_content = (
+            "question,type,options,correct_answer,points,subject,year_level\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5,Mathematics,1\n"
+        )
+        upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
+
+        response = self.client.post(
+            f'/api/exams/{exam.id}/questions/import/',
+            {'file': upload},
+            format='multipart',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('subject', response.data['error'].lower())
+        self.assertEqual(exam.questions.count(), 0)
+
+    def test_import_questions_csv_rejects_year_level_mismatch(self):
+        exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=5, year_level='2')
+        self.authenticate(self.instructor)
+
+        csv_content = (
+            "question,type,options,correct_answer,points,subject,year_level\n"
+            "Capital of France?,multiple_choice,Paris|Rome|Berlin,Paris,5,Programming,1\n"
+        )
+        upload = SimpleUploadedFile("questions.csv", csv_content.encode("utf-8"), content_type="text/csv")
+
+        response = self.client.post(
+            f'/api/exams/{exam.id}/questions/import/',
+            {'file': upload},
+            format='multipart',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('year level', response.data['error'].lower())
+        self.assertEqual(exam.questions.count(), 0)
 
     def test_save_questions_requires_total_points_match(self):
         exam = self.create_exam(is_approved=False, approved_by=None, approved_at=None, total_points=10)

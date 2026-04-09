@@ -18,7 +18,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .serializers import RegisterSerializer
-from .models import User, PasswordResetToken, PreRegistrationOTP, EnrolledStudent, EmailChangeOTP
+from .models import User, PasswordResetToken, PreRegistrationOTP, EnrolledStudent, EmailChangeOTP, SubjectAssignment
 from exams.models import Exam
 from notifications.models import Notification
 from notifications.email_utils import send_student_approval_email, send_password_reset_email, send_bulk_import_email, send_student_rejected_email, send_email_verification_otp, send_pre_registration_otp, send_masterlist_approval_email
@@ -34,6 +34,57 @@ import cloudinary
 from cloudinary import utils as cloudinary_utils, api as cloudinary_api
 
 logger = logging.getLogger(__name__)
+
+
+def _serialize_subject_assignment(assignment):
+    return {
+        'id': assignment.id,
+        'subject_name': assignment.subject_name,
+        'department': assignment.department,
+        'is_active': assignment.is_active,
+        'instructor_id': assignment.instructor_id,
+    }
+
+
+def _subject_assignment_summary(assignments):
+    active = [assignment.subject_name for assignment in assignments if assignment.is_active]
+    if not active:
+        return 'No active subjects'
+    return ', '.join(active[:2]) + (f" +{len(active) - 2} more" if len(active) > 2 else '')
+
+
+def _available_imported_subjects_for_department(department):
+    subjects = {}
+
+    imported_students = User.objects.filter(
+        role='student',
+        department=department,
+        account_source='masterlist_import',
+    ).only('enrolled_subjects')
+    for student in imported_students:
+        for subject in student.enrolled_subjects or []:
+            cleaned = str(subject or '').strip()
+            if cleaned:
+                subjects.setdefault(cleaned.lower(), cleaned)
+
+    enrolled_records = EnrolledStudent.objects.filter(department=department).only('enrolled_subjects')
+    for record in enrolled_records:
+        for subject in record.enrolled_subjects or []:
+            cleaned = str(subject or '').strip()
+            if cleaned:
+                subjects.setdefault(cleaned.lower(), cleaned)
+
+    return sorted(subjects.values(), key=lambda value: value.lower())
+
+
+def _canonical_imported_subject_for_department(department, subject_name):
+    normalized_subject = str(subject_name or '').strip().lower()
+    if not normalized_subject:
+        return None
+    for subject in _available_imported_subjects_for_department(department):
+        if subject.lower() == normalized_subject:
+            return subject
+    return None
 
 
 def _require_internal_email_bridge_secret(request):
@@ -550,6 +601,7 @@ def get_user_profile(request):
     """Get authenticated user profile"""
     user = request.user
     _normalize_cloudinary_field(user, 'study_load')
+    assignments = list(SubjectAssignment.objects.filter(instructor=user).order_by('subject_name')) if user.role == 'instructor' else []
     return Response({
         'id': user.id,
         'username': user.username,
@@ -574,6 +626,7 @@ def get_user_profile(request):
         'is_rejected': user.is_rejected,
         'rejection_reason': user.rejection_reason,
         'force_password_change': user.force_password_change,
+        'assigned_subjects': [_serialize_subject_assignment(assignment) for assignment in assignments],
     })
 
 
@@ -596,6 +649,10 @@ def get_department_users(request):
     ).filter(
         models.Q(department=user.department) | models.Q(department='GENERAL')
     ).distinct()
+    assignment_map = {}
+    for assignment in SubjectAssignment.objects.filter(instructor__in=instructors, department=user.department).order_by('subject_name'):
+        assignment_map.setdefault(assignment.instructor_id, []).append(assignment)
+    available_subjects = _available_imported_subjects_for_department(user.department)
     
     students_list = [{
         'id': s.id,
@@ -621,13 +678,168 @@ def get_department_users(request):
         'school_id': i.school_id,
         'contact_number': i.contact_number,
         'department': i.department,
-        'subject_type': 'General' if i.department == 'GENERAL' else i.department,
+        'subject_type': _subject_assignment_summary(assignment_map.get(i.id, [])),
+        'assigned_subjects': [_serialize_subject_assignment(assignment) for assignment in assignment_map.get(i.id, [])],
     } for i in instructors]
     
     return Response({
         'students': students_list,
-        'instructors': instructors_list
+        'instructors': instructors_list,
+        'available_subjects': available_subjects,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_subject_assignments(request):
+    """List subject assignments for the dean's department or the authenticated instructor."""
+    user = request.user
+
+    if user.role == 'dean':
+        instructor_id = request.query_params.get('instructor_id')
+        assignments = SubjectAssignment.objects.filter(department=user.department).select_related('instructor').order_by('subject_name')
+        if instructor_id:
+            assignments = assignments.filter(instructor_id=instructor_id)
+        return Response({
+            'assignments': [{
+                **_serialize_subject_assignment(assignment),
+                'instructor_name': assignment.instructor.get_full_name() or assignment.instructor.username,
+            } for assignment in assignments]
+        })
+
+    if user.role == 'instructor':
+        assignments = SubjectAssignment.objects.filter(instructor=user).order_by('subject_name')
+        return Response({'assignments': [_serialize_subject_assignment(assignment) for assignment in assignments]})
+
+    return Response({'error': 'Only deans or instructors can access subject assignments'}, status=status.HTTP_403_FORBIDDEN)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_subject_assignment(request):
+    """Dean assigns an active/inactive subject to an instructor."""
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can assign subjects'}, status=status.HTTP_403_FORBIDDEN)
+
+    instructor_id = request.data.get('instructor_id')
+    subject_name = str(request.data.get('subject_name', '')).strip()
+    is_active = bool(request.data.get('is_active', True))
+
+    if not instructor_id or not subject_name:
+        return Response({'error': 'instructor_id and subject_name are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        instructor = User.objects.get(
+            id=instructor_id,
+            role='instructor',
+            is_approved=True,
+        )
+    except User.DoesNotExist:
+        return Response({'error': 'Instructor not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if instructor.department not in (user.department, 'GENERAL'):
+        return Response({'error': 'Instructor is outside your department'}, status=status.HTTP_403_FORBIDDEN)
+
+    canonical_subject_name = _canonical_imported_subject_for_department(user.department, subject_name)
+    if not canonical_subject_name:
+        return Response(
+            {'error': 'Subject must come from the imported masterlist for your department'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    subject_name = canonical_subject_name
+
+    assignment, created = SubjectAssignment.objects.get_or_create(
+        instructor=instructor,
+        department=user.department,
+        subject_name=subject_name,
+        defaults={'is_active': is_active, 'assigned_by': user},
+    )
+
+    if not created:
+        assignment.is_active = is_active
+        assignment.assigned_by = user
+        assignment.save(update_fields=['is_active', 'assigned_by', 'updated_at'])
+
+    log_activity(
+        user,
+        'profile_updated',
+        f'Assigned subject {subject_name} to {instructor.username}',
+        request,
+        {'instructor_id': instructor.id, 'subject_name': subject_name, 'is_active': assignment.is_active},
+    )
+
+    return Response({'assignment': _serialize_subject_assignment(assignment)}, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_subject_assignment(request, assignment_id):
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can update subject assignments'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        assignment = SubjectAssignment.objects.select_related('instructor').get(id=assignment_id, department=user.department)
+    except SubjectAssignment.DoesNotExist:
+        return Response({'error': 'Subject assignment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    new_subject_name = request.data.get('subject_name')
+    if new_subject_name is not None:
+        normalized_subject_name = str(new_subject_name).strip()
+        if normalized_subject_name:
+            canonical_subject_name = _canonical_imported_subject_for_department(user.department, normalized_subject_name)
+            if not canonical_subject_name:
+                return Response(
+                    {'error': 'Subject must come from the imported masterlist for your department'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            assignment.subject_name = canonical_subject_name
+
+    if 'is_active' in request.data:
+        assignment.is_active = bool(request.data.get('is_active'))
+
+    assignment.assigned_by = user
+    try:
+        assignment.save()
+    except Exception as exc:
+        return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    log_activity(
+        user,
+        'profile_updated',
+        f'Updated subject assignment {assignment.subject_name} for {assignment.instructor.username}',
+        request,
+        {'assignment_id': assignment.id, 'subject_name': assignment.subject_name, 'is_active': assignment.is_active},
+    )
+
+    return Response({'assignment': _serialize_subject_assignment(assignment)})
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_subject_assignment(request, assignment_id):
+    user = request.user
+    if user.role != 'dean':
+        return Response({'error': 'Only deans can delete subject assignments'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        assignment = SubjectAssignment.objects.select_related('instructor').get(id=assignment_id, department=user.department)
+    except SubjectAssignment.DoesNotExist:
+        return Response({'error': 'Subject assignment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    subject_name = assignment.subject_name
+    instructor_username = assignment.instructor.username
+    assignment.delete()
+
+    log_activity(
+        user,
+        'profile_updated',
+        f'Deleted subject assignment {subject_name} for {instructor_username}',
+        request,
+        {'subject_name': subject_name, 'instructor_username': instructor_username},
+    )
+    return Response({'message': 'Subject assignment deleted'})
 
 
 
@@ -2495,6 +2707,31 @@ def sync_masterlist_accounts(request):
         'updated_count': updated_count,
         'unchanged_count': unchanged_count,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_subject_year_levels(request):
+    """Return distinct year levels from EnrolledStudent for a given subject + department."""
+    user = request.user
+    if user.role not in ('instructor', 'dean'):
+        return Response({'error': 'Only instructors or deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+
+    subject = request.query_params.get('subject', '').strip()
+    department = request.query_params.get('department', '').strip()
+
+    if not subject or not department:
+        return Response({'error': 'subject and department are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    year_levels = (
+        EnrolledStudent.objects
+        .filter(department=department, enrolled_subjects__contains=subject)
+        .values_list('year_level', flat=True)
+        .distinct()
+        .order_by('year_level')
+    )
+
+    return Response({'year_levels': sorted(set(year_levels))})
 
 
 @api_view(['GET'])

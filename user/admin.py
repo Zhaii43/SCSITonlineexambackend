@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils import timezone
-from .models import User, EnrolledStudent
+from .models import User, EnrolledStudent, SubjectAssignment
 
 @admin.register(EnrolledStudent)
 class EnrolledStudentAdmin(admin.ModelAdmin):
@@ -60,3 +60,11 @@ class CustomUserAdmin(UserAdmin):
         updated = queryset.update(is_active=False, is_approved=False)
         self.message_user(request, f'{updated} user(s) successfully rejected.')
     reject_users.short_description = 'Reject selected users'
+
+
+@admin.register(SubjectAssignment)
+class SubjectAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('subject_name', 'department', 'instructor', 'is_active', 'assigned_by', 'created_at')
+    list_filter = ('department', 'is_active')
+    search_fields = ('subject_name', 'instructor__username', 'instructor__first_name', 'instructor__last_name')
+    ordering = ('department', 'subject_name')

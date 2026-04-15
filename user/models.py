@@ -178,6 +178,71 @@ class EnrolledStudent(models.Model):
 
     class Meta:
         db_table = 'enrolled_students'
+
+
+class MasterlistImportRun(models.Model):
+    STATUS_CHOICES = [
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('completed_with_warnings', 'Completed With Warnings'),
+        ('failed', 'Failed'),
+    ]
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='masterlist_import_runs',
+    )
+    department = models.CharField(max_length=10, blank=True)
+    filename = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='processing')
+    success_count = models.PositiveIntegerField(default=0)
+    error_count = models.PositiveIntegerField(default=0)
+    email_total = models.PositiveIntegerField(default=0)
+    email_sent = models.PositiveIntegerField(default=0)
+    email_failed = models.PositiveIntegerField(default=0)
+    email_pending = models.PositiveIntegerField(default=0)
+    row_errors = models.JSONField(default=list, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'masterlist_import_runs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Import #{self.id} ({self.department}) - {self.status}"
+
+
+class MasterlistImportEmailStatus(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('failed', 'Failed'),
+    ]
+
+    import_run = models.ForeignKey(
+        MasterlistImportRun,
+        on_delete=models.CASCADE,
+        related_name='email_statuses',
+    )
+    school_id = models.CharField(max_length=20, blank=True)
+    email = models.EmailField()
+    first_name = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'masterlist_import_email_statuses'
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.email} - {self.status}"
         ordering = ['department', 'last_name']
 
 

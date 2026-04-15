@@ -20,11 +20,19 @@ from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .serializers import RegisterSerializer
-from .models import User, PasswordResetToken, PreRegistrationOTP, EnrolledStudent, EmailChangeOTP, SubjectAssignment
+from .models import (
+    User,
+    PasswordResetToken,
+    PreRegistrationOTP,
+    EnrolledStudent,
+    EmailChangeOTP,
+    SubjectAssignment,
+    MasterlistImportRun,
+    MasterlistImportEmailStatus,
+)
 from exams.models import Exam
 from notifications.models import Notification
 from notifications.email_utils import send_student_approval_email, send_password_reset_email, send_bulk_import_email, send_student_rejected_email, send_email_verification_otp, send_pre_registration_otp, send_masterlist_approval_email
-from .models import EnrolledStudent
 from notifications.push_utils import send_push_notification
 from notifications.realtime import send_notification
 from .realtime import send_enrollment_records_update, send_student_verification_update
@@ -346,6 +354,33 @@ def _dispatch_masterlist_notifications_async(student_ids, trigger):
         name=f'masterlist-notify-{trigger}',
         daemon=True,
     ).start()
+
+
+def _can_access_import_run(user, import_run):
+    return user.department == 'GENERAL' or import_run.department == user.department
+
+
+def _serialize_import_run(import_run):
+    return {
+        'id': import_run.id,
+        'department': import_run.department,
+        'filename': import_run.filename,
+        'status': import_run.status,
+        'success_count': import_run.success_count,
+        'error_count': import_run.error_count,
+        'email_total': import_run.email_total,
+        'email_sent': import_run.email_sent,
+        'email_failed': import_run.email_failed,
+        'email_pending': import_run.email_pending,
+        'row_errors': import_run.row_errors or [],
+        'notes': import_run.notes or '',
+        'created_at': import_run.created_at,
+        'completed_at': import_run.completed_at,
+        'created_by': (
+            f"{import_run.created_by.first_name} {import_run.created_by.last_name}".strip()
+            if import_run.created_by else None
+        ),
+    }
 
 
 class CustomLoginView(APIView):
@@ -2771,10 +2806,17 @@ def import_enrolled_students_csv(request):
     import csv
     import io
 
+    import_run = None
     try:
         decoded = csv_file.read().decode('utf-8-sig')
         reader = csv.DictReader(io.StringIO(decoded))
         reader.fieldnames = [f.strip() for f in (reader.fieldnames or [])]
+        import_run = MasterlistImportRun.objects.create(
+            created_by=user,
+            department=user.department,
+            filename=csv_file.name or '',
+            status='processing',
+        )
 
         success_count = 0
         error_count = 0
@@ -2885,14 +2927,59 @@ def import_enrolled_students_csv(request):
             )
             _dispatch_masterlist_notifications_async(notify_student_ids, trigger='csv_import')
 
+        if email_candidates:
+            MasterlistImportEmailStatus.objects.bulk_create([
+                MasterlistImportEmailStatus(
+                    import_run=import_run,
+                    school_id=str(candidate.get('school_id') or '').strip(),
+                    email=str(candidate.get('to') or '').strip(),
+                    first_name=str(candidate.get('first_name') or '').strip(),
+                    status='pending',
+                )
+                for candidate in email_candidates
+                if str(candidate.get('to') or '').strip()
+            ])
+
+        import_run.success_count = success_count
+        import_run.error_count = error_count
+        import_run.row_errors = errors
+        import_run.email_total = len(email_candidates)
+        import_run.email_sent = 0
+        import_run.email_failed = 0
+        import_run.email_pending = len(email_candidates)
+        import_run.status = (
+            'processing'
+            if len(email_candidates) > 0
+            else ('completed_with_warnings' if error_count > 0 else 'completed')
+        )
+        if len(email_candidates) == 0:
+            import_run.completed_at = timezone.now()
+        import_run.save(update_fields=[
+            'success_count',
+            'error_count',
+            'row_errors',
+            'email_total',
+            'email_sent',
+            'email_failed',
+            'email_pending',
+            'status',
+            'completed_at',
+        ])
+
         return Response({
             'message': f'{success_count} records imported, {error_count} errors',
             'success_count': success_count,
             'error_count': error_count,
             'errors': errors,
             'email_candidates': email_candidates,
+            'import_run_id': import_run.id if import_run else None,
         })
     except Exception as e:
+        if import_run is not None:
+            import_run.status = 'failed'
+            import_run.notes = str(e)
+            import_run.completed_at = timezone.now()
+            import_run.save(update_fields=['status', 'notes', 'completed_at'])
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -2995,6 +3082,91 @@ def sync_masterlist_accounts(request):
         'updated_count': updated_count,
         'unchanged_count': unchanged_count,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_import_history(request):
+    """List recent masterlist import runs for EDP users."""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access import history'}, status=status.HTTP_403_FORBIDDEN)
+
+    runs = MasterlistImportRun.objects.all()
+    if user.department != 'GENERAL':
+        runs = runs.filter(department=user.department)
+    runs = runs[:30]
+
+    return Response([_serialize_import_run(run) for run in runs])
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_import_email_delivery(request, import_id):
+    """Update per-email delivery status for an import run."""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can update import email status'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        import_run = MasterlistImportRun.objects.get(id=import_id)
+    except MasterlistImportRun.DoesNotExist:
+        return Response({'error': 'Import run not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if not _can_access_import_run(user, import_run):
+        return Response({'error': 'Import run not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    payload = request.data if isinstance(request.data, dict) else {}
+    results = payload.get('results') if isinstance(payload.get('results'), list) else []
+
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        school_id = str(item.get('school_id') or '').strip()
+        email = str(item.get('email') or '').strip()
+        raw_status = str(item.get('status') or '').strip().lower()
+        if raw_status not in ('sent', 'failed'):
+            continue
+
+        query = MasterlistImportEmailStatus.objects.filter(import_run=import_run)
+        if school_id:
+            query = query.filter(school_id=school_id)
+        elif email:
+            query = query.filter(email=email)
+        else:
+            continue
+        email_status = query.first()
+        if email_status is None:
+            continue
+
+        email_status.status = raw_status
+        email_status.error_message = str(item.get('error') or '').strip() if raw_status == 'failed' else ''
+        email_status.save(update_fields=['status', 'error_message', 'updated_at'])
+
+    sent_count = MasterlistImportEmailStatus.objects.filter(import_run=import_run, status='sent').count()
+    failed_count = MasterlistImportEmailStatus.objects.filter(import_run=import_run, status='failed').count()
+    total_count = MasterlistImportEmailStatus.objects.filter(import_run=import_run).count()
+    pending_count = max(total_count - sent_count - failed_count, 0)
+
+    import_run.email_total = total_count
+    import_run.email_sent = sent_count
+    import_run.email_failed = failed_count
+    import_run.email_pending = pending_count
+    if pending_count == 0:
+        import_run.completed_at = timezone.now()
+        import_run.status = 'completed_with_warnings' if (import_run.error_count > 0 or failed_count > 0) else 'completed'
+    else:
+        import_run.status = 'processing'
+    import_run.save(update_fields=[
+        'email_total',
+        'email_sent',
+        'email_failed',
+        'email_pending',
+        'status',
+        'completed_at',
+    ])
+
+    return Response(_serialize_import_run(import_run))
 
 
 @api_view(['GET'])

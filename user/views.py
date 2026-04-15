@@ -8,12 +8,13 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework import serializers
 import secrets
 import logging
+import threading
 from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.db import models
+from django.db import models, close_old_connections
 from django.core.mail import send_mail
 from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
@@ -321,6 +322,36 @@ def _send_masterlist_activation(student):
         link='/login'
     )
     send_notification(notification)
+
+
+def _dispatch_masterlist_notifications_async(student_ids, trigger):
+    """Send masterlist notifications off-request to avoid import timeouts."""
+    unique_ids = list({int(student_id) for student_id in (student_ids or []) if student_id})
+    if not unique_ids:
+        return
+
+    def _worker():
+        close_old_connections()
+        try:
+            for student in User.objects.filter(id__in=unique_ids, role='student'):
+                try:
+                    _send_masterlist_activation(student)
+                except Exception:
+                    logger.exception('Masterlist activation notification failed for student_id=%s trigger=%s', student.id, trigger)
+
+                try:
+                    if not send_masterlist_approval_email(student):
+                        logger.error('Masterlist approval email failed for student_id=%s email=%s trigger=%s', student.id, student.email, trigger)
+                except Exception:
+                    logger.exception('Masterlist approval email exception for student_id=%s trigger=%s', student.id, trigger)
+        finally:
+            close_old_connections()
+
+    threading.Thread(
+        target=_worker,
+        name=f'masterlist-notify-{trigger}',
+        daemon=True,
+    ).start()
 
 
 class CustomLoginView(APIView):
@@ -2755,6 +2786,7 @@ def import_enrolled_students_csv(request):
         error_count = 0
         errors = []
         touched_departments = set()
+        notify_student_ids = set()
 
         for row_num, row in enumerate(reader, start=2):
             row = {k: (v.strip() if v else v) for k, v in row.items()}
@@ -2817,6 +2849,7 @@ def import_enrolled_students_csv(request):
                 )
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save()
+                notify_student_ids.add(_imp_student.id)
             elif _imp_student.role == 'student' and not _imp_student.is_approved:
                 _imp_student.is_approved = True
                 _imp_student.approved_by = user
@@ -2824,6 +2857,7 @@ def import_enrolled_students_csv(request):
                 _imp_student.force_password_change = True
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save(update_fields=['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
+                notify_student_ids.add(_imp_student.id)
             success_count += 1
 
         if success_count > 0:
@@ -2834,6 +2868,7 @@ def import_enrolled_students_csv(request):
                 'imported',
                 {'success_count': success_count},
             )
+            _dispatch_masterlist_notifications_async(notify_student_ids, trigger='csv_import')
 
         return Response({
             'message': f'{success_count} records imported, {error_count} errors',
@@ -2874,6 +2909,7 @@ def sync_masterlist_accounts(request):
     created_count = 0
     updated_count = 0
     unchanged_count = 0
+    notify_student_ids = set()
 
     records = EnrolledStudent.objects.all() if user.department == 'GENERAL' else EnrolledStudent.objects.filter(department=user.department)
     records = records.order_by('last_name', 'first_name')
@@ -2899,6 +2935,7 @@ def sync_masterlist_accounts(request):
             student.set_password(record.school_id)
             student.save()
             created_count += 1
+            notify_student_ids.add(student.id)
             continue
 
         changed_fields = []
@@ -2914,6 +2951,7 @@ def sync_masterlist_accounts(request):
             student.force_password_change = True
             student.set_password(record.school_id)
             changed_fields.extend(['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
+            notify_student_ids.add(student.id)
 
         if changed_fields:
             student.save(update_fields=list(set(changed_fields)))
@@ -2933,6 +2971,7 @@ def sync_masterlist_accounts(request):
         'accounts_synced',
         {'created_count': created_count, 'updated_count': updated_count, 'unchanged_count': unchanged_count},
     )
+    _dispatch_masterlist_notifications_async(notify_student_ids, trigger='sync_accounts')
 
     return Response({
         'message': f'Masterlist sync completed: {created_count} created, {updated_count} updated, {unchanged_count} unchanged',

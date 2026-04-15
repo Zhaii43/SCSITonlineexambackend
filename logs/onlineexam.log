@@ -20420,3 +20420,26 @@ DETAIL:  Key (contact_number)=(09123456789) already exists.
 2026-04-15 19:25:10,941 WARNING django.request Not Found: /ws/notifications/
 2026-04-15 19:25:12,965 WARNING django.request Not Found: /ws/exams/
 2026-04-15 19:25:14,936 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:48:36,931 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 19:48:51,298 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:48:51,326 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:48:51,390 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:18,169 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:18,208 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:21,263 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:24,278 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:27,299 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:30,640 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:34,040 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:37,643 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:41,273 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:44,293 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:47,317 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:53,901 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:53,926 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:49:56,957 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:50:00,658 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:50:04,643 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:50:08,661 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 20:03:28,343 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 20:03:31,058 INFO django.utils.autoreload Watching for file changes with StatReloader

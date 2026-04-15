@@ -2817,11 +2817,6 @@ def import_enrolled_students_csv(request):
                 )
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save()
-                try:
-                    _send_masterlist_activation(_imp_student)
-                    send_masterlist_approval_email(_imp_student)
-                except Exception:
-                    logger.exception('Post-import notification failed for school_id=%s', row['school_id'])
             elif _imp_student.role == 'student' and not _imp_student.is_approved:
                 _imp_student.is_approved = True
                 _imp_student.approved_by = user
@@ -2829,11 +2824,6 @@ def import_enrolled_students_csv(request):
                 _imp_student.force_password_change = True
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save(update_fields=['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
-                try:
-                    _send_masterlist_activation(_imp_student)
-                    send_masterlist_approval_email(_imp_student)
-                except Exception:
-                    logger.exception('Post-import notification failed for school_id=%s', row['school_id'])
             success_count += 1
 
         if success_count > 0:
@@ -2908,11 +2898,6 @@ def sync_masterlist_accounts(request):
             student = User(**defaults, school_id=record.school_id, is_approved=True, approved_by=user, approved_at=_tz_sync.now(), force_password_change=True)
             student.set_password(record.school_id)
             student.save()
-            try:
-                _send_masterlist_activation(student)
-                send_masterlist_approval_email(student)
-            except Exception:
-                logger.exception('Post-sync notification failed for school_id=%s', record.school_id)
             created_count += 1
             continue
 
@@ -2929,11 +2914,6 @@ def sync_masterlist_accounts(request):
             student.force_password_change = True
             student.set_password(record.school_id)
             changed_fields.extend(['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
-            try:
-                _send_masterlist_activation(student)
-                send_masterlist_approval_email(student)
-            except Exception:
-                logger.exception('Post-sync notification failed for school_id=%s', record.school_id)
 
         if changed_fields:
             student.save(update_fields=list(set(changed_fields)))

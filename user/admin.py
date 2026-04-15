@@ -1,15 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils import timezone
-from .models import User, EnrolledStudent, SubjectAssignment
-
-@admin.register(EnrolledStudent)
-class EnrolledStudentAdmin(admin.ModelAdmin):
-    list_display = ('school_id', 'first_name', 'last_name', 'department', 'year_level', 'email', 'contact_number', 'added_at')
-    list_filter = ('department', 'year_level')
-    search_fields = ('school_id', 'first_name', 'last_name', 'email')
-    ordering = ('department', 'last_name')
-
+from .models import User, SubjectAssignment
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'role', 'department', 'school_id', 'is_approved', 'is_staff', 'date_joined')
@@ -33,9 +25,9 @@ class CustomUserAdmin(UserAdmin):
     )
     
     def save_model(self, request, obj, form, change):
-        """Auto-approve instructors and deans created by admin"""
+        """Auto-approve staff roles created by admin"""
         if not change:  # New user
-            if obj.role in ['instructor', 'dean']:
+            if obj.role in ['instructor', 'dean', 'edp']:
                 obj.is_approved = True
                 obj.approved_by = request.user
                 obj.approved_at = timezone.now()

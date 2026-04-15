@@ -36,6 +36,30 @@ from cloudinary import utils as cloudinary_utils, api as cloudinary_api
 logger = logging.getLogger(__name__)
 
 
+def _subject_year_levels_for_department_subject(department, subject_name):
+    normalized_subject = str(subject_name or '').strip().lower()
+    if not department or not normalized_subject:
+        return []
+
+    year_levels = set()
+
+    for record in EnrolledStudent.objects.filter(department=department).only('year_level', 'enrolled_subjects'):
+        subjects = [str(subject).strip() for subject in (record.enrolled_subjects or [])]
+        if any(subject.lower() == normalized_subject for subject in subjects) and record.year_level:
+            year_levels.add(record.year_level)
+
+    for student in User.objects.filter(
+        role='student',
+        department=department,
+        account_source='masterlist_import',
+    ).only('year_level', 'enrolled_subjects'):
+        subjects = [str(subject).strip() for subject in (student.enrolled_subjects or [])]
+        if any(subject.lower() == normalized_subject for subject in subjects) and student.year_level:
+            year_levels.add(student.year_level)
+
+    return sorted(year_levels)
+
+
 def _serialize_subject_assignment(assignment):
     return {
         'id': assignment.id,
@@ -43,6 +67,7 @@ def _serialize_subject_assignment(assignment):
         'department': assignment.department,
         'is_active': assignment.is_active,
         'instructor_id': assignment.instructor_id,
+        'year_levels': _subject_year_levels_for_department_subject(assignment.department, assignment.subject_name),
     }
 
 
@@ -223,6 +248,37 @@ def _parse_subject_list(raw_value):
         seen.add(key)
         subjects.append(cleaned)
     return subjects
+
+
+def _resolve_department_code(raw_value):
+    value = str(raw_value or '').strip()
+    if not value:
+        return None
+
+    normalized = ''.join(ch for ch in value.lower() if ch.isalnum())
+    department_aliases = {
+        'bshm': 'BSHM',
+        'hospitalitymanagement': 'BSHM',
+        'bsit': 'BSIT',
+        'informationtechnology': 'BSIT',
+        'bsee': 'BSEE',
+        'electricalengineering': 'BSEE',
+        'bsba': 'BSBA',
+        'businessadministration': 'BSBA',
+        'bscrim': 'BSCRIM',
+        'criminology': 'BSCRIM',
+        'bsed': 'BSED',
+        'education': 'BSED',
+        'bsce': 'BSCE',
+        'civilengineering': 'BSCE',
+        'bsche': 'BSChE',
+        'chemicalengineering': 'BSChE',
+        'bsme': 'BSME',
+        'mechanicalengineering': 'BSME',
+        'general': 'GENERAL',
+        'generaleducation': 'GENERAL',
+    }
+    return department_aliases.get(normalized)
 
 
 def _create_password_setup_token(user, validity_days=7):
@@ -960,7 +1016,8 @@ def approve_student(request, student_id):
                 student.force_password_change = True
                 student.save(update_fields=['password', 'force_password_change'])
                 _send_masterlist_activation(student)
-                send_masterlist_approval_email(student)
+                if not send_masterlist_approval_email(student):
+                    logger.error("Approval email failed for masterlist student_id=%s email=%s", student.id, student.email)
             else:
                 notification = Notification.objects.create(
                     user=student,
@@ -970,7 +1027,8 @@ def approve_student(request, student_id):
                     link='/login'
                 )
                 send_notification(notification)
-                send_student_approval_email(student)
+                if not send_student_approval_email(student):
+                    logger.error("Approval email failed for student_id=%s email=%s", student.id, student.email)
 
             send_push_notification(
                 student.expo_push_token,
@@ -1165,7 +1223,8 @@ def bulk_approve_students(request):
                         student.force_password_change = True
                         student.save(update_fields=['password', 'force_password_change'])
                         _send_masterlist_activation(student)
-                        send_masterlist_approval_email(student)
+                        if not send_masterlist_approval_email(student):
+                            logger.error("Bulk approval email failed for masterlist student_id=%s email=%s", student.id, student.email)
                         approved_students.append({
                             'id': student.id,
                             'email': student.email,
@@ -1187,7 +1246,8 @@ def bulk_approve_students(request):
                                 link='/login'
                             )
                         )
-                        send_student_approval_email(student)
+                        if not send_student_approval_email(student):
+                            logger.error("Bulk approval email failed for student_id=%s email=%s", student.id, student.email)
                         approved_students.append({
                             'id': student.id,
                             'email': student.email,
@@ -2180,7 +2240,7 @@ def bulk_import_students(request):
     """Bulk import students from a plain CSV file"""
     user = request.user
 
-    role_response = require_role(user, 'dean', message='Only deans can import students')
+    role_response = require_role(user, 'edp', message='Only EDP can import students')
     if role_response:
         return role_response
 
@@ -2218,7 +2278,7 @@ def bulk_import_students(request):
         for row_num, row in enumerate(reader, start=2):
             try:
                 row = {k: (v.strip() if v else v) for k, v in row.items()}
-                required_fields = ['school_id', 'email', 'first_name', 'last_name', 'year_level', 'course', 'subjects']
+                required_fields = ['school_id', 'email', 'first_name', 'last_name', 'year_level', 'course', 'subjects', 'contact_number']
                 missing_fields = [f for f in required_fields if not row.get(f)]
 
                 if missing_fields:
@@ -2254,6 +2314,16 @@ def bulk_import_students(request):
                     error_count += 1
                     continue
 
+                resolved_department = _resolve_department_code(row.get('department')) or _resolve_department_code(row.get('course'))
+                if not resolved_department or resolved_department == 'GENERAL':
+                    errors.append({
+                        'row': row_num,
+                        'error': 'Unable to determine department from CSV. Use a recognized department value in the department column or course field.',
+                        'data': row,
+                    })
+                    error_count += 1
+                    continue
+
                 student = User(
                     username=username,
                     email=row['email'],
@@ -2262,7 +2332,7 @@ def bulk_import_students(request):
                     school_id=row['school_id'],
                     year_level=year_level_map[row['year_level']],
                     contact_number=row.get('contact_number') or None,
-                    department=user.department,
+                    department=resolved_department,
                     role='student',
                     is_approved=False,
                     account_source='masterlist_import',
@@ -2404,8 +2474,8 @@ def download_student_template(request):
     """Download CSV template for bulk student import"""
     user = request.user
     
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can download template'}, 
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can download template'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
     import csv
@@ -2452,13 +2522,13 @@ def update_student_school_id(request, student_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_enrolled_students(request):
-    """List all enrolled students — dean only, filtered by their department"""
+    """List enrolled student records — EDP only"""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
 
     search = request.GET.get('search', '').strip()
-    qs = EnrolledStudent.objects.filter(department=user.department)
+    qs = EnrolledStudent.objects.all() if user.department == 'GENERAL' else EnrolledStudent.objects.filter(department=user.department)
     if search:
         from django.db.models import Q
         qs = qs.filter(
@@ -2485,10 +2555,10 @@ def list_enrolled_students(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_enrolled_student(request):
-    """Manually add a single enrolled student record — dean only"""
+    """Manually add a single enrolled student record — EDP only"""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
 
     school_id = request.data.get('school_id', '').strip()
     first_name = request.data.get('first_name', '').strip()
@@ -2523,15 +2593,20 @@ def add_enrolled_student(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_enrolled_student(request, record_id):
-    """Delete an enrolled student record — dean only"""
+    """Delete an enrolled student record — EDP only"""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
-        record = EnrolledStudent.objects.get(id=record_id, department=user.department)
+        record = EnrolledStudent.objects.get(id=record_id)
+        if user.department != 'GENERAL' and record.department != user.department:
+            return Response({'error': 'Record not found'}, status=status.HTTP_404_NOT_FOUND)
         deleted_id = record.id
+        school_id = record.school_id
         record.delete()
+        # Also delete the corresponding User account if it exists
+        User.objects.filter(school_id=school_id, account_source='masterlist_import').delete()
         send_enrollment_records_update(user.department, 'deleted', {'record_id': deleted_id})
         return Response({'message': 'Record deleted'})
     except EnrolledStudent.DoesNotExist:
@@ -2541,10 +2616,10 @@ def delete_enrolled_student(request, record_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def import_enrolled_students_csv(request):
-    """Bulk import enrolled students from CSV — dean only"""
+    """Bulk import enrolled students from CSV — EDP only"""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
 
     if 'file' not in request.FILES:
         return Response({'error': 'No file uploaded'}, status=status.HTTP_400_BAD_REQUEST)
@@ -2585,11 +2660,14 @@ def import_enrolled_students_csv(request):
                 error_count += 1
                 continue
 
+            resolved_department = _resolve_department_code(row.get('department')) or _resolve_department_code(row.get('course'))
+            final_department = resolved_department if resolved_department and resolved_department != 'GENERAL' else user.department
+
             EnrolledStudent.objects.create(
                 school_id=row['school_id'],
                 first_name=row['first_name'],
                 last_name=row['last_name'],
-                department=user.department,
+                department=final_department,
                 year_level=year_map[row['year_level']],
                 course=row.get('course', ''),
                 enrolled_subjects=_parse_subject_list(row.get('subjects')),
@@ -2620,8 +2698,8 @@ def import_enrolled_students_csv(request):
 def download_enrolled_template(request):
     """Download CSV template for enrolled student import"""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can download this template'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can download this template'}, status=status.HTTP_403_FORBIDDEN)
 
     import csv
     from django.http import HttpResponse
@@ -2638,21 +2716,22 @@ def download_enrolled_template(request):
 def sync_masterlist_accounts(request):
     """Create or update student accounts from the official masterlist."""
     user = request.user
-    if user.role != 'dean':
-        return Response({'error': 'Only deans can sync masterlist accounts'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can sync masterlist accounts'}, status=status.HTTP_403_FORBIDDEN)
 
     created_count = 0
     updated_count = 0
     unchanged_count = 0
 
-    records = EnrolledStudent.objects.filter(department=user.department).order_by('last_name', 'first_name')
+    records = EnrolledStudent.objects.all() if user.department == 'GENERAL' else EnrolledStudent.objects.filter(department=user.department)
+    records = records.order_by('last_name', 'first_name')
     for record in records:
         defaults = {
             'username': record.school_id,
             'email': record.email or '',
             'first_name': record.first_name,
             'last_name': record.last_name,
-            'department': user.department,
+            'department': record.department,
             'year_level': record.year_level,
             'contact_number': record.contact_number,
             'course': record.course,
@@ -2712,7 +2791,7 @@ def sync_masterlist_accounts(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_subject_year_levels(request):
-    """Return distinct year levels from EnrolledStudent for a given subject + department."""
+    """Return distinct year levels for a subject+department from EnrolledStudent and imported User accounts."""
     user = request.user
     if user.role not in ('instructor', 'dean'):
         return Response({'error': 'Only instructors or deans can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
@@ -2723,15 +2802,7 @@ def get_subject_year_levels(request):
     if not subject or not department:
         return Response({'error': 'subject and department are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    year_levels = (
-        EnrolledStudent.objects
-        .filter(department=department, enrolled_subjects__contains=subject)
-        .values_list('year_level', flat=True)
-        .distinct()
-        .order_by('year_level')
-    )
-
-    return Response({'year_levels': sorted(set(year_levels))})
+    return Response({'year_levels': _subject_year_levels_for_department_subject(department, subject)})
 
 
 @api_view(['GET'])

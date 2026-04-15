@@ -1,0 +1,33 @@
+def list_enrolled_students(request):
+    """List enrolled student records — EDP only"""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
+
+    search = request.GET.get('search', '').strip()
+    qs = EnrolledStudent.objects.filter(department=user.department)
+    if search:
+        from django.db.models import Q
+        qs = qs.filter(
+            Q(school_id__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search)
+        )
+
+    return Response([{
+        'id': r.id,
+        'school_id': r.school_id,
+        'first_name': r.first_name,
+        'last_name': r.last_name,
+        'department': r.department,
+        'year_level': r.year_level,
+        'course': r.course,
+        'enrolled_subjects': r.enrolled_subjects or [],
+        'email': r.email,
+        'contact_number': r.contact_number,
+        'added_at': r.added_at.isoformat(),
+    } for r in qs])
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])

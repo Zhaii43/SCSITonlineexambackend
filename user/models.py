@@ -9,6 +9,7 @@ class User(AbstractUser):
         ('student', 'Student'),
         ('instructor', 'Instructor'),
         ('dean', 'Dean'),
+        ('edp', 'EDP'),
     ]
 
     ACCOUNT_SOURCE_CHOICES = [

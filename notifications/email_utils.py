@@ -191,7 +191,7 @@ def send_student_approval_email(user):
     first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
     frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
     approved_at = getattr(user, "approved_at", None)
-    return _post_email_bridge({
+    bridge_result = _post_email_bridge({
         "emailType": "student_approval",
         "to": to,
         "firstName": first_name,
@@ -204,6 +204,28 @@ def send_student_approval_email(user):
         "approvedAt": approved_at.strftime("%B %d, %Y %I:%M %p") if approved_at else "",
         "frontendUrl": frontend_url,
     })
+    if bridge_result is True:
+        return True
+
+    text_body = (
+        f"Hello {first_name},\n\n"
+        "Your student account has been approved.\n\n"
+        f"Username: {getattr(user, 'username', '')}\n"
+        f"Email: {to}\n"
+        f"School ID: {getattr(user, 'school_id', '') or 'N/A'}\n"
+        f"Department: {getattr(user, 'department', '') or 'N/A'}\n"
+        f"Year Level: {getattr(user, 'year_level', '') or 'N/A'}\n\n"
+        "You can now log in and access your dashboard to view available exams.\n\n"
+    )
+    if frontend_url:
+        text_body += f"Login page: {frontend_url}/login"
+    return _send_templated_email(
+        to,
+        "Your Student Account Has Been Approved - SCSIT Online Exam",
+        "emails/student_approval.html",
+        {"user": user, "frontend_url": frontend_url},
+        text_body,
+    )
 
 
 def send_masterlist_approval_email(user):
@@ -213,20 +235,189 @@ def send_masterlist_approval_email(user):
         return False
     first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
     frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
-    return _post_email_bridge({
+    username = getattr(user, "school_id", "") or getattr(user, "username", "")
+    subjects = getattr(user, "enrolled_subjects", None) or []
+    bridge_result = _post_email_bridge({
         "emailType": "masterlist_approval",
         "to": to,
         "firstName": first_name,
-        "username": getattr(user, "school_id", "") or getattr(user, "username", ""),
+        "username": username,
         "schoolId": getattr(user, "school_id", "") or "",
+        "department": getattr(user, "department", "") or "",
+        "yearLevel": getattr(user, "year_level", "") or "",
+        "enrolledSubjects": subjects,
         "frontendUrl": frontend_url,
     })
+    if bridge_result is True:
+        return True
+
+    subjects_text = ("\nEnrolled Subjects:\n" + "\n".join(f"  - {s}" for s in subjects)) if subjects else ""
+    text_body = (
+        f"Hello {first_name},\n\n"
+        "Your student account has been approved.\n\n"
+        f"Username: {username}\n"
+        f"Temporary Password: {getattr(user, 'school_id', '') or username}\n"
+        f"Department: {getattr(user, 'department', '') or 'N/A'}\n"
+        f"Year Level: {getattr(user, 'year_level', '') or 'N/A'}"
+        f"{subjects_text}\n\n"
+        "Use your School ID as both username and temporary password on your first login.\n"
+        "You will be required to change your password immediately after signing in.\n\n"
+    )
+    if frontend_url:
+        text_body += f"Login page: {frontend_url}/login"
+    return _send_templated_email(
+        to,
+        "Your Student Account Has Been Approved - SCSIT Online Exam",
+        "emails/masterlist_approval.html",
+        {"user": user, "frontend_url": frontend_url, "username": username, "subjects": subjects},
+        text_body,
+    )
 
 
-def send_student_rejected_email(user, rejection_reason=None): pass
-def send_exam_scheduled_email(user, exam): pass
-def send_dean_exam_created_email(user, exam): pass
-def send_results_published_email(user, result): pass
+def send_student_rejected_email(user, rejection_reason=None):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    bridge_result = _post_email_bridge({
+        "emailType": "student_rejected",
+        "to": to,
+        "firstName": first_name,
+        "fullName": f"{user.first_name} {user.last_name}".strip(),
+        "schoolId": getattr(user, "school_id", "") or "",
+        "department": getattr(user, "department", "") or "",
+        "yearLevel": getattr(user, "year_level", "") or "",
+        "rejectionReason": rejection_reason or None,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        "Your Application Was Not Approved - SCSIT Online Exam",
+        "emails/student_rejected.html",
+        {"user": user, "rejection_reason": rejection_reason, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\nUnfortunately your student account application was not approved.\n"
+        + (f"Reason: {rejection_reason}\n" if rejection_reason else "")
+        + "\nPlease contact your department for assistance.",
+    )
+
+
+def send_exam_scheduled_email(user, exam):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    full_name = f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip() or first_name
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    exam_data = {
+        "title": exam.title,
+        "subject": exam.subject,
+        "department": exam.department,
+        "examType": exam.exam_type,
+        "scheduledDate": exam.scheduled_date.strftime("%B %d, %Y %I:%M %p"),
+        "expirationTime": exam.expiration_time.strftime("%B %d, %Y %I:%M %p") if exam.expiration_time else None,
+        "durationMinutes": exam.duration_minutes,
+        "totalPoints": exam.total_points,
+        "passingScore": exam.passing_score,
+        "instructions": exam.instructions or "",
+        "yearLevel": exam.year_level,
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "exam_scheduled",
+        "to": to,
+        "firstName": first_name,
+        "fullName": full_name,
+        "exam": exam_data,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'New Exam Scheduled: {exam.title} - SCSIT Online Exam',
+        "emails/exam_scheduled.html",
+        {"user": user, "exam": exam, "frontend_url": frontend_url},
+        (
+            f"Hello {first_name},\n\n"
+            f'A new {exam.exam_type} exam "{exam.title}" has been scheduled.\n'
+            f"Subject: {exam.subject}\n"
+            f"Date: {exam.scheduled_date.strftime('%B %d, %Y %I:%M %p')}\n"
+            f"Duration: {exam.duration_minutes} minutes\n\n"
+            "Log in to your dashboard to view the exam details."
+        ),
+    )
+
+
+def send_dean_exam_created_email(user, exam):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    full_name = f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip() or getattr(user, "username", "")
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    exam_data = {
+        "title": exam.title,
+        "subject": exam.subject,
+        "department": exam.department,
+        "examType": exam.exam_type,
+        "scheduledDate": exam.scheduled_date.strftime("%B %d, %Y %I:%M %p"),
+        "yearLevel": exam.year_level,
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "dean_exam_created",
+        "to": to,
+        "fullName": full_name,
+        "exam": exam_data,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'Exam Created: {exam.title} - SCSIT Online Exam',
+        "emails/exam_scheduled.html",
+        {"user": user, "exam": exam, "frontend_url": frontend_url},
+        f"Hello {full_name},\n\nYour exam \"{exam.title}\" has been created and published.\n"
+        f"Subject: {exam.subject}\nDate: {exam.scheduled_date.strftime('%B %d, %Y %I:%M %p')}",
+    )
+
+
+def send_results_published_email(user, result):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    exam = result.exam
+    result_data = {
+        "examTitle": exam.title,
+        "subject": exam.subject,
+        "score": result.score,
+        "totalPoints": result.total_points,
+        "percentage": round(result.percentage, 1),
+        "grade": result.grade,
+        "remarks": result.remarks,
+        "passed": result.remarks == "Passed",
+        "submittedAt": result.submitted_at.strftime("%B %d, %Y %I:%M %p"),
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "results_published",
+        "to": to,
+        "firstName": first_name,
+        "result": result_data,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'Your Result for "{exam.title}" - SCSIT Online Exam',
+        "emails/results_published.html",
+        {"user": user, "result": result, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\nYour result for \"{exam.title}\" is now available.\n"
+        f"Score: {result.score}/{result.total_points} | Grade: {result.grade} | {result.remarks}",
+    )
 def send_bulk_import_email(user, set_password_token):
     to = getattr(user, "email", "")
     first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
@@ -262,8 +453,129 @@ def send_bulk_exam_notification(users, exam): return 0
 def send_announcement_email(user, announcement, created_by): pass
 def _build_announcement_message(user, announcement, created_by): return None
 def send_bulk_emails(messages): return 0
-def send_time_extension_email(user, exam, extra_minutes, reason): pass
-def send_exam_rejected_email(user, exam_title, dean_name): pass
-def send_issue_report_email(user, report, actor_name): pass
-def send_issue_report_reply_email(user, report, actor_name, message_text): pass
+def send_time_extension_email(user, exam, extra_minutes, reason):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    exam_data = {
+        "title": exam.title,
+        "subject": exam.subject,
+        "scheduledDate": exam.scheduled_date.strftime("%B %d, %Y %I:%M %p"),
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "time_extension",
+        "to": to,
+        "firstName": first_name,
+        "exam": exam_data,
+        "extraMinutes": extra_minutes,
+        "reason": reason or "No reason provided.",
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'Exam Time Extended: {exam.title} - SCSIT Online Exam',
+        "emails/time_extension.html",
+        {"user": user, "exam": exam, "extra_minutes": extra_minutes, "reason": reason, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\nYour time for \"{exam.title}\" has been extended by {extra_minutes} minute(s).\n"
+        f"Reason: {reason or 'No reason provided.'}",
+    )
+
+
+def send_exam_rejected_email(user, exam_title, dean_name):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    bridge_result = _post_email_bridge({
+        "emailType": "exam_rejected",
+        "to": to,
+        "firstName": first_name,
+        "examTitle": exam_title,
+        "deanName": dean_name,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'Exam Rejected: {exam_title} - SCSIT Online Exam',
+        "emails/exam_rejected.html",
+        {"user": user, "exam_title": exam_title, "dean_name": dean_name, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\nYour exam \"{exam_title}\" was rejected by {dean_name}.\n"
+        "Please review and resubmit your exam for approval.",
+    )
+
+
+def send_issue_report_email(user, report, actor_name):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    report_data = {
+        "id": report.id,
+        "examTitle": report.exam.title,
+        "questionOrder": report.question.order,
+        "issueType": report.get_issue_type_display(),
+        "description": report.description,
+        "reportedAnswer": report.reported_answer or None,
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "issue_report",
+        "to": to,
+        "firstName": first_name,
+        "report": report_data,
+        "actorName": actor_name,
+        "role": getattr(user, "role", ""),
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'New Issue Report: {report.exam.title} - SCSIT Online Exam',
+        "emails/exam_scheduled.html",
+        {"user": user, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\n{actor_name} reported an issue in \"{report.exam.title}\" "
+        f"(Question {report.question.order}).\nType: {report.get_issue_type_display()}\n"
+        f"Description: {report.description}",
+    )
+
+
+def send_issue_report_reply_email(user, report, actor_name, message_text):
+    to = getattr(user, "email", "")
+    if not to:
+        return False
+    first_name = (getattr(user, "first_name", "") or "").strip() or getattr(user, "username", "") or "there"
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    report_data = {
+        "id": report.id,
+        "examTitle": report.exam.title,
+        "questionOrder": report.question.order,
+        "issueType": report.get_issue_type_display(),
+    }
+    bridge_result = _post_email_bridge({
+        "emailType": "issue_report_reply",
+        "to": to,
+        "firstName": first_name,
+        "report": report_data,
+        "actorName": actor_name,
+        "messageText": message_text,
+        "frontendUrl": frontend_url,
+    })
+    if bridge_result is True:
+        return True
+    return _send_templated_email(
+        to,
+        f'Issue Report Update: {report.exam.title} - SCSIT Online Exam',
+        "emails/exam_scheduled.html",
+        {"user": user, "frontend_url": frontend_url},
+        f"Hello {first_name},\n\n{actor_name} replied to your issue report for \"{report.exam.title}\".\n"
+        f"Message: {message_text}",
+    )
 def _send_email_sync(to, subject, html, text=""): return False

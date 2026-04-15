@@ -1144,21 +1144,24 @@ def create_exam(request):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
+        exam_type = request.data.get('exam_type')
+
         # Check for duplicate exam at same date/hour in same department
         # Round down to the hour to prevent exams within the same hour
         scheduled_hour = naive_dt.replace(minute=0, second=0, microsecond=0)
         next_hour = scheduled_hour + timedelta(hours=1)
         
-        existing_exam = Exam.objects.filter(
-            department=department,
-            scheduled_date__gte=scheduled_hour,
-            scheduled_date__lt=next_hour
-        ).exists()
-        
-        if existing_exam:
-            return Response({
-                'error': 'Failed to create exam: A duplicate exam already exists for this department at the selected date and time. Please choose a different schedule.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        if exam_type not in ('quiz', 'practice'):
+            existing_exam = Exam.objects.filter(
+                department=department,
+                scheduled_date__gte=scheduled_hour,
+                scheduled_date__lt=next_hour
+            ).exclude(exam_type__in=['quiz', 'practice']).exists()
+
+            if existing_exam:
+                return Response({
+                    'error': 'Failed to create exam: A duplicate exam already exists for this department at the selected date and time. Please choose a different schedule.'
+                }, status=status.HTTP_400_BAD_REQUEST)
         
         # Parse expiration_time if provided
         expiration_time = None
@@ -1166,9 +1169,7 @@ def create_exam(request):
             expiration_time_str = request.data.get('expiration_time')
             expiration_time = datetime.fromisoformat(expiration_time_str.replace('Z', ''))
         
-        exam_type = request.data.get('exam_type')
         is_practice = exam_type == 'practice'
-        department = user.department if user.role == 'dean' else request.data.get('department')
         
         auto_approve = user.role in ('dean', 'instructor')
         exam_title = request.data.get('title')
@@ -1427,12 +1428,12 @@ def import_questions_csv(request, exam_id):
                 points=q_data['points'],
                 order=idx + 1,
             )
-            if exam.is_approved and questions_data:
-                _publish_staff_exam_if_ready(exam, user)
         # Mark exam as no longer a draft — questions imported successfully
         if exam.is_draft:
             exam.is_draft = False
             exam.save(update_fields=['is_draft'])
+        if exam.is_approved:
+            _publish_staff_exam_if_ready(exam, user)
         
         return Response({
             'message': f'{len(questions_data)} questions imported successfully',
@@ -1579,8 +1580,8 @@ def get_exam_for_taking(request, exam_id):
                 active_session.last_heartbeat = tz.now()
                 active_session.save(update_fields=['last_heartbeat'])
             else:
-                # Stale if no heartbeat for 35 seconds (heartbeat interval is 30s)
-                stale_threshold = tz.now() - timedelta(seconds=35)
+                # Stale if no heartbeat for 90 seconds (3 missed heartbeats at 30s interval)
+                stale_threshold = tz.now() - timedelta(seconds=90)
                 if active_session.last_heartbeat > stale_threshold:
                     return Response({
                         'error': 'You already have an active exam session on another device. Please finish or close that session first.'
@@ -3263,7 +3264,7 @@ def start_exam_session(request, exam_id):
         existing = ExamSession.objects.filter(exam=exam, student=user, is_active=True).first()
         if existing:
             supplied_session_token = _extract_exam_session_token(request)
-            stale_threshold = tz.now() - timedelta(seconds=35)
+            stale_threshold = tz.now() - timedelta(seconds=90)
             if supplied_session_token and supplied_session_token == existing.session_token:
                 existing.last_heartbeat = tz.now()
                 existing.save(update_fields=['last_heartbeat'])

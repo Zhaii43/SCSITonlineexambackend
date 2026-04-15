@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from audit.models import AuditLog
 from notifications.email_utils import send_password_reset_email, send_pre_registration_otp
 from notifications.models import Announcement, Notification
-from user.models import PasswordResetToken, User
+from user.models import EnrolledStudent, PasswordResetToken, SubjectAssignment, User
 
 
 TEST_STORAGES = {
@@ -319,6 +319,89 @@ class UserAndNotificationApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['unread_count'], 1)
         self.assertEqual(len(response.data['notifications']), 1)
+
+    def test_profile_includes_year_levels_for_assigned_subjects(self):
+        SubjectAssignment.objects.create(
+            instructor=self.instructor,
+            department='BSIT',
+            subject_name='Programming 1',
+            assigned_by=self.dean,
+            is_active=True,
+        )
+        User.objects.create_user(
+            username='masterliststudent',
+            email='masterliststudent@example.com',
+            password='StrongPass123!',
+            role='student',
+            department='BSIT',
+            year_level='1',
+            school_id='S-2050',
+            contact_number='09170000050',
+            account_source='masterlist_import',
+            enrolled_subjects=['Programming 1', 'Data Structures'],
+        )
+        EnrolledStudent.objects.create(
+            school_id='S-2051',
+            first_name='Enrolled',
+            last_name='Record',
+            department='BSIT',
+            year_level='3',
+            course='BSIT',
+            enrolled_subjects=['Programming 1'],
+            email='record@example.com',
+            contact_number='09170000051',
+        )
+
+        self.client.force_authenticate(user=self.instructor)
+        response = self.client.get('/api/profile/')
+
+        self.assertEqual(response.status_code, 200)
+        programming_assignment = next(
+            item for item in response.data['assigned_subjects'] if item['subject_name'] == 'Programming 1'
+        )
+        self.assertEqual(programming_assignment['year_levels'], ['1', '3'])
+
+    def test_subject_year_levels_endpoint_uses_masterlist_and_enrolled_records(self):
+        User.objects.create_user(
+            username='masterliststudent2',
+            email='masterliststudent2@example.com',
+            password='StrongPass123!',
+            role='student',
+            department='BSIT',
+            year_level='2',
+            school_id='S-2052',
+            contact_number='09170000052',
+            account_source='masterlist_import',
+            enrolled_subjects=['Programming 1'],
+        )
+        EnrolledStudent.objects.create(
+            school_id='S-2053',
+            first_name='Another',
+            last_name='Student',
+            department='BSIT',
+            year_level='4',
+            course='BSIT',
+            enrolled_subjects=['Programming 1', 'Networks'],
+            email='record2@example.com',
+            contact_number='09170000053',
+        )
+        EnrolledStudent.objects.create(
+            school_id='S-2054',
+            first_name='Other',
+            last_name='Department',
+            department='BSBA',
+            year_level='1',
+            course='BSBA',
+            enrolled_subjects=['Programming 1'],
+            email='record3@example.com',
+            contact_number='09170000054',
+        )
+
+        self.client.force_authenticate(user=self.instructor)
+        response = self.client.get('/api/subject-year-levels/', {'subject': 'Programming 1', 'department': 'BSIT'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['year_levels'], ['2', '4'])
 
     def test_announcement_creation_notifies_target_students(self):
         self.student.is_approved = True

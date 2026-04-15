@@ -75,3 +75,22 @@ class SubjectAssignmentAdmin(admin.ModelAdmin):
     list_filter = ('department', 'is_active')
     search_fields = ('subject_name', 'instructor__username', 'instructor__first_name', 'instructor__last_name')
     ordering = ('department', 'subject_name')
+
+
+@admin.register(EnrolledStudent)
+class EnrolledStudentAdmin(admin.ModelAdmin):
+    list_display = ('school_id', 'first_name', 'last_name', 'department', 'year_level', 'course', 'email', 'added_at')
+    list_filter = ('department', 'year_level', 'course')
+    search_fields = ('school_id', 'first_name', 'last_name', 'email')
+    ordering = ('department', 'last_name', 'first_name')
+    readonly_fields = ('added_at',)
+
+    def delete_model(self, request, obj):
+        User.objects.filter(school_id=obj.school_id, account_source='masterlist_import').delete()
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        school_ids = list(queryset.exclude(school_id__isnull=True).values_list('school_id', flat=True))
+        if school_ids:
+            User.objects.filter(school_id__in=school_ids, account_source='masterlist_import').delete()
+        super().delete_queryset(request, queryset)

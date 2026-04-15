@@ -19813,3 +19813,610 @@ DETAIL:  Key (contact_number)=(09123456789) already exists.
 2026-04-15 18:09:57,279 WARNING django.request Not Found: /ws/notifications/
 2026-04-15 18:09:57,315 WARNING django.request Not Found: /ws/notifications/
 2026-04-15 18:09:57,343 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:10:38,162 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:10:41,079 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:10:41,129 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:10:50,926 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:10:54,143 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:10:57,166 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:00,650 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:04,628 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:08,642 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:12,646 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:16,643 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:20,652 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:24,645 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:28,656 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:32,658 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:36,636 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:40,659 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:44,656 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:47,692 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:48,282 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:51,665 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:55,636 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:11:59,651 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:00,182 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:00,204 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:02,701 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:03,301 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:05,801 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:06,337 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:08,865 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:09,370 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:11,895 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:12,413 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:15,046 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:15,453 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:18,086 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:18,487 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:21,139 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:21,585 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:24,177 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:24,637 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:27,213 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:27,679 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:30,290 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:30,745 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:33,333 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:33,801 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:36,372 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:36,945 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:39,435 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:40,000 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:42,523 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:43,115 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:45,596 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:46,176 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:48,663 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:49,273 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:51,903 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:52,398 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:55,128 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:55,550 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:12:58,207 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:12:58,724 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:01,314 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:01,902 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:04,612 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:05,028 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:07,914 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:08,348 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:11,046 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:11,547 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:14,695 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:15,032 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:18,293 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:18,396 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:21,638 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:22,366 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:25,202 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:13:26,593 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:53,609 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:13:59,951 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:07,422 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:13,874 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:22,315 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:26,832 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:33,353 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:37,872 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:43,978 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:48,128 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:55,755 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:14:57,128 ERROR django.request Internal Server Error: /api/enrolled-records/add/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "user_user_contact_number_5c92e4d4_uniq"
+DETAIL:  Key (contact_number)=(09123456789) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py", line 2613, in add_enrolled_student
+    student.save()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\models.py", line 93, in save
+    super().save(*args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\base_user.py", line 62, in save
+    super().save(**kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 966, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 1167, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 1218, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1918, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1925, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "user_user_contact_number_5c92e4d4_uniq"
+DETAIL:  Key (contact_number)=(09123456789) already exists.
+
+2026-04-15 18:15:03,089 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:08,321 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:15,844 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:21,829 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:29,554 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:33,934 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:37,648 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:41,660 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:45,659 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:48,695 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:51,727 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:54,783 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:15:57,857 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:01,553 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\admin.py changed, reloading.
+2026-04-15 18:16:04,124 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:16:06,858 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:11,671 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:15,758 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:19,699 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:23,718 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:27,710 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:31,696 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:35,734 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:39,957 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:43,782 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:47,765 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:52,261 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:55,793 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:16:59,858 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:04,288 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:08,558 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:11,951 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:17,891 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:22,325 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:27,220 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:31,923 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:38,604 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:45,270 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:51,337 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:17:58,264 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:06,111 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:14,536 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:22,413 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:26,800 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:27,369 ERROR django.request Internal Server Error: /api/enrolled-records/add/
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "user_user_contact_number_5c92e4d4_uniq"
+DETAIL:  Key (contact_number)=(09123456789) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py", line 2613, in add_enrolled_student
+    student.save()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\models.py", line 93, in save
+    super().save(*args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\base_user.py", line 62, in save
+    super().save(**kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 966, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 1167, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\base.py", line 1218, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1918, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1925, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\hanz\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "user_user_contact_number_5c92e4d4_uniq"
+DETAIL:  Key (contact_number)=(09123456789) already exists.
+
+2026-04-15 18:18:33,851 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:40,041 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:46,744 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:51,666 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:18:57,398 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:04,777 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:10,637 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:17,173 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:24,905 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:32,423 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:40,589 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:45,743 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:51,952 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:19:59,374 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:07,281 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:13,221 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:21,315 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:28,068 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:35,284 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:40,978 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:47,107 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:20:54,000 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:00,637 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:08,686 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:14,983 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:21,821 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:29,414 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:34,982 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:38,632 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:42,645 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:46,638 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:50,645 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:54,637 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:21:58,660 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:02,650 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:06,660 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:10,653 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:14,677 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:18,666 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:22,796 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:26,953 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:30,944 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:35,651 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:40,837 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:48,232 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:22:55,021 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:01,739 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:07,827 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:12,880 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:18,646 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:23,852 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:25,714 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:23:27,881 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:23:30,798 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:38,572 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:41,646 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:45,635 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:49,637 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:53,646 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:57,639 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:23:58,460 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:24:01,087 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:24:03,228 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:06,652 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:10,655 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:14,657 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:18,662 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:22,286 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:25,804 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:29,887 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:33,962 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:38,621 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:42,339 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:47,842 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:24:53,538 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:00,773 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:04,796 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:05,287 WARNING django.request Bad Request: /api/enrolled-records/add/
+2026-04-15 18:25:11,687 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:17,619 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:22,780 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:28,651 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:45,034 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:25:48,066 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:25:51,640 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:25:55,651 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:25:59,382 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:59,423 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:25:59,639 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:26:02,644 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:26:03,664 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:26:06,797 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:26:06,835 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:26:10,143 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:26:10,177 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:26:13,355 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:26:13,388 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:30,472 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:33,654 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:37,648 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:41,215 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:44,669 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:45,931 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:28:45,980 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:28:48,698 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:49,353 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:28:52,663 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:28:52,693 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:28:56,677 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:28:56,707 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:00,656 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:00,688 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:04,705 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:04,739 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:08,689 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:08,720 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:12,749 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:12,859 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:16,736 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:17,283 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:20,883 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:20,948 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:25,068 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:25,720 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:28,658 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:29,621 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:29:49,425 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:52,722 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:29:56,717 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:00,788 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:04,763 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:08,786 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:12,793 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:16,837 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:20,815 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:24,806 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:29,055 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:33,201 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:37,340 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:41,457 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:45,004 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:49,333 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:54,215 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:58,598 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:30:58,798 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:31:01,971 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:31:04,363 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:11,801 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:15,753 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:31:18,600 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:31:24,499 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:30,950 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:36,278 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:41,888 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:45,901 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:50,059 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:54,215 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:31:58,086 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:02,347 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:06,270 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:13,953 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:20,861 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:27,234 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:49,450 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:32:51,806 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:52,801 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:32:55,303 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:32:56,026 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:32:58,846 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:33:00,556 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:33:03,809 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:33:05,835 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:33:08,573 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:33:11,444 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:33:12,371 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:33:16,824 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:33:17,813 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 18:33:22,147 WARNING django.request Not Found: /ws/exams/
+2026-04-15 18:41:06,110 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:41:09,767 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:41:23,052 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:41:25,728 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:43:32,470 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:43:34,967 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 18:44:15,926 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 18:44:17,992 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 19:13:06,270 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 19:14:05,773 INFO django.utils.autoreload C:\Users\hanz\OneDrive\Documents\onlineexam\onlineexam\backend\user\views.py changed, reloading.
+2026-04-15 19:14:07,693 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 19:15:45,158 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-15 19:21:45,338 WARNING django.request Bad Request: /api/login/
+2026-04-15 19:22:05,330 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:05,355 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:08,415 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:11,453 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:14,482 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:17,511 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:20,528 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:23,556 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:26,575 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:29,642 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:33,636 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:36,657 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:39,679 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:42,701 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:45,718 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:48,750 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:51,769 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:54,806 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:22:57,884 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:16,166 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:19,183 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:22,023 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:22,043 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:22,212 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:25,070 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:25,242 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:28,109 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:28,408 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:31,140 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:31,488 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:34,183 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:34,549 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:37,239 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:37,588 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:40,274 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:40,627 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:43,322 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:43,690 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:46,380 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:46,745 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:49,523 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:49,807 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:52,590 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:52,892 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:55,771 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:56,055 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:23:58,932 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:23:59,144 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:02,194 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:02,508 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:05,319 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:05,701 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:08,531 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:09,291 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:11,715 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:12,879 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:15,990 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:17,877 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:19,303 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:22,900 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:26,008 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:26,735 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:29,143 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:29,840 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:32,772 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:33,100 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:24:53,481 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:24:56,727 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:25:00,679 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:25:02,711 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:25:04,931 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:25:06,846 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:25:08,822 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:25:10,941 WARNING django.request Not Found: /ws/notifications/
+2026-04-15 19:25:12,965 WARNING django.request Not Found: /ws/exams/
+2026-04-15 19:25:14,936 WARNING django.request Not Found: /ws/notifications/

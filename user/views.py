@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.db import models
 from django.core.mail import send_mail
+from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .serializers import RegisterSerializer
@@ -36,28 +37,65 @@ from cloudinary import utils as cloudinary_utils, api as cloudinary_api
 logger = logging.getLogger(__name__)
 
 
-def _subject_year_levels_for_department_subject(department, subject_name):
-    normalized_subject = str(subject_name or '').strip().lower()
-    if not department or not normalized_subject:
-        return []
+def _department_subject_metadata_cache_key(department):
+    return f"department_subject_metadata:{department}"
 
-    year_levels = set()
+
+def _build_department_subject_metadata(department):
+    canonical_subjects = {}
+    year_levels_by_subject = {}
+
+    def add_subject(raw_subject, raw_year_level):
+        cleaned_subject = str(raw_subject or '').strip()
+        if not cleaned_subject:
+            return
+        normalized_subject = cleaned_subject.lower()
+        canonical_subjects.setdefault(normalized_subject, cleaned_subject)
+        if raw_year_level:
+            year_levels_by_subject.setdefault(normalized_subject, set()).add(str(raw_year_level))
 
     for record in EnrolledStudent.objects.filter(department=department).only('year_level', 'enrolled_subjects'):
-        subjects = [str(subject).strip() for subject in (record.enrolled_subjects or [])]
-        if any(subject.lower() == normalized_subject for subject in subjects) and record.year_level:
-            year_levels.add(record.year_level)
+        for subject in record.enrolled_subjects or []:
+            add_subject(subject, record.year_level)
 
     for student in User.objects.filter(
         role='student',
         department=department,
         account_source='masterlist_import',
     ).only('year_level', 'enrolled_subjects'):
-        subjects = [str(subject).strip() for subject in (student.enrolled_subjects or [])]
-        if any(subject.lower() == normalized_subject for subject in subjects) and student.year_level:
-            year_levels.add(student.year_level)
+        for subject in student.enrolled_subjects or []:
+            add_subject(subject, student.year_level)
 
-    return sorted(year_levels)
+    available_subjects = sorted(canonical_subjects.values(), key=lambda value: value.lower())
+    normalized_year_levels = {key: sorted(values) for key, values in year_levels_by_subject.items()}
+    return {
+        'available_subjects': available_subjects,
+        'year_levels_by_subject': normalized_year_levels,
+    }
+
+
+def _get_department_subject_metadata(department):
+    cache_key = _department_subject_metadata_cache_key(department)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    metadata = _build_department_subject_metadata(department)
+    cache.set(cache_key, metadata, timeout=30)
+    return metadata
+
+
+def _invalidate_department_subject_metadata(department):
+    if not department:
+        return
+    cache.delete(_department_subject_metadata_cache_key(department))
+
+
+def _subject_year_levels_for_department_subject(department, subject_name):
+    normalized_subject = str(subject_name or '').strip().lower()
+    if not department or not normalized_subject:
+        return []
+    metadata = _get_department_subject_metadata(department)
+    return metadata['year_levels_by_subject'].get(normalized_subject, [])
 
 
 def _serialize_subject_assignment(assignment):
@@ -79,27 +117,8 @@ def _subject_assignment_summary(assignments):
 
 
 def _available_imported_subjects_for_department(department):
-    subjects = {}
-
-    imported_students = User.objects.filter(
-        role='student',
-        department=department,
-        account_source='masterlist_import',
-    ).only('enrolled_subjects')
-    for student in imported_students:
-        for subject in student.enrolled_subjects or []:
-            cleaned = str(subject or '').strip()
-            if cleaned:
-                subjects.setdefault(cleaned.lower(), cleaned)
-
-    enrolled_records = EnrolledStudent.objects.filter(department=department).only('enrolled_subjects')
-    for record in enrolled_records:
-        for subject in record.enrolled_subjects or []:
-            cleaned = str(subject or '').strip()
-            if cleaned:
-                subjects.setdefault(cleaned.lower(), cleaned)
-
-    return sorted(subjects.values(), key=lambda value: value.lower())
+    metadata = _get_department_subject_metadata(department)
+    return metadata['available_subjects']
 
 
 def _canonical_imported_subject_for_department(department, subject_name):
@@ -2555,7 +2574,9 @@ def list_enrolled_students(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_enrolled_student(request):
-    """Manually add a single enrolled student record — EDP only"""
+    """Manually add a single enrolled student record - EDP only"""
+    from django.db import IntegrityError, transaction
+
     user = request.user
     if user.role != 'edp':
         return Response({'error': 'Only EDP can access this endpoint'}, status=status.HTTP_403_FORBIDDEN)
@@ -2577,47 +2598,107 @@ def add_enrolled_student(request):
         return Response({'error': f'Invalid year level "{year_level}". Use 1, 2, 3, 4 or 1st, 2nd, 3rd, 4th.'}, status=status.HTTP_400_BAD_REQUEST)
     year_level = year_map[year_level]
 
-    if EnrolledStudent.objects.filter(school_id=school_id, department=user.department).exists():
+    if EnrolledStudent.objects.filter(school_id=school_id).exists():
         return Response({'error': f'School ID "{school_id}" already exists in enrollment records'}, status=status.HTTP_400_BAD_REQUEST)
 
-    record = EnrolledStudent.objects.create(
-        school_id=school_id,
-        first_name=first_name,
-        last_name=last_name,
-        department=user.department,
-        year_level=year_level,
-        course=course,
-        enrolled_subjects=subjects,
-        email=email,
-        contact_number=contact_number,
-    )
-    # Auto-sync: create the corresponding student User account immediately
-    student = User.objects.filter(role='student', school_id=school_id).first()
-    if student is None:
-        student = User(
-            username=school_id,
-            email=email or '',
-            first_name=first_name,
-            last_name=last_name,
-            school_id=school_id,
-            department=user.department,
-            year_level=year_level,
-            course=course,
-            enrolled_subjects=subjects,
-            contact_number=contact_number,
-            role='student',
-            account_source='masterlist_import',
-            is_approved=False,
-        )
-        student.set_unusable_password()
-        student.save()
-        Notification.objects.create(
-            user=student,
-            type='account_approved',
-            title='Account Imported',
-            message='Your account has been created from the official masterlist and is waiting for dean approval.',
-            link='/login'
-        )
+    department = user.department
+    if department == 'GENERAL':
+        resolved_department = _resolve_department_code(request.data.get('department')) or _resolve_department_code(course)
+        if resolved_department and resolved_department != 'GENERAL':
+            department = resolved_department
+
+    try:
+        with transaction.atomic():
+            record = EnrolledStudent.objects.create(
+                school_id=school_id,
+                first_name=first_name,
+                last_name=last_name,
+                department=department,
+                year_level=year_level,
+                course=course,
+                enrolled_subjects=subjects,
+                email=email,
+                contact_number=contact_number,
+            )
+
+            # Auto-sync: create/update the corresponding student User account immediately.
+            student = User.objects.filter(school_id=school_id).first()
+            if student is None:
+                from django.utils import timezone as _tz_add
+                student = User(
+                    username=school_id,
+                    email=email or '',
+                    first_name=first_name,
+                    last_name=last_name,
+                    school_id=school_id,
+                    department=department,
+                    year_level=year_level,
+                    course=course,
+                    enrolled_subjects=subjects,
+                    contact_number=contact_number,
+                    role='student',
+                    account_source='masterlist_import',
+                    is_approved=True,
+                    approved_by=user,
+                    approved_at=_tz_add.now(),
+                    force_password_change=True,
+                )
+                student.set_password(school_id)
+                student.save()
+                try:
+                    _send_masterlist_activation(student)
+                    send_masterlist_approval_email(student)
+                except Exception:
+                    logger.exception('Post-add notification failed for school_id=%s', school_id)
+            elif student.role != 'student':
+                return Response(
+                    {'error': f'School ID "{school_id}" is already used by a non-student account.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                changed_fields = []
+                updates = {
+                    'username': school_id,
+                    'email': email or '',
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'department': department,
+                    'year_level': year_level,
+                    'course': course,
+                    'enrolled_subjects': subjects,
+                    'contact_number': contact_number,
+                    'account_source': 'masterlist_import',
+                }
+                for field, value in updates.items():
+                    if getattr(student, field) != value:
+                        setattr(student, field, value)
+                        changed_fields.append(field)
+                if not student.is_approved:
+                    from django.utils import timezone as _tz_add2
+                    student.is_approved = True
+                    student.approved_by = user
+                    student.approved_at = _tz_add2.now()
+                    student.force_password_change = True
+                    student.set_password(school_id)
+                    changed_fields.extend(['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
+                    try:
+                        _send_masterlist_activation(student)
+                        send_masterlist_approval_email(student)
+                    except Exception:
+                        logger.exception('Post-add notification failed for school_id=%s', school_id)
+                if changed_fields:
+                    student.save(update_fields=list(set(changed_fields)))
+    except IntegrityError as exc:
+        error_text = str(exc)
+        if 'contact_number' in error_text:
+            return Response({'error': 'Contact number is already in use by another account.'}, status=status.HTTP_400_BAD_REQUEST)
+        if 'school_id' in error_text:
+            return Response({'error': f'School ID "{school_id}" already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        if 'username' in error_text:
+            return Response({'error': f'Username "{school_id}" already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Unable to add record due to a duplicate value conflict.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    _invalidate_department_subject_metadata(department)
     send_enrollment_records_update(user.department, 'created', {'record_id': record.id})
     return Response({'id': record.id, 'message': 'Enrollment record added'}, status=status.HTTP_201_CREATED)
 
@@ -2636,9 +2717,11 @@ def delete_enrolled_student(request, record_id):
             return Response({'error': 'Record not found'}, status=status.HTTP_404_NOT_FOUND)
         deleted_id = record.id
         school_id = record.school_id
+        department = record.department
         record.delete()
         # Also delete the corresponding User account if it exists
         User.objects.filter(school_id=school_id, account_source='masterlist_import').delete()
+        _invalidate_department_subject_metadata(department)
         send_enrollment_records_update(user.department, 'deleted', {'record_id': deleted_id})
         return Response({'message': 'Record deleted'})
     except EnrolledStudent.DoesNotExist:
@@ -2671,6 +2754,7 @@ def import_enrolled_students_csv(request):
         success_count = 0
         error_count = 0
         errors = []
+        touched_departments = set()
 
         for row_num, row in enumerate(reader, start=2):
             row = {k: (v.strip() if v else v) for k, v in row.items()}
@@ -2695,6 +2779,8 @@ def import_enrolled_students_csv(request):
             resolved_department = _resolve_department_code(row.get('department')) or _resolve_department_code(row.get('course'))
             final_department = resolved_department if resolved_department and resolved_department != 'GENERAL' else user.department
 
+            _rec_email = row.get('email') or None
+            _rec_contact = row.get('contact_number') or None
             EnrolledStudent.objects.create(
                 school_id=row['school_id'],
                 first_name=row['first_name'],
@@ -2703,12 +2789,56 @@ def import_enrolled_students_csv(request):
                 year_level=year_map[row['year_level']],
                 course=row.get('course', ''),
                 enrolled_subjects=_parse_subject_list(row.get('subjects')),
-                email=row.get('email') or None,
-                contact_number=row.get('contact_number') or None,
+                email=_rec_email,
+                contact_number=_rec_contact,
             )
+            touched_departments.add(final_department)
+            from django.utils import timezone as _tz_imp
+            _imp_subjects = _parse_subject_list(row.get('subjects'))
+            _imp_student = User.objects.filter(school_id=row['school_id']).first()
+            if _imp_student is None:
+                _imp_student = User(
+                    username=row['school_id'],
+                    email=_rec_email or '',
+                    first_name=row['first_name'],
+                    last_name=row['last_name'],
+                    school_id=row['school_id'],
+                    department=final_department,
+                    year_level=year_map[row['year_level']],
+                    course=row.get('course', ''),
+                    enrolled_subjects=_imp_subjects,
+                    contact_number=_rec_contact,
+                    role='student',
+                    account_source='masterlist_import',
+                    is_approved=True,
+                    approved_by=user,
+                    approved_at=_tz_imp.now(),
+                    force_password_change=True,
+                )
+                _imp_student.set_password(row['school_id'])
+                _imp_student.save()
+                try:
+                    _send_masterlist_activation(_imp_student)
+                    send_masterlist_approval_email(_imp_student)
+                except Exception:
+                    logger.exception('Post-import notification failed for school_id=%s', row['school_id'])
+            elif _imp_student.role == 'student' and not _imp_student.is_approved:
+                _imp_student.is_approved = True
+                _imp_student.approved_by = user
+                _imp_student.approved_at = _tz_imp.now()
+                _imp_student.force_password_change = True
+                _imp_student.set_password(row['school_id'])
+                _imp_student.save(update_fields=['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
+                try:
+                    _send_masterlist_activation(_imp_student)
+                    send_masterlist_approval_email(_imp_student)
+                except Exception:
+                    logger.exception('Post-import notification failed for school_id=%s', row['school_id'])
             success_count += 1
 
         if success_count > 0:
+            for department in touched_departments:
+                _invalidate_department_subject_metadata(department)
             send_enrollment_records_update(
                 user.department,
                 'imported',
@@ -2773,17 +2903,16 @@ def sync_masterlist_accounts(request):
         }
 
         student = User.objects.filter(role='student', school_id=record.school_id).first()
+        from django.utils import timezone as _tz_sync
         if student is None:
-            student = User(**defaults, school_id=record.school_id, is_approved=False)
-            student.set_unusable_password()
+            student = User(**defaults, school_id=record.school_id, is_approved=True, approved_by=user, approved_at=_tz_sync.now(), force_password_change=True)
+            student.set_password(record.school_id)
             student.save()
-            Notification.objects.create(
-                user=student,
-                type='account_approved',
-                title='Account Imported',
-                message='Your account has been created from the official masterlist and is waiting for dean approval.',
-                link='/login'
-            )
+            try:
+                _send_masterlist_activation(student)
+                send_masterlist_approval_email(student)
+            except Exception:
+                logger.exception('Post-sync notification failed for school_id=%s', record.school_id)
             created_count += 1
             continue
 
@@ -2793,8 +2922,21 @@ def sync_masterlist_accounts(request):
                 setattr(student, field, value)
                 changed_fields.append(field)
 
+        if not student.is_approved:
+            student.is_approved = True
+            student.approved_by = user
+            student.approved_at = _tz_sync.now()
+            student.force_password_change = True
+            student.set_password(record.school_id)
+            changed_fields.extend(['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
+            try:
+                _send_masterlist_activation(student)
+                send_masterlist_approval_email(student)
+            except Exception:
+                logger.exception('Post-sync notification failed for school_id=%s', record.school_id)
+
         if changed_fields:
-            student.save(update_fields=changed_fields)
+            student.save(update_fields=list(set(changed_fields)))
             updated_count += 1
         else:
             unchanged_count += 1
@@ -2938,3 +3080,4 @@ def test_email_config(request):
         })
 
     return Response({'status': 'ok', 'smtp_login': 'success', 'config': config_info})
+

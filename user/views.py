@@ -338,12 +338,6 @@ def _dispatch_masterlist_notifications_async(student_ids, trigger):
                     _send_masterlist_activation(student)
                 except Exception:
                     logger.exception('Masterlist activation notification failed for student_id=%s trigger=%s', student.id, trigger)
-
-                try:
-                    if not send_masterlist_approval_email(student):
-                        logger.error('Masterlist approval email failed for student_id=%s email=%s trigger=%s', student.id, student.email, trigger)
-                except Exception:
-                    logger.exception('Masterlist approval email exception for student_id=%s trigger=%s', student.id, trigger)
         finally:
             close_old_connections()
 
@@ -2786,6 +2780,7 @@ def import_enrolled_students_csv(request):
         error_count = 0
         errors = []
         touched_departments = set()
+        email_candidates = []
         notify_student_ids = set()
 
         for row_num, row in enumerate(reader, start=2):
@@ -2850,6 +2845,16 @@ def import_enrolled_students_csv(request):
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save()
                 notify_student_ids.add(_imp_student.id)
+                if _imp_student.email:
+                    email_candidates.append({
+                        'to': _imp_student.email,
+                        'first_name': _imp_student.first_name or 'there',
+                        'username': _imp_student.school_id or _imp_student.username,
+                        'school_id': _imp_student.school_id or '',
+                        'department': _imp_student.department or '',
+                        'year_level': _imp_student.year_level or '',
+                        'enrolled_subjects': _imp_student.enrolled_subjects or [],
+                    })
             elif _imp_student.role == 'student' and not _imp_student.is_approved:
                 _imp_student.is_approved = True
                 _imp_student.approved_by = user
@@ -2858,6 +2863,16 @@ def import_enrolled_students_csv(request):
                 _imp_student.set_password(row['school_id'])
                 _imp_student.save(update_fields=['is_approved', 'approved_by', 'approved_at', 'force_password_change', 'password'])
                 notify_student_ids.add(_imp_student.id)
+                if _imp_student.email:
+                    email_candidates.append({
+                        'to': _imp_student.email,
+                        'first_name': _imp_student.first_name or 'there',
+                        'username': _imp_student.school_id or _imp_student.username,
+                        'school_id': _imp_student.school_id or '',
+                        'department': _imp_student.department or '',
+                        'year_level': _imp_student.year_level or '',
+                        'enrolled_subjects': _imp_student.enrolled_subjects or [],
+                    })
             success_count += 1
 
         if success_count > 0:
@@ -2875,6 +2890,7 @@ def import_enrolled_students_csv(request):
             'success_count': success_count,
             'error_count': error_count,
             'errors': errors,
+            'email_candidates': email_candidates,
         })
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

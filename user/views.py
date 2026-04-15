@@ -2572,7 +2572,12 @@ def add_enrolled_student(request):
     if not all([school_id, first_name, last_name, year_level, course]) or not subjects:
         return Response({'error': 'school_id, first_name, last_name, year_level, course, and subjects are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if EnrolledStudent.objects.filter(school_id=school_id).exists():
+    year_map = {'1st': '1', '2nd': '2', '3rd': '3', '4th': '4', '1': '1', '2': '2', '3': '3', '4': '4'}
+    if year_level not in year_map:
+        return Response({'error': f'Invalid year level "{year_level}". Use 1, 2, 3, 4 or 1st, 2nd, 3rd, 4th.'}, status=status.HTTP_400_BAD_REQUEST)
+    year_level = year_map[year_level]
+
+    if EnrolledStudent.objects.filter(school_id=school_id, department=user.department).exists():
         return Response({'error': f'School ID "{school_id}" already exists in enrollment records'}, status=status.HTTP_400_BAD_REQUEST)
 
     record = EnrolledStudent.objects.create(
@@ -2586,6 +2591,33 @@ def add_enrolled_student(request):
         email=email,
         contact_number=contact_number,
     )
+    # Auto-sync: create the corresponding student User account immediately
+    student = User.objects.filter(role='student', school_id=school_id).first()
+    if student is None:
+        student = User(
+            username=school_id,
+            email=email or '',
+            first_name=first_name,
+            last_name=last_name,
+            school_id=school_id,
+            department=user.department,
+            year_level=year_level,
+            course=course,
+            enrolled_subjects=subjects,
+            contact_number=contact_number,
+            role='student',
+            account_source='masterlist_import',
+            is_approved=False,
+        )
+        student.set_unusable_password()
+        student.save()
+        Notification.objects.create(
+            user=student,
+            type='account_approved',
+            title='Account Imported',
+            message='Your account has been created from the official masterlist and is waiting for dean approval.',
+            link='/login'
+        )
     send_enrollment_records_update(user.department, 'created', {'record_id': record.id})
     return Response({'id': record.id, 'message': 'Enrollment record added'}, status=status.HTTP_201_CREATED)
 

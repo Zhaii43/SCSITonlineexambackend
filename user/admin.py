@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils import timezone
-from .models import User, SubjectAssignment
+from .models import User, SubjectAssignment, EnrolledStudent
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'role', 'department', 'school_id', 'is_approved', 'is_staff', 'date_joined')
@@ -52,6 +52,21 @@ class CustomUserAdmin(UserAdmin):
         updated = queryset.update(is_active=False, is_approved=False)
         self.message_user(request, f'{updated} user(s) successfully rejected.')
     reject_users.short_description = 'Reject selected users'
+
+    def delete_model(self, request, obj):
+        if obj.account_source == 'masterlist_import' and obj.school_id:
+            EnrolledStudent.objects.filter(school_id=obj.school_id).delete()
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        school_ids = list(
+            queryset.filter(account_source='masterlist_import')
+            .exclude(school_id__isnull=True)
+            .values_list('school_id', flat=True)
+        )
+        if school_ids:
+            EnrolledStudent.objects.filter(school_id__in=school_ids).delete()
+        super().delete_queryset(request, queryset)
 
 
 @admin.register(SubjectAssignment)

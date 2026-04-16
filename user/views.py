@@ -3117,6 +3117,65 @@ def list_import_history(request):
     return Response([_serialize_import_run(run) for run in runs])
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_import_history_item(request, import_id):
+    """Delete a single import history run (EDP only)."""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can delete import history'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        import_run = MasterlistImportRun.objects.get(id=import_id)
+    except MasterlistImportRun.DoesNotExist:
+        return Response({'error': 'Import run not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if not _can_access_import_run(user, import_run):
+        return Response({'error': 'Import run not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    deleted_id = import_run.id
+    import_run.delete()
+    return Response({'message': 'Import history deleted', 'id': deleted_id})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_delete_import_history(request):
+    """Bulk-delete import history runs (EDP only)."""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can delete import history'}, status=status.HTTP_403_FORBIDDEN)
+
+    import_ids = request.data.get('import_ids', []) if isinstance(request.data, dict) else []
+    if not isinstance(import_ids, list) or not import_ids:
+        return Response({'error': 'import_ids must be a non-empty list'}, status=status.HTTP_400_BAD_REQUEST)
+
+    normalized_ids = []
+    for value in import_ids:
+        try:
+            normalized_ids.append(int(value))
+        except (TypeError, ValueError):
+            continue
+
+    if not normalized_ids:
+        return Response({'error': 'No valid import IDs provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    runs = MasterlistImportRun.objects.filter(id__in=normalized_ids)
+    if user.department != 'GENERAL':
+        runs = runs.filter(department=user.department)
+
+    deleted_ids = list(runs.values_list('id', flat=True))
+    if not deleted_ids:
+        return Response({'error': 'No matching import history found'}, status=status.HTTP_404_NOT_FOUND)
+
+    runs.delete()
+    return Response({
+        'message': f'Deleted {len(deleted_ids)} import history record(s)',
+        'deleted_ids': deleted_ids,
+        'deleted_count': len(deleted_ids),
+    })
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_import_email_delivery(request, import_id):

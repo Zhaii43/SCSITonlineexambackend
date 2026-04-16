@@ -87,8 +87,9 @@ class User(AbstractUser):
 
     
     def save(self, *args, **kwargs):
-        # Students require dean approval
-        if not self.pk and self.role == 'student':
+        # Self-registered students require dean approval.
+        # Masterlist-imported students are auto-approved by the import flow.
+        if not self.pk and self.role == 'student' and self.account_source != 'masterlist_import':
             self.is_approved = False
         super().save(*args, **kwargs)
     

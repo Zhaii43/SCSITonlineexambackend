@@ -125,6 +125,20 @@ def _subject_assignment_summary(assignments):
     return ', '.join(active[:2]) + (f" +{len(active) - 2} more" if len(active) > 2 else '')
 
 
+def _is_assignment_in_current_masterlist(assignment):
+    normalized_subject = str(getattr(assignment, 'subject_name', '') or '').strip().lower()
+    department = str(getattr(assignment, 'department', '') or '').strip()
+    if not normalized_subject or not department:
+        return False
+    return normalized_subject in {
+        subject.lower() for subject in _available_imported_subjects_for_department(department)
+    }
+
+
+def _visible_assignments(assignments):
+    return [assignment for assignment in assignments if _is_assignment_in_current_masterlist(assignment)]
+
+
 def _available_imported_subjects_for_department(department):
     metadata = _get_department_subject_metadata(department)
     return metadata['available_subjects']
@@ -804,18 +818,21 @@ def get_department_users(request):
         'is_approved': s.is_approved,
     } for s in students]
     
-    instructors_list = [{
-        'id': i.id,
-        'username': i.username,
-        'email': i.email,
-        'first_name': i.first_name,
-        'last_name': i.last_name,
-        'school_id': i.school_id,
-        'contact_number': i.contact_number,
-        'department': i.department,
-        'subject_type': _subject_assignment_summary(assignment_map.get(i.id, [])),
-        'assigned_subjects': [_serialize_subject_assignment(assignment) for assignment in assignment_map.get(i.id, [])],
-    } for i in instructors]
+    instructors_list = []
+    for i in instructors:
+        visible_assignments = _visible_assignments(assignment_map.get(i.id, []))
+        instructors_list.append({
+            'id': i.id,
+            'username': i.username,
+            'email': i.email,
+            'first_name': i.first_name,
+            'last_name': i.last_name,
+            'school_id': i.school_id,
+            'contact_number': i.contact_number,
+            'department': i.department,
+            'subject_type': _subject_assignment_summary(visible_assignments),
+            'assigned_subjects': [_serialize_subject_assignment(assignment) for assignment in visible_assignments],
+        })
     
     return Response({
         'students': students_list,

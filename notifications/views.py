@@ -119,34 +119,80 @@ def create_announcement(request):
 
     title = request.data.get('title', '').strip()
     message = request.data.get('message', '').strip()
-    target_audience = request.data.get('target_audience', 'all')
-    department = request.data.get('department', '').strip() or None
-    year_level = request.data.get('year_level', '').strip() or None
 
     if not title or not message:
         return Response({'error': 'Title and message are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if target_audience not in ['all', 'student', 'instructor']:
-        return Response({'error': 'Invalid target audience'}, status=status.HTTP_400_BAD_REQUEST)
+    # Instructor-specific subject-based targeting
+    if request.user.role == 'instructor':
+        from user.models import SubjectAssignment
+        apply_to_all_raw = request.data.get('apply_to_all', False)
+        if isinstance(apply_to_all_raw, str):
+            apply_to_all = apply_to_all_raw.strip().lower() in ['1', 'true', 'yes', 'on']
+        else:
+            apply_to_all = bool(apply_to_all_raw)
 
-    if year_level and year_level not in ['1', '2', '3', '4']:
-        return Response({'error': 'Invalid year level'}, status=status.HTTP_400_BAD_REQUEST)
+        subject_name_raw = request.data.get('subject_name', '')
+        if isinstance(subject_name_raw, str):
+            subject_name = subject_name_raw.strip() or None
+        else:
+            subject_name = None
 
-    # year_level only applies when targeting students
-    if target_audience == 'instructor':
-        year_level = None
+        if apply_to_all:
+            subject_name = None
+            active_assignments = SubjectAssignment.objects.filter(instructor=request.user, is_active=True)
+            subject_names = list(active_assignments.values_list('subject_name', flat=True))
+        elif subject_name:
+            subject_names = [subject_name]
+        else:
+            return Response({'error': 'Select a subject or apply to all subjects.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    announcement = Announcement.objects.create(
-        title=title,
-        message=message,
-        target_audience=target_audience,
-        department=department,
-        year_level=year_level,
-        created_by=request.user,
-    )
+        # Target students enrolled in those subjects
+        from django.db.models import Q
+        if subject_names:
+            recipients_qs = User.objects.filter(is_active=True, is_approved=True, role='student')
+            subject_filter = Q()
+            for sn in subject_names:
+                subject_filter |= Q(enrolled_subjects__contains=[sn])
+            recipients_qs = recipients_qs.filter(subject_filter)
+        else:
+            recipients_qs = User.objects.filter(is_active=True, is_approved=True, role='student')
+
+        announcement = Announcement.objects.create(
+            title=title,
+            message=message,
+            target_audience='student',
+            department=None,
+            year_level=None,
+            subject_name=subject_name,
+            created_by=request.user,
+        )
+        recipients = list(recipients_qs.exclude(email='').filter(email__isnull=False))
+    else:
+        # Dean flow: always announce to everyone within the dean's own department.
+        target_audience = 'all'
+        department = (request.user.department or '').strip() or None
+        year_level_raw = request.data.get('year_level', '')
+        year_level = year_level_raw.strip() if isinstance(year_level_raw, str) else None
+        year_level = year_level or None
+
+        if not department:
+            return Response({'error': 'Dean account has no department assigned.'}, status=status.HTTP_400_BAD_REQUEST)
+        if year_level and year_level not in ['1', '2', '3', '4']:
+            return Response({'error': 'Invalid year level'}, status=status.HTTP_400_BAD_REQUEST)
+
+        announcement = Announcement.objects.create(
+            title=title,
+            message=message,
+            target_audience=target_audience,
+            department=department,
+            year_level=year_level,
+            subject_name=None,
+            created_by=request.user,
+        )
+        recipients = list(_get_announcement_recipients(target_audience, department, year_level))
 
     created_by_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-    recipients = list(_get_announcement_recipients(target_audience, department, year_level))
 
     # Build all messages then send in one SMTP session
     from .email_utils import send_bulk_emails
@@ -162,7 +208,7 @@ def create_announcement(request):
         import threading
         threading.Thread(target=send_bulk_emails, args=(messages,), daemon=False).start()
 
-    link = '/dashboard/student' if target_audience in ['all', 'student'] else '/dashboard'
+    link = '/dashboard/student' if announcement.target_audience in ['all', 'student'] else '/dashboard'
     notifications = Notification.objects.bulk_create([
         Notification(
             user=user,
@@ -181,8 +227,7 @@ def create_announcement(request):
         'title': announcement.title,
         'message': announcement.message,
         'target_audience': announcement.target_audience,
-        'department': announcement.department,
-        'year_level': announcement.year_level,
+        'subject_name': announcement.subject_name,
         'created_at': announcement.created_at.isoformat(),
     }, status=status.HTTP_201_CREATED)
 
@@ -211,6 +256,17 @@ def get_my_announcements(request):
 
     announcements = Announcement.objects.filter(created_by=request.user).order_by('-created_at')
 
+    from user.models import SubjectAssignment
+
+    # For instructor announcements, resolve subject_names from assignment or stored subject_name
+    def _resolve_subject_names(a):
+        if a.created_by.role != 'instructor':
+            return []
+        if a.subject_name:
+            return [a.subject_name]
+        # apply_to_all — return all active subjects at time of query
+        return list(SubjectAssignment.objects.filter(instructor=a.created_by, is_active=True).values_list('subject_name', flat=True))
+
     data = [{
         'id': a.id,
         'title': a.title,
@@ -218,6 +274,7 @@ def get_my_announcements(request):
         'target_audience': a.target_audience,
         'department': a.department,
         'year_level': a.year_level,
+        'subject_names': _resolve_subject_names(a),
         'is_active': a.is_active,
         'created_at': a.created_at.isoformat(),
     } for a in announcements]
@@ -254,3 +311,4 @@ def test_email_bridge(request):
         })
     except Exception as exc:
         return Response({'bridge_url': bridge_url, 'error': str(exc)}, status=500)
+

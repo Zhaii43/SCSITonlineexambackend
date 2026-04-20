@@ -423,3 +423,33 @@ class UserAndNotificationApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Announcement.objects.filter(title='Enrollment Reminder').exists())
         self.assertTrue(Notification.objects.filter(user=self.student, type='announcement').exists())
+
+    def test_instructor_announcement_apply_all_accepts_null_subject_name(self):
+        SubjectAssignment.objects.create(
+            instructor=self.instructor,
+            department='BSIT',
+            subject_name='Programming 1',
+            assigned_by=self.dean,
+            is_active=True,
+        )
+        self.student.is_approved = True
+        self.student.enrolled_subjects = ['Programming 1']
+        self.student.save(update_fields=['is_approved', 'enrolled_subjects'])
+        self.client.force_authenticate(user=self.instructor)
+
+        with patch('notifications.views.send_notification'):
+            response = self.client.post(
+                '/api/notifications/announcements/create/',
+                {
+                    'title': 'Section Update',
+                    'message': 'Class starts at 9:00 AM tomorrow.',
+                    'subject_name': None,
+                    'apply_to_all': True,
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, 201)
+        announcement = Announcement.objects.get(title='Section Update')
+        self.assertIsNone(announcement.subject_name)
+        self.assertTrue(Notification.objects.filter(user=self.student, type='announcement').exists())

@@ -21,6 +21,7 @@ class Announcement(models.Model):
     target_audience = models.CharField(max_length=20, choices=TARGET_CHOICES, default='all')
     department = models.CharField(max_length=10, blank=True, null=True, help_text='Leave blank for all departments')
     year_level = models.CharField(max_length=1, choices=YEAR_LEVEL_CHOICES, blank=True, null=True, help_text='Leave blank for all year levels (students only)')
+    subject_name = models.CharField(max_length=120, blank=True, null=True, help_text='Subject this announcement targets (instructor announcements)')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

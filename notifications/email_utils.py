@@ -391,6 +391,7 @@ def send_results_published_email(user, result):
     frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
     exam = result.exam
     result_data = {
+        "id": result.id,
         "examTitle": exam.title,
         "subject": exam.subject,
         "score": result.score,

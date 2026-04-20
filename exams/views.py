@@ -1911,6 +1911,7 @@ def submit_exam(request, exam_id):
             email_data = {
                 'to': user.email,
                 'firstName': user.first_name or 'there',
+                'id': result.id,
                 'examTitle': exam.title,
                 'subject': exam.subject,
                 'score': adjusted_score,

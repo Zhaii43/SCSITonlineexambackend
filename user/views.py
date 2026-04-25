@@ -2780,6 +2780,68 @@ def add_enrolled_student(request):
     return Response({'id': record.id, 'message': 'Enrollment record added'}, status=status.HTTP_201_CREATED)
 
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_enrolled_student(request, record_id):
+    """Update an enrolled student record — EDP only"""
+    user = request.user
+    if user.role != 'edp':
+        return Response({'error': 'Only EDP can update records'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        record = EnrolledStudent.objects.get(id=record_id)
+        if user.department != 'GENERAL' and record.department != user.department:
+            return Response({'error': 'Record not found'}, status=status.HTTP_404_NOT_FOUND)
+    except EnrolledStudent.DoesNotExist:
+        return Response({'error': 'Record not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    school_id = request.data.get('school_id', record.school_id).strip()
+    first_name = request.data.get('first_name', record.first_name).strip()
+    last_name = request.data.get('last_name', record.last_name).strip()
+    year_level_raw = request.data.get('year_level', record.year_level).strip()
+    course = request.data.get('course', record.course).strip()
+    subjects_raw = request.data.get('subjects')
+
+    year_map = {'1st': '1', '2nd': '2', '3rd': '3', '4th': '4', '1': '1', '2': '2', '3': '3', '4': '4'}
+    year_level = year_map.get(year_level_raw, record.year_level)
+
+    if EnrolledStudent.objects.filter(school_id=school_id).exclude(pk=record.pk).exists():
+        return Response({'error': f'School ID "{school_id}" already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    record.school_id = school_id
+    record.first_name = first_name
+    record.last_name = last_name
+    record.year_level = year_level
+    record.course = course
+    if subjects_raw is not None:
+        record.enrolled_subjects = _parse_subject_list(subjects_raw)
+    record.save()
+
+    # Sync the corresponding student User account if it exists
+    student = User.objects.filter(school_id=school_id, role='student').first() or \
+               User.objects.filter(school_id=record.school_id, role='student').first()
+    if student:
+        student.school_id = school_id
+        student.first_name = first_name
+        student.last_name = last_name
+        student.year_level = year_level
+        student.course = course
+        if subjects_raw is not None:
+            student.enrolled_subjects = record.enrolled_subjects
+        student.save(update_fields=['school_id', 'first_name', 'last_name', 'year_level', 'course', 'enrolled_subjects'])
+
+    _invalidate_department_subject_metadata(record.department)
+    return Response({
+        'id': record.id,
+        'school_id': record.school_id,
+        'first_name': record.first_name,
+        'last_name': record.last_name,
+        'year_level': record.year_level,
+        'course': record.course,
+        'enrolled_subjects': record.enrolled_subjects,
+    })
+
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_enrolled_student(request, record_id):

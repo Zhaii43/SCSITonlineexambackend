@@ -23456,3 +23456,4 @@ AttributeError: 'NoneType' object has no attribute 'strip'
 2026-04-25 17:03:14,801 WARNING django.request Not Found: /ws/notifications/
 2026-04-25 17:03:18,798 WARNING django.request Not Found: /ws/notifications/
 2026-04-25 17:03:21,812 WARNING django.request Not Found: /ws/notifications/
+2026-04-26 07:08:14,571 INFO django.utils.autoreload Watching for file changes with StatReloader

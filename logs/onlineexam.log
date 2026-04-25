@@ -23282,3 +23282,110 @@ AttributeError: 'NoneType' object has no attribute 'strip'
 2026-04-24 19:47:32,098 WARNING django.request Not Found: /ws/notifications/
 2026-04-24 19:47:33,112 WARNING django.request Not Found: /ws/exams/
 2026-04-24 19:47:34,962 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:49:36,419 INFO django.utils.autoreload Watching for file changes with StatReloader
+2026-04-24 19:50:05,621 WARNING django.request Not Found: /ws/exams/
+2026-04-24 19:50:09,259 WARNING django.request Not Found: /ws/exams/
+2026-04-24 19:50:13,266 WARNING django.request Not Found: /ws/exams/
+2026-04-24 19:50:17,258 WARNING django.request Not Found: /ws/exams/
+2026-04-24 19:50:18,138 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:18,164 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:18,194 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:20,433 WARNING django.request Not Found: /ws/exams/
+2026-04-24 19:50:21,189 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:21,224 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:24,614 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:24,652 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:24,700 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:27,702 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:27,744 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:30,748 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:30,796 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:33,804 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 19:50:33,884 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:48:58,594 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:48:58,615 WARNING django.request Unauthorized: /api/notifications/
+2026-04-24 20:48:58,647 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:48:58,663 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:48:58,672 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:48:58,683 WARNING django.request Unauthorized: /api/notifications/
+2026-04-24 20:48:58,729 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:01,723 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:01,752 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:04,748 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:04,776 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:07,787 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:07,820 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:10,370 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:49:10,376 WARNING django.request Unauthorized: /api/notifications/announcements/
+2026-04-24 20:49:10,399 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:10,406 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:49:10,418 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:10,423 WARNING django.request Unauthorized: /api/notifications/announcements/
+2026-04-24 20:49:10,433 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:49:10,442 WARNING django.request Unauthorized: /api/notifications/
+2026-04-24 20:49:10,482 WARNING django.request Unauthorized: /api/profile/
+2026-04-24 20:49:10,489 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:10,492 WARNING django.request Unauthorized: /api/notifications/
+2026-04-24 20:49:10,519 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:22,366 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:25,392 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:28,438 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:31,461 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:33,194 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:33,216 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:33,248 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:34,498 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:49:36,250 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:49:36,288 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:04,823 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:07,840 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:10,856 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:13,881 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:15,268 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:15,294 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:15,327 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:16,898 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:37,766 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:40,782 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:43,799 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:46,829 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:49,851 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:52,878 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:55,895 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:56:57,829 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:57,843 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:56:58,933 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:00,868 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:01,972 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:03,898 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:05,011 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:05,249 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:05,276 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:08,330 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:11,354 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:14,387 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:16,166 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:19,287 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:22,345 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:26,276 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:29,320 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:32,352 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:32,511 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:57:35,394 WARNING django.request Not Found: /ws/exams/
+2026-04-24 20:57:35,551 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:02,659 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:02,673 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:05,704 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:08,750 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:11,799 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:14,842 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:17,884 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:21,836 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:24,890 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:28,238 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:31,301 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:34,380 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:37,937 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:41,964 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:45,860 WARNING django.request Not Found: /ws/notifications/
+2026-04-24 20:58:50,271 WARNING django.request Not Found: /ws/notifications/
